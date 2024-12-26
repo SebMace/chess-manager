@@ -1,7 +1,9 @@
 # chess-manager
 A chess manager to organize your games and results.
 
-Together with **Valentina Jemuović (Cupać) ** and her sister **Jelena Cupać**, I’m following a training program designed to help me develop a fully TDD-compliant application using **Chess Manager**. This project serves as a "sandbox" where I will apply and refine the best practices of **Software Craftsmanship**. Contributions are welcome, provided they strictly adhere to these principles.
+A TDD Sandbox.
+
+Together with **Valentina Jemuović (Cupać)** and her sister **Jelena Cupać**, I’m following a training program designed to help me develop a fully TDD-compliant application using **Chess Manager**. This project serves as a "sandbox" where I will apply and refine the best practices of **Software Craftsmanship**. Contributions are welcome, provided they strictly adhere to these principles.
 
 ## Why Chess Manager?
 
@@ -16,6 +18,10 @@ As a **French chess player**, I’ve observed a significant lack of tools for ef
 
 - Need reliable, user-friendly tournament pairing software?  
   **Chess Manager** will be your friend!
+
+### System Architecture Style
+
+Frontend + Microservice Backend
 
 ---
 
