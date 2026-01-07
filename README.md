@@ -19,6 +19,13 @@ As a **French chess player**, I’ve observed a significant lack of tools for ef
 - Need reliable, user-friendly tournament pairing software?  
   **Chess Manager** will be your friend!
 
+- Use cases : 
+What are primary actors ?
+What are secondary actors ?
+
+
+
+
 ### System Architecture Style
 
 Frontend + Microservice Backend
