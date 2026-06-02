@@ -319,6 +319,66 @@ ChessManager aims to become:
 - a SaaS product for chess organizations
 
 ---
+## Learning and Knowledge Sharing
+
+ChessManager is more than a software project.
+
+It is also an educational project whose purpose is to promote Software Craftsmanship practices and help developers improve their skills while building a real-world application.
+
+The project embraces continuous learning and knowledge sharing through:
+
+- Domain Driven Design (DDD)
+- Test Driven Development (TDD)
+- Acceptance Test Driven Development (ATDD)
+- Clean Architecture
+- Refactoring
+- Software Craftsmanship
+- Functional programming concepts where appropriate
+
+Whenever possible, architectural decisions, design choices and development practices should be documented alongside the code.
+
+The goal is not only to build software, but also to explain:
+
+- why a solution was chosen
+- what alternatives were considered
+- what trade-offs were made
+- how the domain was modeled
+
+Documentation is therefore considered a first-class citizen of the project.
+
+---
+
+## Build in Public
+
+ChessManager is intended to be developed openly.
+
+Part of the project's journey will be shared publicly through articles, videos, live coding sessions and technical discussions.
+
+The objective is to make the design and development process visible, including:
+
+- domain discovery
+- ubiquitous language definition
+- bounded context identification
+- modeling sessions
+- architecture discussions
+- TDD sessions
+- refactoring sessions
+
+---
+
+## Mob Programming Sessions
+
+The project may include regular mob programming sessions.
+
+These sessions aim to:
+
+- learn collectively
+- discuss design decisions
+- share Software Craftsmanship practices
+- explore DDD concepts
+- improve code quality
+- mentor less experienced developers
+
 
 ## License
 
