@@ -44,19 +44,6 @@ Possible concepts:
 
 ---
 
-### Player Context
-
-Manages chess players as chess identities.
-
-Possible concepts:
-
-- Player
-- Rating
-- FederationId
-- Title
-- ChessProfile
-
----
 
 ### Game Management Context
 
