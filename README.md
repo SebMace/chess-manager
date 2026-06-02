@@ -379,6 +379,15 @@ These sessions aim to:
 - improve code quality
 - mentor less experienced developers
 
+## Contributing
+
+ChessManager welcomes human contributors.
+
+AI tools may be used as assistants, but they are not considered contributors to the project. Every contribution must be reviewed, understood and assumed by a human developer.
+
+As Julien Dubois, creator of JHipster, said in podcast "If This Then Dev"
+
+> "You don't have a drink with an AI."
 
 ## License
 
@@ -388,7 +397,7 @@ MIT License
 
 ## Author
 
-Created by Sébastien Macé.principles**.
+Created by Sébastien Macé.
 
 Contributions are welcome! Please ensure your pull requests strictly follow the project's guidelines for high-quality code.
 
