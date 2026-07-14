@@ -1,6 +1,6 @@
 package domain.player.entities;
 
-import domain.exceptions.FideIdAlReadyAssigned;
+import domain.exceptions.FideIdAlreadyAssignedException;
 import domain.player.vo.EloRating;
 import domain.player.vo.FideId;
 
@@ -44,9 +44,8 @@ public class Player {
     return this.eloRating;
     }
 
-    public void registerFideId(FideId fideId) throws FideIdAlReadyAssigned {
-
-        if (this.fideId != null) throw new FideIdAlReadyAssigned();
+    public void registerFideId(FideId fideId) throws FideIdAlreadyAssignedException {
+        if (this.fideId != null) throw new FideIdAlreadyAssignedException();
         this.fideId = fideId;
 
     }
