@@ -1,8 +1,9 @@
 package player;
 
+import domain.exceptions.FideIdAlReadyAssigned;
 import domain.player.entities.Player;
 import domain.player.vo.EloRating;
-import domain.player.vo.PlayerId;
+import domain.player.vo.FideId;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -13,7 +14,7 @@ class PlayerTests {
     @Test
     void should_create_a_player_with_a_first_name_and_a_last_name() {
         Player player = new Player(
-                new PlayerId("1503014"),
+                new FideId(1503014L),
                 "Magnus",
                 "Carlsen"
         );
@@ -41,5 +42,14 @@ class PlayerTests {
         assertEquals(new EloRating(1600),player.eloRating());
     }
 
-    
+    // Day 4 13/07/2026
+
+    @Test
+    void should_reject_replacing_an_existing_fide_id() throws FideIdAlReadyAssigned {
+    //Given  : a player with an existing FIDE ID
+        Player player = new Player("Sébastien", "Macé");
+        player.registerFideId(new FideId(641839L));
+    // When / Then  : assigning another FIDE ID is rejected
+        assertThrows(FideIdAlReadyAssigned.class, () -> player.registerFideId(new FideId(1503014L)));
+    }
 }

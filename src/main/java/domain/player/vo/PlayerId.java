@@ -1,4 +1,7 @@
 package domain.player.vo;
 
-public record PlayerId(String fideId) {
+import java.io.Serializable;
+import java.util.UUID;
+
+public record PlayerId(UUID playerId) implements Serializable {
 }
