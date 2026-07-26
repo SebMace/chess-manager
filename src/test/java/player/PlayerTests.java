@@ -76,4 +76,9 @@ class PlayerTests {
     void should_reject_a_player_without_a_player_id() {
         assertThrows(IllegalArgumentException.class, () -> new Player(null, "Anatoly", "Karpov"));
     }
+    // Day 8
+    @Test
+    void should_reject_a_null_uuid_in_player_id() {
+        assertThrows(IllegalArgumentException.class, () -> new PlayerId(null));
+    }
 }
