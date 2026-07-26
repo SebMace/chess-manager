@@ -3,9 +3,13 @@ package domain.player.entities;
 import domain.exceptions.FideIdAlreadyAssignedException;
 import domain.player.vo.EloRating;
 import domain.player.vo.FideId;
+import domain.player.vo.PlayerId;
+
+import java.util.Optional;
 
 public class Player {
 
+    private final PlayerId playerId;
     private FideId fideId;
     private String firstName;
     private String lastName;
@@ -13,13 +17,17 @@ public class Player {
     private EloRating eloRating;
     private EloRating eloRatingLastRecorded;
 
-    public Player(FideId playerId, String firstName, String lastName) {
-        this.fideId = playerId;
+    public Player(PlayerId playerId, FideId fideId, String firstName, String lastName) {
+        this.playerId = playerId;
+        this.fideId = fideId;
         this.firstName = firstName;
         this.lastName = lastName;
     }
 
-    public Player(String firstName, String lastName) {
+
+
+    public Player(PlayerId playerId, String firstName, String lastName) {
+        this.playerId = playerId;
         this.firstName = firstName;
         this.lastName = lastName;
     }
@@ -47,6 +55,10 @@ public class Player {
     public void registerFideId(FideId fideId) throws FideIdAlreadyAssignedException {
         if (this.fideId != null) throw new FideIdAlreadyAssignedException();
         this.fideId = fideId;
-
     }
+
+    public Optional<FideId> fideId() {return Optional.ofNullable(fideId);}
+
+    public PlayerId id() {return playerId;}
 }
+

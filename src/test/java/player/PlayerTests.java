@@ -4,19 +4,21 @@ import domain.exceptions.FideIdAlreadyAssignedException;
 import domain.player.entities.Player;
 import domain.player.vo.EloRating;
 import domain.player.vo.FideId;
+import domain.player.vo.PlayerId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class PlayerTests {
     // Day 1 10/07/2026
     @Test
     void should_create_a_player_with_a_first_name_and_a_last_name() {
         Player player = new Player(
-                new FideId(1503014L),
+                new PlayerId(UUID.randomUUID()),
                 "Magnus",
                 "Carlsen"
         );
@@ -36,7 +38,7 @@ class PlayerTests {
     @Test
     void should_change_the_elo_rating_of_a_player() {
         //Given : one existing player with an initial elo rating.
-        Player player = new Player("Sébastien", "Macé");
+        Player player = new Player(new PlayerId(UUID.randomUUID()),"Sébastien", "Macé");
         player.giveEloRating(new EloRating(1500));
         // when : his rating is updated
         player.recordEloRating(new EloRating(1600));
@@ -49,7 +51,7 @@ class PlayerTests {
     @Test
     void should_reject_replacing_an_existing_fide_id() throws FideIdAlreadyAssignedException {
     //Given  : a player with an existing FIDE ID
-        Player player = new Player("Sébastien", "Macé");
+        Player player = new Player(new PlayerId(UUID.randomUUID()),"Sébastien", "Macé");
         player.registerFideId(new FideId(641839L));
     // When / Then  : assigning another FIDE ID is rejected
         assertThrows(FideIdAlreadyAssignedException.class, () -> player.registerFideId(new FideId(1503014L)));
@@ -59,5 +61,14 @@ class PlayerTests {
     @ValueSource(longs = {-1L, 0L})
     void should_reject_a_non_positive_fide_id(long invalidFideId)  {
         assertThrows(IllegalArgumentException.class, () -> new FideId(invalidFideId));
+    }
+
+    @Test
+    void should_create_a_player_without_a_fide_id() {
+        // Given  : a PlayerId, first name, last_name, no FideId
+        PlayerId playerId = new PlayerId(UUID.randomUUID());
+        Player player = new Player(playerId, "Anatoly", "Karpov");
+        assertEquals(playerId, player.id());
+        assertTrue(player.fideId().isEmpty());
     }
 }
