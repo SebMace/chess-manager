@@ -62,13 +62,18 @@ class PlayerTests {
     void should_reject_a_non_positive_fide_id(long invalidFideId)  {
         assertThrows(IllegalArgumentException.class, () -> new FideId(invalidFideId));
     }
-
+    // Day 6
     @Test
-    void should_create_a_player_without_a_fide_id() {
+    void should_create_a_player_with_an_internal_id_and_without_a_fide_id() {
         // Given  : a PlayerId, first name, last_name, no FideId
         PlayerId playerId = new PlayerId(UUID.randomUUID());
         Player player = new Player(playerId, "Anatoly", "Karpov");
         assertEquals(playerId, player.id());
         assertTrue(player.fideId().isEmpty());
+    }
+    // Day 7
+    @Test
+    void should_reject_a_player_without_a_player_id() {
+        assertThrows(IllegalArgumentException.class, () -> new Player(null, "Anatoly", "Karpov"));
     }
 }

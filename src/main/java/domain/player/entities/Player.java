@@ -17,16 +17,8 @@ public class Player {
     private EloRating eloRating;
     private EloRating eloRatingLastRecorded;
 
-    public Player(PlayerId playerId, FideId fideId, String firstName, String lastName) {
-        this.playerId = playerId;
-        this.fideId = fideId;
-        this.firstName = firstName;
-        this.lastName = lastName;
-    }
-
-
-
     public Player(PlayerId playerId, String firstName, String lastName) {
+        if (playerId == null) throw new IllegalArgumentException("playerId cannot be null");
         this.playerId = playerId;
         this.firstName = firstName;
         this.lastName = lastName;
