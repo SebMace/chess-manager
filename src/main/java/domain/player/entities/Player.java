@@ -1,10 +1,15 @@
 package domain.player.entities;
 
+import domain.club.vo.ClubId;
+import domain.club.vo.Season;
 import domain.exceptions.FideIdAlreadyAssignedException;
 import domain.player.vo.EloRating;
 import domain.player.vo.FideId;
 import domain.player.vo.PlayerId;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 public class Player {
@@ -16,6 +21,8 @@ public class Player {
 
     private EloRating eloRating;
     private EloRating eloRatingLastRecorded;
+
+    Map<Season, ClubId> seasonsClub;
 
     public Player(PlayerId playerId, String firstName, String lastName) {
         if (playerId == null) throw new IllegalArgumentException("playerId cannot be null");
@@ -52,5 +59,24 @@ public class Player {
     public Optional<FideId> fideId() {return Optional.ofNullable(fideId);}
 
     public PlayerId id() {return playerId;}
+    public void affiliateTo(ClubId clubId, Season season) {
+        seasonsClub = new HashMap<Season, ClubId>();
+        seasonsClub.put(season, clubId);
+    }
+
+    public Optional<ClubId> club(Season season) {
+        return Optional.ofNullable(seasonsClub.get(season));
+    }
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Player player = (Player) o;
+        return Objects.equals(playerId, player.playerId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(playerId);
+    }
 }
 

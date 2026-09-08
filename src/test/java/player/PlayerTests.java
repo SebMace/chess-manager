@@ -81,4 +81,24 @@ class PlayerTests {
     void should_reject_a_null_uuid_in_player_id() {
         assertThrows(IllegalArgumentException.class, () -> new PlayerId(null));
     }
+    // Day 9
+
+    @Test
+    void should_consider_players_with_the_same_player_id_as_the_same_player() {
+        // Given: two players with equal identifiers and different names
+        UUID uuid = UUID.fromString("00000000-0000-0000-0000-000000000001");
+        Player player1 = new Player(new PlayerId(uuid), "Anatoly", "Karpov");
+        Player player2 = new Player(new PlayerId(uuid), "Magnus", "Carlsen");
+        // When / Then: they represent the same player
+        assertEquals(player1, player2);
+    }
+
+    @Test
+    void should_consider_homonyms_as_different_players_if_their_identities_are_different () {
+        PlayerId playerId1 = new PlayerId(UUID.fromString("00000000-0000-0000-0000-000000000001"));
+        PlayerId playerId2 = new PlayerId(UUID.fromString("00000000-0000-0000-0000-000000000002"));
+        Player player1 = new Player(playerId1, "Anatoly", "Karpov");
+        Player player2 = new Player(playerId2, "Anatoly", "Karpov");
+        assertNotEquals(player1, player2);
+    }
 }
