@@ -22,13 +22,14 @@ public class Player {
     private EloRating eloRating;
     private EloRating eloRatingLastRecorded;
 
-    Map<Season, ClubId> seasonsClub;
+    private final Map<Season, ClubId> seasonsClub;
 
     public Player(PlayerId playerId, String firstName, String lastName) {
         if (playerId == null) throw new IllegalArgumentException("playerId cannot be null");
         this.playerId = playerId;
         this.firstName = firstName;
         this.lastName = lastName;
+        seasonsClub = new HashMap<>();
     }
 
     public String firstName() {
@@ -60,7 +61,6 @@ public class Player {
 
     public PlayerId id() {return playerId;}
     public void affiliateTo(ClubId clubId, Season season) {
-        seasonsClub = new HashMap<Season, ClubId>();
         seasonsClub.put(season, clubId);
     }
 
