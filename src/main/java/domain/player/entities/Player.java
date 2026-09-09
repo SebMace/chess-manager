@@ -16,8 +16,8 @@ public class Player {
 
     private final PlayerId playerId;
     private FideId fideId;
-    private String firstName;
-    private String lastName;
+    private final String firstName;
+    private final String lastName;
 
     private EloRating eloRating;
     private EloRating eloRatingLastRecorded;
