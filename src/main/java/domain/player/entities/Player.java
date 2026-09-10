@@ -61,7 +61,12 @@ public class Player {
 
     public PlayerId id() {return playerId;}
     public void affiliateTo(ClubId clubId, Season season) {
+        if (season==null) throw new IllegalArgumentException("season cannot be null");
+        if (clubId == null) throw new IllegalArgumentException("clubId cannot be null");
+        if (club(season).filter(currentClub -> currentClub.equals(clubId)).isPresent()) return;
+        if (seasonsClub.containsKey(season)) throw new IllegalStateException("Player already affiliated for this season");
         seasonsClub.put(season, clubId);
+
     }
 
     public Optional<ClubId> club(Season season) {
@@ -79,4 +84,3 @@ public class Player {
         return Objects.hashCode(playerId);
     }
 }
-
