@@ -1,4 +1,4 @@
-package domain.player.vo;
+package domain.member.vo;
 
 public record EloRating(int rating) {
      public EloRating  {

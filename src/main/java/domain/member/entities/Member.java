@@ -1,21 +1,25 @@
-package domain.player.entities;
+package domain.member.entities;
 
 import domain.club.vo.ClubId;
 import domain.club.vo.Season;
 import domain.exceptions.FideIdAlreadyAssignedException;
-import domain.player.vo.EloRating;
-import domain.player.vo.FideId;
-import domain.player.vo.PlayerId;
+import domain.member.vo.EloRating;
+import domain.member.vo.FideId;
+import domain.member.vo.FfeId;
+import domain.member.vo.FfeLicense;
+import domain.member.vo.FfeLicenseType;
+import domain.member.vo.MemberId;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-public class Player {
+public class Member {
 
-    private final PlayerId playerId;
+    private final MemberId memberId;
     private FideId fideId;
+    private FfeLicense ffeLicense;
     private final String firstName;
     private final String lastName;
 
@@ -24,9 +28,9 @@ public class Player {
 
     private final Map<Season, ClubId> seasonsClub;
 
-    public Player(PlayerId playerId, String firstName, String lastName) {
-        if (playerId == null) throw new IllegalArgumentException("playerId cannot be null");
-        this.playerId = playerId;
+    public Member(MemberId memberId, String firstName, String lastName) {
+        if (memberId == null) throw new IllegalArgumentException("memberId cannot be null");
+        this.memberId = memberId;
         this.firstName = firstName;
         this.lastName = lastName;
         seasonsClub = new HashMap<>();
@@ -59,12 +63,24 @@ public class Player {
 
     public Optional<FideId> fideId() {return Optional.ofNullable(fideId);}
 
-    public PlayerId id() {return playerId;}
+    public Optional<FfeId> ffeId() {
+        return Optional.ofNullable(ffeLicense).map(FfeLicense::ffeId);
+    }
+
+    public Optional<FfeLicenseType> ffeLicenseType() {
+        return Optional.ofNullable(ffeLicense).map(FfeLicense::type);
+    }
+
+    public void registerFfeLicense(FfeId ffeId, FfeLicenseType licenseType) {
+        this.ffeLicense = new FfeLicense(ffeId, licenseType);
+    }
+
+    public MemberId id() {return memberId;}
     public void affiliateTo(ClubId clubId, Season season) {
         if (season==null) throw new IllegalArgumentException("season cannot be null");
         if (clubId == null) throw new IllegalArgumentException("clubId cannot be null");
         if (club(season).filter(currentClub -> currentClub.equals(clubId)).isPresent()) return;
-        if (seasonsClub.containsKey(season)) throw new IllegalStateException("Player already affiliated for this season");
+        if (seasonsClub.containsKey(season)) throw new IllegalStateException("Member already affiliated for this season");
         seasonsClub.put(season, clubId);
 
     }
@@ -75,12 +91,12 @@ public class Player {
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        Player player = (Player) o;
-        return Objects.equals(playerId, player.playerId);
+        Member member = (Member) o;
+        return Objects.equals(memberId, member.memberId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(playerId);
+        return Objects.hashCode(memberId);
     }
 }

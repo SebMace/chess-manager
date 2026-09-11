@@ -1,4 +1,4 @@
-package domain.player.vo;
+package domain.member.vo;
 
 public record FideId(Long fideId) {
     public FideId(Long fideId) {
