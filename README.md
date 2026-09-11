@@ -90,8 +90,32 @@ The domain has no framework or persistence dependencies.
 - `src/test/java/member`: member identity, FIDE, FFE registration and rating tests.
 - `src/test/java/affiliation`: seasonal affiliation and season tests.
 
-The feature file in `src/test/resources/features` is a draft, not an executable
-acceptance test; Cucumber is not configured as a test dependency.
+## Acceptance specifications and Cucumber
+
+Cucumber 7.22.1 runs on the JUnit Platform alongside JUnit Jupiter 5.10.2.
+All Cucumber dependencies are test-scoped; the domain remains independent of them.
+The setup follows the [Cucumber JUnit Platform integration](https://cucumber.io/docs/installation/java/).
+
+- `src/test/resources/features/implemented`: specifications of rules already covered
+  by domain tests; this directory does not imply that their Cucumber steps exist.
+- `src/test/resources/features/pending`: confirmed behaviors to build together.
+- `src/test/java/acceptance/RunCucumberTests.java`: selects scenarios tagged `@acceptance`.
+- `src/test/java/acceptance/steps`: Java bindings for the selected scenarios.
+
+Only "Reject construction of a member without a license" currently has the
+`@acceptance` tag and step definitions. Other scenarios remain specifications,
+so undefined-step editor warnings on those scenarios are expected.
+
+The acceptance scenario currently fails because the real `Member` constructor
+still accepts a person without an FFE license. This is the intentional ATDD RED
+checkpoint, not a Cucumber configuration failure. The 33 existing domain tests
+remain green. No application registration use case exists yet: this first scenario
+exercises the domain construction boundary directly.
+
+For the inner loop, add a focused JUnit test for the license invariant, implement
+the smallest change, and return to the outer Cucumber scenario until it is green.
+Add `@acceptance` to further scenarios when connecting them to real steps and
+assertions; do not add empty steps merely to remove editor warnings.
 
 ## Run the tests
 
@@ -107,6 +131,20 @@ To run only the affiliation tests:
 ```sh
 mvn -Dtest=affiliation.AffiliationsTests test
 ```
+
+To run the selected Cucumber scenarios (currently expected to fail at the RED checkpoint):
+
+```sh
+mvn -Dtest=RunCucumberTests test
+```
+
+The full `mvn test` command also runs this acceptance suite and therefore currently
+reports 34 tests with one expected failure. Cucumber writes its HTML report to
+`target/cucumber/cucumber.html`.
+
+In IntelliJ, reload the Maven project after changing `pom.xml`, then run
+`RunCucumberTests` to use the same scenario selection as Maven. Editor recognition
+of Java step definitions requires Cucumber for Java support in addition to Gherkin.
 
 Use RED → GREEN → REFACTOR for new behavior. Rename and simplify existing code
 under green tests, keeping domain language consistent and changes small.
