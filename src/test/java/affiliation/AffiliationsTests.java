@@ -4,6 +4,9 @@ import domain.club.vo.ClubId;
 import domain.club.vo.Season;
 import domain.member.entities.Member;
 import domain.member.vo.MemberId;
+import domain.member.vo.FfeId;
+import domain.member.vo.FfeLicense;
+import domain.member.vo.FfeLicenseType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -24,7 +27,8 @@ public class AffiliationsTests {
     void setUp() {
         member = new Member(
                 new MemberId(UUID.fromString("00000000-0000-0000-0000-000000000001")),
-                "Anatoly", "Karpov"
+                "Anatoly", "Karpov",
+                new FfeLicense(new FfeId("A12345"), FfeLicenseType.A)
         );
         firstClub = new ClubId(
                 UUID.fromString("00000000-0000-0000-0000-000000000002")

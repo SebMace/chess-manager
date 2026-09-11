@@ -1,5 +1,5 @@
 # Business specifications only. FfeMembershipTests and FfeIdTests cover the core rules.
-# Their unlicensed Member fixture is superseded by register_member.feature.
+# Member fixtures now require a valid license at construction.
 # Identifiers are synthetic: no official FFE pattern is asserted.
 # Identifier replacement, renewal, expiry and license season scope remain undecided.
 @club_management @existing_domain_rules

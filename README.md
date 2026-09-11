@@ -50,13 +50,13 @@ be rejected.
 
 ## FFE identification and licenses
 
-Every member holding an FFE license A or B has an FFE identifier. A newly created
-member may have neither an FFE identifier nor an FFE license. FFE registration is
+Every member must be constructed with an FFE license A or B and its FFE identifier.
+Construction without a license is rejected. FFE registration is
 independent of the member's internal identity and optional FIDE identifier.
 
 `Member.registerFfeLicense(ffeId, licenseType)` records the identifier and category
 together. Both arguments are required. `Member.ffeId()` and
-`Member.ffeLicenseType()` return `Optional.empty()` before registration.
+`Member.ffeLicenseType()` expose the values supplied at construction or subsequently recorded.
 
 - A and B are the only modeled license categories.
 - An FFE identifier cannot be null, empty or whitespace-only. Its value is preserved
@@ -106,14 +106,13 @@ Only "Reject construction of a member without a license" currently has the
 `@acceptance` tag and step definitions. Other scenarios remain specifications,
 so undefined-step editor warnings on those scenarios are expected.
 
-The acceptance scenario currently fails because the real `Member` constructor
-still accepts a person without an FFE license. This is the intentional ATDD RED
-checkpoint, not a Cucumber configuration failure. The 33 existing domain tests
-remain green. No application registration use case exists yet: this first scenario
+The acceptance scenario now passes because the real `Member` constructor rejects
+a missing FFE license. The ATDD outer loop has reached GREEN, alongside 35 domain
+tests. No application registration use case exists yet: this first scenario
 exercises the domain construction boundary directly.
 
-For the inner loop, add a focused JUnit test for the license invariant, implement
-the smallest change, and return to the outer Cucumber scenario until it is green.
+The inner loop verifies rejection of a missing license and successful construction
+with either category A or B. Test fixtures explicitly provide synthetic valid licenses.
 Add `@acceptance` to further scenarios when connecting them to real steps and
 assertions; do not add empty steps merely to remove editor warnings.
 
@@ -132,14 +131,14 @@ To run only the affiliation tests:
 mvn -Dtest=affiliation.AffiliationsTests test
 ```
 
-To run the selected Cucumber scenarios (currently expected to fail at the RED checkpoint):
+To run the selected Cucumber scenarios:
 
 ```sh
 mvn -Dtest=RunCucumberTests test
 ```
 
 The full `mvn test` command also runs this acceptance suite and therefore currently
-reports 34 tests with one expected failure. Cucumber writes its HTML report to
+reports 36 passing tests. Cucumber writes its HTML report to
 `target/cucumber/cucumber.html`.
 
 In IntelliJ, reload the Maven project after changing `pom.xml`, then run

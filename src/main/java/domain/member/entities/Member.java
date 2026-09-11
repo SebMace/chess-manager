@@ -28,13 +28,19 @@ public class Member {
 
     private final Map<Season, ClubId> seasonsClub;
 
-    public Member(MemberId memberId, String firstName, String lastName) {
+    public Member(MemberId memberId,
+                  String firstName,
+                  String lastName,
+                  FfeLicense ffeLicense) {
         if (memberId == null) throw new IllegalArgumentException("memberId cannot be null");
+        if (ffeLicense == null) throw new IllegalArgumentException("ffeLicense cannot be null");
         this.memberId = memberId;
         this.firstName = firstName;
         this.lastName = lastName;
         seasonsClub = new HashMap<>();
+        this.ffeLicense = ffeLicense;
     }
+
 
     public String firstName() {
         return firstName;

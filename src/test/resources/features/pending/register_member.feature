@@ -1,5 +1,5 @@
 # Only scenarios tagged @acceptance are connected to Cucumber step definitions.
-# These confirmed rules supersede the current Java construction of an unlicensed Member.
+# Missing-license rejection is implemented; the remaining scenarios still await bindings.
 @club_management @to_implement
 Feature: Register a licensed member of a club
   As a club administrator

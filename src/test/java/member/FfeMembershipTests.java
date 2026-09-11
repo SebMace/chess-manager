@@ -3,6 +3,7 @@ package member;
 import domain.member.entities.Member;
 import domain.member.vo.MemberId;
 import domain.member.vo.FfeId;
+import domain.member.vo.FfeLicense;
 import domain.member.vo.FfeLicenseType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,31 +13,39 @@ import org.junit.jupiter.params.provider.EnumSource;
 import java.util.UUID;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class FfeMembershipTests {
     private Member member;
+    private final FfeLicense initialLicense = new FfeLicense(new FfeId("B54321"), FfeLicenseType.B);
 
     @BeforeEach
     void setUp() {
         member = new Member(
                 new MemberId(UUID.fromString("00000000-0000-0000-0000-000000000001")),
-                "Anatoly", "Karpov"
+                "Anatoly", "Karpov", initialLicense
         );
     }
 
-    @Test
-    void should_create_a_member_without_an_ffe_id() {
-        assertTrue(member.ffeId().isEmpty());
-        assertTrue(member.ffeLicenseType().isEmpty());
+    @ParameterizedTest
+    @EnumSource(FfeLicenseType.class)
+    void should_create_a_member_with_an_ffe_license(FfeLicenseType licenseType) {
+        FfeLicense license = new FfeLicense(new FfeId("A12345"), licenseType);
+
+        Member licensedMember = new Member(
+                new MemberId(UUID.fromString("00000000-0000-0000-0000-000000000001")),
+                "Anatoly", "Karpov", license
+        );
+
+        assertEquals(Optional.of(license.ffeId()), licensedMember.ffeId());
+        assertEquals(Optional.of(licenseType), licensedMember.ffeLicenseType());
     }
 
     @ParameterizedTest
     @EnumSource(FfeLicenseType.class)
     void should_assign_an_ffe_id_with_either_license_type(FfeLicenseType licenseType) {
-        // Given: a member without FFE registration
+        // Given: a member with an existing FFE license
         FfeId ffeId = new FfeId("A12345");
 
         // When: the member receives an A or B license
@@ -53,8 +62,8 @@ class FfeMembershipTests {
         assertThrows(IllegalArgumentException.class,
                 () -> member.registerFfeLicense(null, licenseType));
 
-        assertTrue(member.ffeId().isEmpty());
-        assertTrue(member.ffeLicenseType().isEmpty());
+        assertEquals(Optional.of(initialLicense.ffeId()), member.ffeId());
+        assertEquals(Optional.of(initialLicense.type()), member.ffeLicenseType());
     }
 
     @Test
@@ -62,8 +71,8 @@ class FfeMembershipTests {
         assertThrows(IllegalArgumentException.class,
                 () -> member.registerFfeLicense(new FfeId("A12345"), null));
 
-        assertTrue(member.ffeId().isEmpty());
-        assertTrue(member.ffeLicenseType().isEmpty());
+        assertEquals(Optional.of(initialLicense.ffeId()), member.ffeId());
+        assertEquals(Optional.of(initialLicense.type()), member.ffeLicenseType());
     }
 
     @Test

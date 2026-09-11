@@ -24,7 +24,7 @@ public class MemberRegistrationSteps {
     @When("an attempt is made to create Camille as a member")
     public void attemptToCreateMember() {
         try {
-            createdMember = new Member(memberId, "Camille", "Martin");
+            createdMember = new Member(memberId, "Camille", "Martin", null);
         } catch (IllegalArgumentException exception) {
             rejection = exception;
         }
