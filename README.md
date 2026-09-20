@@ -205,6 +205,47 @@ and coverage plugin versions are pinned in `pom.xml`.
 See the official [Maven scanner documentation](https://docs.sonarsource.com/sonarqube-cloud/advanced-setup/ci-based-analysis/sonarscanner-for-maven)
 and [Java coverage documentation](https://docs.sonarsource.com/sonarqube-cloud/enriching/test-coverage/java-test-coverage).
 
+## Mutation testing with PIT
+
+PIT 1.25.9, with its JUnit 5 plugin 1.2.3, checks whether tests detect small
+changes to production bytecode. Source files are not rewritten. This first
+exercise targets only `domain.member.vo.FfeId` and `member.FfeIdTests`;
+its score does not describe the whole project or the Cucumber acceptance suite.
+
+With Maven running on Java 26, run the existing examples, then mutation analysis:
+
+```sh
+mvn -Dtest=member.FfeIdTests test
+mvn test-compile org.pitest:pitest-maven:mutationCoverage
+```
+
+PIT runs only when explicitly requested; it is not bound to `test` or `verify`.
+The first run downloads the plugin and its dependencies from Maven Central.
+
+- HTML report: `target/pit-reports/index.html`.
+- XML results: `target/pit-reports/mutations.xml`.
+- On macOS: `open target/pit-reports/index.html`.
+
+Reports are ignored by Git, overwritten on the next analysis, and removed by
+`mvn clean`. Rerun mutation analysis to regenerate them.
+
+Read each mutation alongside the business rule and the test that detects it:
+
+- `KILLED`: a test failed after the mutation.
+- `SURVIVED`: the mutation was exercised but no test detected it; investigate a
+  missing example or assertion, or a mutation with equivalent observable behavior.
+- `NO_COVERAGE`: no selected test exercised the mutated code.
+- Timeouts and execution errors need investigation; they are not passing tests.
+
+No mutation score threshold or value-object exclusion is configured. Keep the
+default mutation operators for this first exercise. Add tests for meaningful
+behavioral gaps, then expand `targetClasses` and `targetTests` deliberately.
+PIT complements JaCoCo coverage; a perfect score on this exercise is not proof
+that every possible defect is detected.
+
+See the [PIT Maven documentation](https://pitest.org/quickstart/maven/)
+and the [JUnit 5 plugin](https://github.com/pitest/pitest-junit5-plugin).
+
 ## License and authorship
 
 MIT License. Created by Sébastien Macé.
