@@ -118,12 +118,18 @@ assertions; do not add empty steps merely to remove editor warnings.
 
 ## Run the tests
 
-The Maven project targets Java 17 and uses JUnit Jupiter 5.10.2. With a compatible
-JDK and Maven installed (no Maven wrapper is currently included):
+The Maven project targets Java 26 and uses JUnit Jupiter 5.10.2. Use Eclipse
+Temurin 26 (an open-source OpenJDK distribution) and Maven (no Maven wrapper is
+currently included). Check that `mvn -version` reports Java 26 before running:
 
 ```sh
 mvn test
 ```
+
+In IntelliJ, select Temurin 26 as the Project SDK and use the Project SDK for
+the Maven importer and runner, then reload the Maven project. The compiler uses
+`--release 26` without preview features. Java 26 or newer is required to run the
+compiled application.
 
 To run only the affiliation tests:
 
