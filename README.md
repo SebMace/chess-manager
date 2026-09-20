@@ -154,23 +154,56 @@ of Java step definitions requires Cucumber for Java support in addition to Gherk
 Use RED → GREEN → REFACTOR for new behavior. Rename and simplify existing code
 under green tests, keeping domain language consistent and changes small.
 
-## Code coverage with JaCoCo
+## Code quality with SonarQube and JaCoCo
 
+The build includes SonarScanner for Maven 5.6.0.6792 and JaCoCo 0.8.15.
 JaCoCo measures production-code coverage during both JUnit and Cucumber tests.
+SonarQube imports that coverage and performs its own static analysis.
 
-Generate the coverage reports locally:
+Generate the coverage reports locally, without contacting a SonarQube server:
 
 ```sh
 mvn clean verify
 ```
 
 - HTML coverage report: `target/site/jacoco/index.html`.
-- XML coverage report: `target/site/jacoco/jacoco.xml`.
+- XML coverage report imported by SonarQube: `target/site/jacoco/jacoco.xml`.
 - Cucumber acceptance report: `target/cucumber/cucumber.html`.
 
 `mvn test` runs instrumented tests; `verify` also generates the coverage reports.
 Reports remain under the ignored `target` directory. No arbitrary coverage
 threshold or analysis exclusion is configured.
+
+### Connect an analysis destination
+
+An actual Sonar analysis requires a project on SonarQube Cloud or a SonarQube
+server, its project key, and an analysis token. The repository does not yet select
+a destination or configure an automatic CI analysis.
+
+Set `SONAR_HOST_URL`, `SONAR_PROJECT_KEY` and `SONAR_TOKEN` in your local environment
+or CI secret settings. Use the URL of the selected server or Cloud region. Keep
+the token out of Git and command-line arguments.
+
+For SonarQube Server:
+
+```sh
+mvn clean verify sonar:sonar -Dsonar.projectKey="$SONAR_PROJECT_KEY"
+```
+
+For SonarQube Cloud, also set `SONAR_ORGANIZATION` to the organization key:
+
+```sh
+mvn clean verify sonar:sonar \
+  -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
+  -Dsonar.organization="$SONAR_ORGANIZATION"
+```
+
+These commands send the analysis to the configured destination; a successful
+local coverage build alone does not mean a Sonar analysis has run. The scanner
+and coverage plugin versions are pinned in `pom.xml`.
+
+See the official [Maven scanner documentation](https://docs.sonarsource.com/sonarqube-cloud/advanced-setup/ci-based-analysis/sonarscanner-for-maven)
+and [Java coverage documentation](https://docs.sonarsource.com/sonarqube-cloud/enriching/test-coverage/java-test-coverage).
 
 ## License and authorship
 
