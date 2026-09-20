@@ -154,6 +154,24 @@ of Java step definitions requires Cucumber for Java support in addition to Gherk
 Use RED → GREEN → REFACTOR for new behavior. Rename and simplify existing code
 under green tests, keeping domain language consistent and changes small.
 
+## Code coverage with JaCoCo
+
+JaCoCo measures production-code coverage during both JUnit and Cucumber tests.
+
+Generate the coverage reports locally:
+
+```sh
+mvn clean verify
+```
+
+- HTML coverage report: `target/site/jacoco/index.html`.
+- XML coverage report: `target/site/jacoco/jacoco.xml`.
+- Cucumber acceptance report: `target/cucumber/cucumber.html`.
+
+`mvn test` runs instrumented tests; `verify` also generates the coverage reports.
+Reports remain under the ignored `target` directory. No arbitrary coverage
+threshold or analysis exclusion is configured.
+
 ## License and authorship
 
 MIT License. Created by Sébastien Macé.
