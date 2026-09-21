@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: Tests and mutation analysis
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Set up Java 26 and cache Maven dependencies
+        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
+        with:
+          distribution: temurin
+          java-version: '26'
+          cache: maven
+          cache-dependency-path: pom.xml
+
+      - name: Show Java and Maven versions
+        run: mvn --version
+
+      - name: Build, run JUnit, Cucumber and ArchUnit, and generate coverage
+        run: mvn --batch-mode --no-transfer-progress clean verify
+
+      - name: Run PIT mutation analysis
+        run: mvn --batch-mode --no-transfer-progress org.pitest:pitest-maven:mutationCoverage
+
+      - name: Upload test, coverage and mutation reports
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: test-reports
+          path: |
+            target/surefire-reports/
+            target/cucumber/
+            target/site/jacoco/
+            target/pit-reports/
+          retention-days: 14
+          if-no-files-found: warn

@@ -272,6 +272,42 @@ frameworks. Update the package patterns if the project's root packages change.
 
 See the [ArchUnit user guide](https://www.archunit.org/userguide/html/000_Index.html).
 
+## Continuous integration with GitHub Actions
+
+The [CI workflow](.github/workflows/ci.yml) runs on pull requests, pushes to `main`
+and manual dispatches. Its `Tests and mutation analysis` job uses Ubuntu 24.04,
+Eclipse Temurin Java 26 and Maven, with a cache of Maven dependencies.
+
+The job executes these commands in order:
+
+```sh
+mvn --batch-mode --no-transfer-progress clean verify
+mvn --batch-mode --no-transfer-progress org.pitest:pitest-maven:mutationCoverage
+```
+
+The first command compiles and packages the project, runs JUnit (including
+ArchUnit) and the Cucumber scenarios selected by `RunCucumberTests`, and creates
+the JaCoCo reports. The second runs PIT on the scope configured in `pom.xml`,
+currently only `FfeId` with `FfeIdTests`. No additional test filter is applied in CI.
+
+A compilation failure, failing test, architecture violation or PIT execution
+error fails the job. PIT runs only after a successful verification. As in local
+development, no JaCoCo or mutation-score threshold is enforced: a surviving
+mutant alone does not currently fail the job. Review the mutation report.
+
+In GitHub, open **Actions → CI → the run → Artifacts → test-reports**.
+Download and extract the archive to read Surefire results and open the Cucumber,
+JaCoCo and PIT HTML reports. Available reports are uploaded even after a failure
+and retained for 14 days; reports from steps that did not complete may be absent.
+
+The workflow requires no project secret and performs no deployment or Sonar
+analysis. Actions are pinned to commit hashes, with their release versions in
+comments. A newer run on the same Git ref cancels an older in-progress run.
+
+After the first successful GitHub run, the repository's branch rules can require
+the `Tests and mutation analysis` status check before merging into `main`.
+Adding this workflow does not itself enable that repository setting.
+
 ## License and authorship
 
 MIT License. Created by Sébastien Macé.
