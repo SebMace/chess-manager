@@ -246,6 +246,32 @@ that every possible defect is detected.
 See the [PIT Maven documentation](https://pitest.org/quickstart/maven/)
 and the [JUnit 5 plugin](https://github.com/pitest/pitest-junit5-plugin).
 
+## Architecture tests with ArchUnit
+
+ArchUnit 1.4.2 runs through JUnit Jupiter as a test-only dependency.
+`architecture.DomainDependencyTests` checks that production classes in `domain..`
+do not depend on classes in `application..`, `infrastructure..`, `infra..` or
+`adapters..`. The `..` pattern includes subpackages. The infrastructure and
+adapter package names are guarded even before implementations exist there.
+
+The rule imports compiled domain classes, excluding test classes, and checks
+dependencies such as field types, method signatures and calls. Application
+classes may depend on the domain; the reverse direction is forbidden.
+
+Run this first architecture rule with Maven on Java 26:
+
+```sh
+mvn -Dtest=architecture.DomainDependencyTests test
+```
+
+It also runs automatically with `mvn test` and `mvn verify`. Results appear in
+`target/surefire-reports`. No production code or package layout is changed.
+This rule protects the named package boundary; it does not yet enforce all
+hexagonal architecture rules or forbid direct dependencies on third-party
+frameworks. Update the package patterns if the project's root packages change.
+
+See the [ArchUnit user guide](https://www.archunit.org/userguide/html/000_Index.html).
+
 ## License and authorship
 
 MIT License. Created by Sébastien Macé.

@@ -16,6 +16,7 @@
 
         <cucumber.version>7.22.1</cucumber.version>
         <junit.version>5.10.2</junit.version>
+        <archunit.version>1.4.2</archunit.version>
         <jacoco.version>0.8.15</jacoco.version>
         <pitest.version>1.25.9</pitest.version>
         <pitest-junit5-plugin.version>1.2.3</pitest-junit5-plugin.version>
@@ -39,6 +40,12 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.tngtech.archunit</groupId>
+            <artifactId>archunit</artifactId>
+            <version>${archunit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
