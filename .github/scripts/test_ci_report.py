@@ -1,5 +1,6 @@
 import json
 import os
+import shutil
 import tempfile
 import unittest
 
@@ -136,6 +137,37 @@ class SummaryRowTests(unittest.TestCase):
 
         self.assertIn(("Cucumber, build gate", "1 test, passed, 0 skipped"),
                       ci_report.summary_rows(tests, None, None, None))
+
+
+class ReportSiteTests(unittest.TestCase):
+    def setUp(self):
+        self.target = tempfile.mkdtemp()
+        self.site = os.path.join(tempfile.mkdtemp(), "site")
+        for folder, content in (("cucumber", "build gate run"), ("cucumber-all", "every scenario run")):
+            os.makedirs(os.path.join(self.target, folder))
+            with open(os.path.join(self.target, folder, "cucumber.html"), "w") as report:
+                report.write(content)
+
+    def build(self):
+        ci_report.build_site(self.target, self.site, [], [], None, {})
+        with open(os.path.join(self.site, "index.html")) as page:
+            return page.read()
+
+    def test_publishes_the_run_of_every_scenario_as_the_only_cucumber_report(self):
+        index = self.build()
+
+        with open(os.path.join(self.site, "cucumber", "cucumber.html")) as report:
+            self.assertEqual("every scenario run", report.read())
+        self.assertFalse(os.path.exists(os.path.join(self.site, "cucumber-all")))
+        self.assertEqual(1, index.count("cucumber.html"))
+
+    def test_falls_back_to_the_build_gate_report_without_a_full_run(self):
+        shutil.rmtree(os.path.join(self.target, "cucumber-all"))
+
+        self.build()
+
+        with open(os.path.join(self.site, "cucumber", "cucumber.html")) as report:
+            self.assertEqual("build gate run", report.read())
 
 
 class SourceLinkTests(unittest.TestCase):

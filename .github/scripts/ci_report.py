@@ -198,13 +198,14 @@ def build_site(target, site, rows, failed, scenarios, environment):
         shutil.rmtree(site)
     os.makedirs(site)
     links = []
+    # The run of every scenario includes the build gate scenarios, so it is the only one published.
+    cucumber = os.path.join(target, "cucumber-all")
+    if not os.path.isdir(cucumber):
+        cucumber = os.path.join(target, "cucumber")
     for source, destination, entry, label in (
             (os.path.join(target, "site", "jacoco"), "jacoco", "index.html", "JaCoCo coverage"),
             (os.path.join(target, "pit-reports"), "pit", "index.html", "PIT mutation testing"),
-            (os.path.join(target, "cucumber"), "cucumber", "cucumber.html",
-             "Cucumber acceptance scenarios (build gate)"),
-            (os.path.join(target, "cucumber-all"), "cucumber-all", "cucumber.html",
-             "Cucumber, all scenarios including pending ones")):
+            (cucumber, "cucumber", "cucumber.html", "Cucumber scenarios, including pending ones")):
         if os.path.isdir(source):
             shutil.copytree(source, os.path.join(site, destination))
             links.append('<li><a href="%s/%s">%s</a></li>' % (destination, entry, label))
