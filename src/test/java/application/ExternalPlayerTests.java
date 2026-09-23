@@ -50,6 +50,14 @@ class ExternalPlayerTests {
         assertFalse(isExternalPlayer(season));
     }
 
+    @Test
+    void should_consider_a_player_affiliated_with_a_club_unknown_to_the_application_as_external() {
+        licensedAt(gien, season);
+
+        assertTrue(isExternalPlayer(season));
+        assertTrue(clubs.find(gien).isEmpty());
+    }
+
     private void licensedAt(ClubId clubId, Season licenseSeason) {
         new RegisterLicense(relationships, licenseSeason).execute(person, clubId, license);
     }
