@@ -36,8 +36,26 @@ jobs:
       - name: Show Java and Maven versions
         run: mvn --version
 
+      - name: Test the report script
+        run: python3 -m unittest discover --start-directory .github/scripts
+
       - name: Build, run JUnit, Cucumber and ArchUnit, and generate coverage
         run: mvn --batch-mode --no-transfer-progress clean verify
+
+      # The build gate runs only @acceptance scenarios. This report-only run executes every
+      # scenario so that undefined and pending ones appear in the reports; Cucumber exits
+      # with a non-zero status whenever a scenario is not passing, which is expected here.
+      - name: Run every Cucumber scenario to report pending ones
+        run: |
+          mvn --batch-mode --no-transfer-progress \
+            org.apache.maven.plugins:maven-dependency-plugin:3.11.0:build-classpath \
+            -Dmdep.outputFile=target/test-classpath.txt -Dmdep.includeScope=test
+          java -cp "target/test-classes:target/classes:$(cat target/test-classpath.txt)" \
+            io.cucumber.core.cli.Main --glue acceptance.steps --monochrome \
+            --plugin json:target/cucumber-all/cucumber.json \
+            --plugin html:target/cucumber-all/cucumber.html \
+            classpath:features || true
+          test -s target/cucumber-all/cucumber.json
 
       - name: Run PIT mutation analysis
         run: mvn --batch-mode --no-transfer-progress org.pitest:pitest-maven:mutationCoverage
@@ -60,6 +78,7 @@ jobs:
           path: |
             target/surefire-reports/
             target/cucumber/
+            target/cucumber-all/
             target/site/jacoco/
             target/pit-reports/
           retention-days: 14
