@@ -5,116 +5,108 @@ Test-Driven Development and Clean / Hexagonal Architecture principles.
 
 ## Current bounded context: Club Management
 
-The current implementation focuses on members and their seasonal club affiliations.
-`Member` is the canonical term in this context: it represents the person whose
-identity and affiliations a club administrator manages. A member can be created
-before being affiliated to a club.
+The model separates three aggregate roots:
 
-This context does not yet implement games, tournament participation, authentication
-or club administration workflows. Those concerns must not determine the current
-member model.
+- `Person`: personal identity (`PersonId`), names, optional email, FIDE identification and rating.
+- `Club`: club identity (`ClubId`), name, and whether the application manages the club.
+- `ClubRelationship`: one relationship identified by the pair `PersonId` + `ClubId`,
+  its recorded status and its FFE licenses by season.
 
-## Ubiquitous language
+`ClubRelationship` holds identifiers, never `Person` or `Club` objects. Neither
+`Person` nor `Club` contains a collection of relationships. `PROSPECT`, `MEMBER`
+and `PARTNER` describe relationships, not types of people. There are no separate
+bounded contexts or microservices for these aggregates.
 
-| Term | Meaning in the current model |
-| --- | --- |
-| `Member` | Entity with a durable internal identity, first name, last name and seasonal affiliations. |
-| `MemberId` | Internal identity backed by a non-null UUID; independent of names and FIDE registration. |
-| `ClubId` | Identity of the club referenced by an affiliation, backed by a non-null UUID. |
-| `Season` | Value object containing a beginning year and an ending year. |
-| Affiliation | Association of a member with one club for a given season, managed through `Member.affiliateTo`. |
-| `FideId` | Positive FIDE identifier, optional on a member. |
-| `FfeId` | Identifier assigned by the Fédération Française des Échecs (FFE), represented as a non-blank string. |
-| `FfeLicenseType` | FFE license category: A or B. |
-| `FfeLicense` | Immutable association of an FFE identifier with a license category. |
-| `EloRating` | Non-negative rating value that can be assigned and updated. |
+## Relationship and affiliation rules
 
-`Member` equality is based on `MemberId`: names do not establish identity.
-Affiliation is currently represented inside `Member` as a map from `Season` to
-`ClubId`; there is no separate affiliation entity or `Club` aggregate yet.
+- A person can be a prospect of several clubs before obtaining a license.
+- Recording an A or B license makes the person a member of that club and affiliates
+  them for the current season, including when registration happens during the season.
+- A person cannot be affiliated with two clubs in the same season.
+- Recording a license ends that person's other prospect relationships by default.
+  An explicit request can instead preserve selected relationships as `PARTNER`.
+- An affiliated person cannot be registered as a prospect of any club for that season.
+- The relationship has one recorded status; it cannot be both prospect and member.
+- Relationships belonging to other people are unaffected.
+- Earlier seasonal affiliations are retained when a person changes club in a later
+  season. Repeating the same affiliation preserves it; no new season is implicitly licensed.
+- A partnership can be recorded with a club without licensing the person there and
+  without changing their affiliation elsewhere.
+- A person licensed for the season with a club the application does not manage is an
+  external player. A club unknown to the application is, by definition, not managed.
 
-## Seasonal affiliation rules
+The use cases receive the current `Season` explicitly. Calendar boundaries have not
+been specified, so no calculation from today's date is implemented. The recorded
+relationship status describes its last transition; current seasonal affiliation is
+queried from the licenses for the requested season. Automatic status changes at season
+expiry, partnership termination, and whether a member may also be a partner of the
+same club are outside this slice. What an external player may access once logged in
+belongs to a future authorization context, not to Club Management.
 
-- An affiliation requires both a club and a season; null arguments are rejected.
-- A member can be affiliated to only one club for a given season.
-- Repeating an affiliation to the same club for the same season has no effect.
-- Attempting to affiliate to another club for that season is rejected, preserving
-  the original affiliation.
-- A member may join another club in a subsequent season without losing previous
-  affiliations.
-- Looking up a season without an affiliation returns `Optional.empty()`.
+## Application boundary and persistence
 
-For example, a member affiliated to club A in 2026–2027 can join club B in
-2027–2028. Both affiliations remain available. Joining club B in 2026–2027 would
-be rejected.
+`RegisterProspect` records a new person's names and email and a prospect relationship,
+or registers an existing person with another club. Internal identity generation is
+supplied to the use case so tests can use deterministic IDs.
 
-## FFE identification and licenses
+`RegisterLicense` records a license for the supplied current season and coordinates
+the consequences for other prospect relationships. `ClubAffiliations` holds the
+cross-club business rules (one club per season and prospect eligibility).
 
-Every member must be constructed with an FFE license A or B and its FFE identifier.
-Construction without a license is rejected. FFE registration is
-independent of the member's internal identity and optional FIDE identifier.
+`RegisterPartnership` records a partnership with a club. `IsExternalPlayer` answers
+whether a person is an external player for a season, from their affiliation and the
+club it refers to.
 
-`Member.registerFfeLicense(ffeId, licenseType)` records the identifier and category
-together. Both arguments are required. `Member.ffeId()` and
-`Member.ffeLicenseType()` expose the values supplied at construction or subsequently recorded.
+The use cases depend on three ports: `PersonRepository`, `ClubRelationshipRepository`
+and `ClubRepository`. The relationship repository can find a pair, list a person's
+relationships, save and remove a relationship; the club repository finds and saves
+clubs. These are core-owned application ports; the only implementations currently
+present are in-memory test fakes.
 
-- A and B are the only modeled license categories.
-- An FFE identifier cannot be null, empty or whitespace-only. Its value is preserved
-  exactly; no federation-specific pattern or normalization is assumed yet.
-- Invalid registration requests leave the member's existing registration unchanged.
-- `FfeLicense` keeps the identifier and category together as one valid immutable value.
+`ClubRelationship` is immutable. `registerLicense` returns a new state with the same
+identity; the application must save that state. The fake keys records by the two IDs.
+Application tests use the same repository for setup, action and assertions and reread
+persisted state. Removing `save()` was checked to make the membership test fail.
 
-The current operation records the supplied valid pair, replacing any previous pair.
-Restrictions on changing an existing FFE identifier remain to be specified.
-License seasons, expiry, renewal, category changes and federation lookup are not
-modeled by this first slice. The example identifiers in tests are synthetic, not
-evidence of an official FFE identifier format.
+## Personal identity and FFE licenses
 
-## Other implemented rules and current limits
+Personal equality depends on `PersonId`, not names. A person can exist without a
+license or FIDE identifier. Replacing an assigned FIDE identifier is rejected;
+non-positive FIDE IDs and negative ratings are rejected as before.
 
-- A member requires an internal identity and may initially have no FIDE identifier.
-- Once assigned, a FIDE identifier cannot be assigned again.
-- Negative Elo ratings and non-positive FIDE identifiers are rejected.
-- The relationship between a season's beginning and ending years is not yet validated.
-- Names and the full lifecycle of ratings are not yet constrained by business rules.
+`FfeLicense` remains an immutable pair of `FfeId` and category A or B. Both are
+required. Blank FFE IDs are rejected and supplied values are preserved without an
+invented federation-specific format. Invalid license requests preserve saved state.
+A valid license can replace the pair recorded for the same season, as in the previous
+model; restrictions on changing an FFE identifier have not been specified.
 
-## Implementation
-
-The repository currently contains a Java domain model and JUnit tests. There are
-no application services, persistence adapters, REST endpoints or frontend yet.
-The domain has no framework or persistence dependencies.
-
-- `src/main/java/domain/member`: member entity, identity, FIDE and FFE identifiers, FFE license and rating.
-- `src/main/java/domain/club/vo`: club identity and season.
-- `src/main/java/domain/exceptions`: domain exception for an already assigned FIDE identifier.
-- `src/test/java/member`: member identity, FIDE, FFE registration and rating tests.
-- `src/test/java/affiliation`: seasonal affiliation and season tests.
+The existing value objects remain in `domain/member/vo` to limit package movement.
+The former `Member` entity and `MemberId` have been replaced by `Person` and `PersonId`;
+license and affiliation behavior now belongs to club relationships.
 
 ## Acceptance specifications and Cucumber
 
 Cucumber 7.22.1 runs on the JUnit Platform alongside JUnit Jupiter 5.10.2.
-All Cucumber dependencies are test-scoped; the domain remains independent of them.
-The setup follows the [Cucumber JUnit Platform integration](https://cucumber.io/docs/installation/java/).
+All Cucumber dependencies are test-scoped; the domain has no framework dependencies.
 
-- `src/test/resources/features/implemented`: specifications of rules already covered
-  by domain tests; this directory does not imply that their Cucumber steps exist.
-- `src/test/resources/features/pending`: confirmed behaviors to build together.
-- `src/test/java/acceptance/RunCucumberTests.java`: selects scenarios tagged `@acceptance`.
-- `src/test/java/acceptance/steps`: Java bindings for the selected scenarios.
+- `src/test/resources/features/implemented`: domain specifications, some without Cucumber bindings.
+- `src/test/resources/features/pending`: includes the implemented relationship scenarios
+  alongside future specifications; `@acceptance` determines which scenarios run.
+- `RunCucumberTests`: selects scenarios tagged `@acceptance`; they form the build gate.
+- `acceptance/steps`: business-language steps using a scenario driver that calls application use cases.
 
-Only "Reject construction of a member without a license" currently has the
-`@acceptance` tag and step definitions. Other scenarios remain specifications,
-so undefined-step editor warnings on those scenarios are expected.
+The build gate covers prospect details, rejection of a licensed prospect, rejection
+of membership without a license, default rupture of other prospect links for A and B
+licenses, and explicit preservation as a partner. Scenarios about partnerships and
+external players are bound and pass, but are still tagged `@to_implement`, so they are
+outside the gate. Visitor approval and visitor data access remain to be implemented.
 
-The acceptance scenario now passes because the real `Member` constructor rejects
-a missing FFE license. The ATDD outer loop has reached GREEN, alongside 35 domain
-tests. No application registration use case exists yet: this first scenario
-exercises the domain construction boundary directly.
+A scenario is *pending* when one of its steps is undefined or throws
+`PendingException`. CI runs every scenario, outside the build gate, to report pending
+and failing ones (see [Continuous integration](#continuous-integration-with-github-actions)).
 
-The inner loop verifies rejection of a missing license and successful construction
-with either category A or B. Test fixtures explicitly provide synthetic valid licenses.
-Add `@acceptance` to further scenarios when connecting them to real steps and
-assertions; do not add empty steps merely to remove editor warnings.
+See [the modeling correction report](docs/club-relationship-refactoring.md) for the
+initial inventory, changes and TDD evidence.
 
 ## Run the tests
 
@@ -143,9 +135,22 @@ To run the selected Cucumber scenarios:
 mvn -Dtest=RunCucumberTests test
 ```
 
-The full `mvn test` command also runs this acceptance suite and therefore currently
-reports 36 passing tests. Cucumber writes its HTML report to
+The full `mvn test` command runs the JUnit tests and all selected acceptance
+scenarios. Cucumber writes its HTML report to
 `target/cucumber/cucumber.html`.
+
+To run every scenario, including pending ones, as CI does (Cucumber exits with a
+non-zero status while some scenarios are not passing; the report is still written):
+
+```sh
+mvn test-compile org.apache.maven.plugins:maven-dependency-plugin:3.11.0:build-classpath \
+  -Dmdep.outputFile=target/test-classpath.txt -Dmdep.includeScope=test
+java -cp "target/test-classes:target/classes:$(cat target/test-classpath.txt)" \
+  io.cucumber.core.cli.Main --glue acceptance.steps \
+  --plugin html:target/cucumber-all/cucumber.html classpath:features
+```
+
+Then open `target/cucumber-all/cucumber.html` and filter on `undefined` or `pending`.
 
 In IntelliJ, reload the Maven project after changing `pom.xml`, then run
 `RunCucumberTests` to use the same scenario selection as Maven. Editor recognition
@@ -208,14 +213,14 @@ and [Java coverage documentation](https://docs.sonarsource.com/sonarqube-cloud/e
 ## Mutation testing with PIT
 
 PIT 1.25.9, with its JUnit 5 plugin 1.2.3, checks whether tests detect small
-changes to production bytecode. Source files are not rewritten. This first
-exercise targets only `domain.member.vo.FfeId` and `member.FfeIdTests`;
-its score does not describe the whole project or the Cucumber acceptance suite.
+changes to production bytecode. Source files are not rewritten. It mutates every
+class in `domain` and `application` and runs every JUnit `*Tests` class against them,
+excluding `acceptance` (Cucumber repeats the use-case tests more slowly) and
+`architecture` (ArchUnit checks dependencies, not behavior).
 
-With Maven running on Java 26, run the existing examples, then mutation analysis:
+With Maven running on Java 26:
 
 ```sh
-mvn -Dtest=member.FfeIdTests test
 mvn test-compile org.pitest:pitest-maven:mutationCoverage
 ```
 
@@ -237,11 +242,11 @@ Read each mutation alongside the business rule and the test that detects it:
 - `NO_COVERAGE`: no selected test exercised the mutated code.
 - Timeouts and execution errors need investigation; they are not passing tests.
 
-No mutation score threshold or value-object exclusion is configured. Keep the
-default mutation operators for this first exercise. Add tests for meaningful
-behavioral gaps, then expand `targetClasses` and `targetTests` deliberately.
-PIT complements JaCoCo coverage; a perfect score on this exercise is not proof
-that every possible defect is detected.
+No mutation score threshold or value-object exclusion is configured, and the
+default mutation operators are used. Surviving and uncovered mutants point to
+missing examples or assertions; add tests for the meaningful behavioral gaps.
+PIT complements JaCoCo coverage; a perfect score is not proof that every possible
+defect is detected.
 
 See the [PIT Maven documentation](https://pitest.org/quickstart/maven/)
 and the [JUnit 5 plugin](https://github.com/pitest/pitest-junit5-plugin).
@@ -278,31 +283,40 @@ The [CI workflow](.github/workflows/ci.yml) runs on pull requests, pushes to `ma
 and manual dispatches. Its `Tests and mutation analysis` job uses Ubuntu 24.04,
 Eclipse Temurin Java 26 and Maven, with a cache of Maven dependencies.
 
-The job executes these commands in order:
+The job runs these steps in order:
 
-```sh
-mvn --batch-mode --no-transfer-progress clean verify
-mvn --batch-mode --no-transfer-progress org.pitest:pitest-maven:mutationCoverage
-```
+1. The unit tests of the report script (`.github/scripts/test_ci_report.py`).
+2. `mvn clean verify`: compiles and packages the project, runs JUnit (including
+   ArchUnit) and the Cucumber build gate selected by `RunCucumberTests`, and creates
+   the JaCoCo reports.
+3. A report-only Cucumber run of every scenario, through Cucumber's command-line
+   runner. Pending or failing scenarios do not fail this step; a missing report does.
+4. PIT on the scope configured in `pom.xml`.
+5. `.github/scripts/ci_report.py`, which writes the run summary and assembles the
+   report site.
 
-The first command compiles and packages the project, runs JUnit (including
-ArchUnit) and the Cucumber scenarios selected by `RunCucumberTests`, and creates
-the JaCoCo reports. The second runs PIT on the scope configured in `pom.xml`,
-currently only `FfeId` with `FfeIdTests`. No additional test filter is applied in CI.
+A compilation failure, failing test, architecture violation, failing build-gate
+scenario or PIT execution error fails the job. As in local development, no JaCoCo or
+mutation-score threshold is enforced: a surviving mutant alone does not fail the job.
 
-A compilation failure, failing test, architecture violation or PIT execution
-error fails the job. PIT runs only after a successful verification. As in local
-development, no JaCoCo or mutation-score threshold is enforced: a surviving
-mutant alone does not currently fail the job. Review the mutation report.
+Reports are available in three places:
 
-In GitHub, open **Actions → CI → the run → Artifacts → test-reports**.
-Download and extract the archive to read Surefire results and open the Cucumber,
-JaCoCo and PIT HTML reports. Available reports are uploaded even after a failure
-and retained for 14 days; reports from steps that did not complete may be absent.
+- **Run summary**: on the run page, a table of test counts, coverage and mutation
+  score, followed by the pending scenarios with links to their source lines.
+- **GitHub Pages**: <https://sebmace.github.io/chess-manager/> publishes the same
+  summary with the JaCoCo, PIT and Cucumber HTML reports. The Cucumber report covers
+  every scenario; filter it on `undefined` or `pending`. The site is updated by the
+  `Publish reports to GitHub Pages` job after each successful push to `main`, and is
+  public. Pages must use **Settings → Pages → Source: GitHub Actions**.
+- **Artifact**: **Actions → CI → the run → Artifacts → test-reports** contains the
+  raw Surefire results and both Cucumber reports. It is uploaded even after a failure
+  and retained for 14 days; reports from steps that did not complete may be absent.
 
-The workflow requires no project secret and performs no deployment or Sonar
-analysis. Actions are pinned to commit hashes, with their release versions in
-comments. A newer run on the same Git ref cancels an older in-progress run.
+The workflow requires no project secret and performs no Sonar analysis. Only the
+publishing job receives the `pages: write` and `id-token: write` permissions.
+Actions are pinned to commit hashes, with their release versions in comments; the
+Maven dependency plugin used by step 3 is pinned by version. A newer run on the same
+Git ref cancels an older in-progress run.
 
 After the first successful GitHub run, the repository's branch rules can require
 the `Tests and mutation analysis` status check before merging into `main`.
