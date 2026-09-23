@@ -105,11 +105,17 @@
                 <version>${pitest.version}</version>
                 <configuration>
                     <targetClasses>
-                        <param>domain.member.vo.FfeId</param>
+                        <param>domain.*</param>
+                        <param>application.*</param>
                     </targetClasses>
                     <targetTests>
-                        <param>member.FfeIdTests</param>
+                        <param>*Tests</param>
                     </targetTests>
+                    <!-- ArchUnit checks dependencies, not behavior; Cucumber repeats use-case tests more slowly. -->
+                    <excludedTestClasses>
+                        <param>acceptance.*</param>
+                        <param>architecture.*</param>
+                    </excludedTestClasses>
                     <timestampedReports>false</timestampedReports>
                     <outputFormats>
                         <param>HTML</param>
