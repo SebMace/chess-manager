@@ -2,6 +2,7 @@
 # Club Management owns the president's business approval of a visitor.
 # Technical permissions and authentication belong to Rights and Authorization.
 @club_management @to_implement
+@visitor_approval
 Feature: Approve a club visitor
   As the president of a club
   I want to approve a prospect or partner as a visitor

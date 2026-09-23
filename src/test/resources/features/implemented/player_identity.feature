@@ -1,6 +1,6 @@
-# Business specifications only. MemberTests covers the underlying identity,
-# FIDE and rating rules; moving them to Player is not implemented yet.
+# Executable acceptance examples. Player is a business role; personal identity belongs to Person.
 @club_management @existing_domain_rules
+@identity
 Feature: Identify a licensed person independently of club relationships
   As a club administrator
   I want a stable internal identity for each player
@@ -47,7 +47,7 @@ Feature: Identify a licensed person independently of club relationships
 
   Scenario Outline: Reject a non-positive FIDE identifier
     When a FIDE identifier is created with value <value>
-    Then the identifier is rejected
+    Then the FIDE identifier is rejected
 
     Examples:
       | value |

@@ -1,8 +1,9 @@
-# Business specifications only. FfeMembershipTests and FfeIdTests cover the core rules.
-# Member fixtures now require a valid license at construction.
+# Executable acceptance specifications. FfeMembershipTests and FfeIdTests cover the core rules.
+# Licenses belong to club relationships and are recorded for a season.
 # Identifiers are synthetic: no official FFE pattern is asserted.
-# Identifier replacement, renewal, expiry and license season scope remain undecided.
+# Expiry and restrictions on FFE identifier replacement remain undecided.
 @club_management @existing_domain_rules
+@licenses
 Feature: Associate FFE identification with an A or B license
   As a club administrator
   I want every recorded FFE license to include an identifier and category
@@ -21,7 +22,7 @@ Feature: Associate FFE identification with an A or B license
 
   Scenario Outline: Reject an incomplete registration
     Given no FFE registration is recorded for Camille
-    When registration is requested without the <missing_information>
+    When registration is requested without the "<missing_information>"
     Then the request is rejected
     And no partial FFE registration is recorded
 
@@ -31,8 +32,8 @@ Feature: Associate FFE identification with an A or B license
       | FFE license category |
 
   Scenario Outline: Reject an identifier without a value
-    When an FFE identifier is created with <value>
-    Then the identifier is rejected
+    When an FFE identifier is created with "<value>"
+    Then the FFE identifier is rejected
 
     Examples:
       | value            |
@@ -48,7 +49,7 @@ Feature: Associate FFE identification with an A or B license
 
   Scenario Outline: Preserve registration after an invalid request
     Given Camille has recorded FFE identifier "A12345" and category A
-    When a new registration is requested without the <missing_information>
+    When a new registration is requested without the "<missing_information>"
     Then the request is rejected
     And Camille's FFE identifier remains "A12345"
     And Camille's license category remains A

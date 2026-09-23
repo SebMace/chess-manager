@@ -2,6 +2,7 @@
 # This feature belongs to Rights and Authorization, not member registration.
 # Exact visible data, approval integration and revocation remain undecided.
 @authorization @to_implement
+@visitor_access
 Feature: Allow an approved visitor to view club data
   As a visitor approved by the club president
   I want to consult the club data made available to visitors
