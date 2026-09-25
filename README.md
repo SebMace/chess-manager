@@ -60,13 +60,37 @@ club it refers to.
 The use cases depend on three ports: `PersonRepository`, `ClubRelationshipRepository`
 and `ClubRepository`. The relationship repository can find a pair, list a person's
 relationships, save and remove a relationship; the club repository finds and saves
-clubs. These are core-owned application ports; the only implementations currently
-present are in-memory test fakes.
+clubs. These are core-owned application ports. `ClubRepository` has a PostgreSQL
+implementation (see below); the other ports are implemented only by in-memory test fakes.
 
 `ClubRelationship` is immutable. `registerLicense` returns a new state with the same
 identity; the application must save that state. The fake keys records by the two IDs.
 Application tests use the same repository for setup, action and assertions and reread
 persisted state. Removing `save()` was checked to make the membership test fail.
+
+## Walking skeleton: create a club over HTTP
+
+Creating a club is the first use case wired end to end, from HTTP to PostgreSQL:
+
+```
+POST /clubs {"name": "Montargis"}  →  201 Created, Location: /clubs/<id>
+```
+
+| Package | Role |
+|---|---|
+| `adapters.in.rest` | `ClubController` translates the HTTP request into a call to `CreateClub`. |
+| `application.club` | `CreateClub` saves a club managed by the application and returns its `ClubId`. |
+| `adapters.out.persistence` | `JdbcClubRepository` implements `ClubRepository` with SQL through Spring's `JdbcClient`. |
+| `infrastructure` | `ChessManagerApplication` starts Spring Boot; `ClubConfiguration` wires the objects explicitly. |
+
+`domain` and `application` carry no Spring annotation; Spring objects are declared as
+`@Bean`s in `infrastructure`. In production, `CreateClub` receives random UUIDs.
+
+The database schema is versioned by Flyway in `src/main/resources/db/migration`
+(`V1__create_club_table.sql`). Flyway applies the missing migrations, in order, when the
+application starts; an applied migration is never edited, a change is a new `V<n>` file.
+
+Authentication is deferred: nothing checks yet that the caller is an administrator.
 
 ## Personal identity and FFE licenses
 
@@ -113,7 +137,11 @@ initial inventory, changes and TDD evidence.
 The Maven project targets Java 26 and inherits its dependency management from Spring
 Boot 4.1.1, which sets JUnit Jupiter to 6.0.3. Use Eclipse
 Temurin 26 (an open-source OpenJDK distribution) and Maven (no Maven wrapper is
-currently included). Check that `mvn -version` reports Java 26 before running:
+currently included). Check that `mvn -version` reports Java 26 before running.
+
+The persistence and end-to-end tests start a real PostgreSQL 18 with Testcontainers,
+so a running Docker engine is required (for example OrbStack or Docker Desktop on
+macOS; `docker version` must show a Server section). Without it, these tests fail.
 
 ```sh
 mvn test
@@ -216,8 +244,9 @@ and [Java coverage documentation](https://docs.sonarsource.com/sonarqube-cloud/e
 PIT 1.25.9, with its JUnit 5 plugin 1.2.3, checks whether tests detect small
 changes to production bytecode. Source files are not rewritten. It mutates every
 class in `domain` and `application` and runs every JUnit `*Tests` class against them,
-excluding `acceptance` (Cucumber repeats the use-case tests more slowly) and
-`architecture` (ArchUnit checks dependencies, not behavior).
+excluding `acceptance` (Cucumber repeats the use-case tests more slowly),
+`architecture` (ArchUnit checks dependencies, not behavior), and `adapters` and
+`endtoend` (they start PostgreSQL, too slowly to run for each mutation).
 
 With Maven running on Java 26:
 
@@ -257,24 +286,25 @@ and the [JUnit 5 plugin](https://github.com/pitest/pitest-junit5-plugin).
 ArchUnit 1.4.2 runs through JUnit Jupiter as a test-only dependency.
 `architecture.DomainDependencyTests` checks that production classes in `domain..`
 do not depend on classes in `application..`, `infrastructure..`, `infra..` or
-`adapters..`. The `..` pattern includes subpackages. The infrastructure and
-adapter package names are guarded even before implementations exist there.
+`adapters..`. The `..` pattern includes subpackages. A second rule checks that
+`domain..` and `application..` do not depend on `org.springframework..`,
+`adapters..` or `infrastructure..`: the hexagon's core stays free of the framework
+and of the adapters around it.
 
-The rule imports compiled domain classes, excluding test classes, and checks
-dependencies such as field types, method signatures and calls. Application
+The rules import compiled production classes, excluding test classes, and check
+dependencies such as field types, method signatures, annotations and calls. Application
 classes may depend on the domain; the reverse direction is forbidden.
 
-Run this first architecture rule with Maven on Java 26:
+Run the architecture rules with Maven on Java 26:
 
 ```sh
 mvn -Dtest=architecture.DomainDependencyTests test
 ```
 
 It also runs automatically with `mvn test` and `mvn verify`. Results appear in
-`target/surefire-reports`. No production code or package layout is changed.
-This rule protects the named package boundary; it does not yet enforce all
-hexagonal architecture rules or forbid direct dependencies on third-party
-frameworks. Update the package patterns if the project's root packages change.
+`target/surefire-reports`. These rules protect the named package boundaries; they
+do not yet enforce every hexagonal rule (for instance, between inbound and outbound
+adapters). Update the package patterns if the project's root packages change.
 
 See the [ArchUnit user guide](https://www.archunit.org/userguide/html/000_Index.html).
 
