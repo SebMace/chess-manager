@@ -37,6 +37,21 @@ describe('CreateClub', () => {
     expect(page.textContent).not.toContain('Le club Montargis a été créé.');
     expect(page.textContent).toContain("Le club n'a pas pu être créé. Réessayez.");
   });
+
+  it('no longer tells the administrator that the club could not be created once it has been created', async () => {
+    createClubNamed(page, 'Montargis');
+    server.expectOne({ method: 'POST', url: '/clubs' })
+      .flush(null, { status: 500, statusText: 'Internal Server Error' });
+    await fixture.whenStable();
+
+    createClubNamed(page, 'Montargis');
+    server.expectOne({ method: 'POST', url: '/clubs' })
+      .flush(null, { status: 201, statusText: 'Created', headers: { Location: '/clubs/6' } });
+    await fixture.whenStable();
+
+    expect(page.textContent).toContain('Le club Montargis a été créé.');
+    expect(page.textContent).not.toContain("Le club n'a pas pu être créé. Réessayez.");
+  });
 });
 
 function createClubNamed(page: HTMLElement, name: string): void {
