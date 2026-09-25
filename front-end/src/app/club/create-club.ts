@@ -12,14 +12,21 @@ import { ClubApi } from './club-api';
     @if (createdClub(); as name) {
       <p role="status">Le club {{ name }} a été créé.</p>
     }
+    @if (creationFailed()) {
+      <p role="status">Le club n'a pas pu être créé. Réessayez.</p>
+    }
   `,
 })
 export class CreateClub {
   private readonly clubs = inject(ClubApi);
   protected readonly createdClub = signal<string | null>(null);
+  protected readonly creationFailed = signal(false);
 
   protected create(event: Event, name: string): void {
     event.preventDefault();
-    this.clubs.create(name).subscribe(() => this.createdClub.set(name));
+    this.clubs.create(name).subscribe({
+      next: () => this.createdClub.set(name),
+      error: () => this.creationFailed.set(true),
+    });
   }
 }
