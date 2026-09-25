@@ -1,10 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 import { App } from './app';
+import { appConfig } from './app.config';
 
 describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App],
+      providers: appConfig.providers,
     })
       .compileComponents();
   });
@@ -15,10 +17,11 @@ describe('App', () => {
     expect(app).toBeTruthy();
   });
 
-  it('should render title', async () => {
+  it('lets the administrator create a club', async () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, chess-manager-front');
+    const page = fixture.nativeElement as HTMLElement;
+    const labels = Array.from(page.querySelectorAll('label')).map(label => label.textContent?.trim());
+    expect(labels).toContain('Nom du club');
   });
 });
