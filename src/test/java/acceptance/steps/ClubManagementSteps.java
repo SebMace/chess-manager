@@ -281,7 +281,7 @@ public class ClubManagementSteps {
     public void managedClubs() { application.defineClub("Orléans", true); application.defineClub("Olivet", true); }
 
     @Given("Gien is a club not managed by the application")
-    public void externalClub() { application.defineClub("Gien", false); }
+    public void gienIsNotManaged() { application.defineClub("Gien", false); }
 
     @Given("Camille is a member of Olivet for the {int}-{int} season")
     public void memberOfOlivet(int begin, int end) {
@@ -325,11 +325,11 @@ public class ClubManagementSteps {
     }
 
     @Then("Gien does not become a club managed by the application")
-    public void gienStillExternal() { assertFalse(application.isClubManaged("Gien")); }
+    public void gienStillNotManaged() { assertFalse(application.isClubManaged("Gien")); }
 
     @Given("Camille is an external Player affiliated with Gien for the {int}-{int} season")
-    public void affiliatedWithExternalClub(int begin, int end) {
-        externalClub();
+    public void affiliatedWithUnmanagedClub(int begin, int end) {
+        gienIsNotManaged();
         initialAffiliation("Gien", begin, end);
         originalIdentity = application.person().id();
         assertTrue(application.isExternalPlayer());
