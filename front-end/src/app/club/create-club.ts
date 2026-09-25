@@ -1,6 +1,11 @@
 import { Component, inject, signal } from '@angular/core';
 import { ClubApi } from './club-api';
 
+type CreationOutcome =
+  | { kind: 'none' }
+  | { kind: 'created'; club: string }
+  | { kind: 'failed' };
+
 @Component({
   selector: 'app-create-club',
   template: `
@@ -9,30 +14,23 @@ import { ClubApi } from './club-api';
       <input id="club-name" #clubName />
       <button type="submit">Créer le club</button>
     </form>
-    @if (createdClub(); as name) {
-      <p role="status">Le club {{ name }} a été créé.</p>
-    }
-    @if (creationFailed()) {
+    @let result = outcome();
+    @if (result.kind === 'created') {
+      <p role="status">Le club {{ result.club }} a été créé.</p>
+    } @else if (result.kind === 'failed') {
       <p role="status">Le club n'a pas pu être créé. Réessayez.</p>
     }
   `,
 })
 export class CreateClub {
   private readonly clubs = inject(ClubApi);
-  protected readonly createdClub = signal<string | null>(null);
-  protected readonly creationFailed = signal(false);
+  protected readonly outcome = signal<CreationOutcome>({ kind: 'none' });
 
   protected create(event: Event, name: string): void {
     event.preventDefault();
     this.clubs.create(name).subscribe({
-      next: () => {
-        this.createdClub.set(name);
-        this.creationFailed.set(false);
-      },
-      error: () => {
-        this.creationFailed.set(true);
-        this.createdClub.set(null);
-      },
+      next: () => this.outcome.set({ kind: 'created', club: name }),
+      error: () => this.outcome.set({ kind: 'failed' }),
     });
   }
 }
