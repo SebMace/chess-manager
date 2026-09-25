@@ -2,6 +2,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { CreateClub } from './create-club';
+import { Clubs } from './clubs';
+import { HttpClubs } from './http-clubs';
 
 describe('CreateClub', () => {
   let fixture: ComponentFixture<CreateClub>;
@@ -9,7 +11,9 @@ describe('CreateClub', () => {
   let page: HTMLElement;
 
   beforeEach(async () => {
-    TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] });
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting(), { provide: Clubs, useClass: HttpClubs }],
+    });
     fixture = TestBed.createComponent(CreateClub);
     server = TestBed.inject(HttpTestingController);
     page = fixture.nativeElement as HTMLElement;

@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { ClubApi } from './club-api';
+import { Clubs } from './clubs';
 
 type CreationOutcome =
   | { kind: 'none' }
@@ -23,7 +23,7 @@ type CreationOutcome =
   `,
 })
 export class CreateClub {
-  private readonly clubs = inject(ClubApi);
+  private readonly clubs = inject(Clubs);
   protected readonly outcome = signal<CreationOutcome>({ kind: 'none' });
 
   protected create(event: Event, name: string): void {
