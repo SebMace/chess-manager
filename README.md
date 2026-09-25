@@ -137,6 +137,11 @@ All Cucumber dependencies are test-scoped; the domain has no framework dependenc
 - `RunCucumberTests`: selects scenarios tagged `@acceptance`; they form the build gate.
 - `acceptance/steps`: business-language steps using a scenario driver that calls application use cases.
 
+Scenarios speak only the business language: actors, business actions and outcomes. They never
+mention HTTP, URLs, status codes, JSON, SQL, screens, buttons or frameworks; those details
+belong to step definitions, drivers and adapters. A scenario must stay true whether it runs
+through a use case, the REST API or the user interface (see `AGENTS.md`, section 6).
+
 The build gate covers prospect details, rejection of a licensed prospect, rejection
 of membership without a license, default rupture of other prospect links for A and B
 licenses, and explicit preservation as a partner. Scenarios about partnerships and
