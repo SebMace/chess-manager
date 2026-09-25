@@ -86,7 +86,7 @@ license and affiliation behavior now belongs to club relationships.
 
 ## Acceptance specifications and Cucumber
 
-Cucumber 7.22.1 runs on the JUnit Platform alongside JUnit Jupiter 5.10.2.
+Cucumber 7.22.1 runs on the JUnit Platform alongside JUnit Jupiter 6.0.3.
 All Cucumber dependencies are test-scoped; the domain has no framework dependencies.
 
 - `src/test/resources/features/implemented`: domain specifications, some without Cucumber bindings.
@@ -110,7 +110,8 @@ initial inventory, changes and TDD evidence.
 
 ## Run the tests
 
-The Maven project targets Java 26 and uses JUnit Jupiter 5.10.2. Use Eclipse
+The Maven project targets Java 26 and inherits its dependency management from Spring
+Boot 4.1.1, which sets JUnit Jupiter to 6.0.3. Use Eclipse
 Temurin 26 (an open-source OpenJDK distribution) and Maven (no Maven wrapper is
 currently included). Check that `mvn -version` reports Java 26 before running:
 
