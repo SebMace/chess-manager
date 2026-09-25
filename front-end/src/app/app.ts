@@ -1,11 +1,10 @@
-import { Component, signal } from '@angular/core';
+import { Component } from '@angular/core';
+import { CreateClub } from './club/create-club';
 
 @Component({
-  imports: [],
+  imports: [CreateClub],
   selector: 'app-root',
   styleUrl: './app.css',
   templateUrl: './app.html',
 })
-export class App {
-  protected readonly title = signal('chess-manager-front');
-}
+export class App {}
