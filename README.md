@@ -92,6 +92,24 @@ application starts; an applied migration is never edited, a change is a new `V<n
 
 Authentication is deferred: nothing checks yet that the caller is an administrator.
 
+### Run the application locally
+
+With a running Docker engine and Java 26:
+
+```sh
+mvn spring-boot:run
+```
+
+Spring Boot starts the PostgreSQL 18 service described in `compose.yaml`, connects to it,
+and Flyway migrates the schema; the application listens on port 8080. Data is kept in the
+`postgres-data` Docker volume between runs. The credentials in `compose.yaml` only protect
+this local container. Docker Compose support is a development-only dependency and is
+skipped during tests, which use Testcontainers.
+
+```sh
+curl -i -X POST localhost:8080/clubs -H 'Content-Type: application/json' -d '{"name":"Montargis"}'
+```
+
 ## Personal identity and FFE licenses
 
 Personal equality depends on `PersonId`, not names. A person can exist without a
