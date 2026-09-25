@@ -41,6 +41,14 @@
             <artifactId>spring-boot-starter-jdbc</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-flyway</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-postgresql</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
@@ -140,11 +148,12 @@
                         <param>*Tests</param>
                     </targetTests>
                     <!-- ArchUnit checks dependencies, not behavior; Cucumber repeats use-case tests more slowly;
-                         end-to-end tests start Spring and PostgreSQL, too slow to run for each mutation. -->
+                         end-to-end and adapter tests start PostgreSQL, too slow to run for each mutation. -->
                     <excludedTestClasses>
                         <param>acceptance.*</param>
                         <param>architecture.*</param>
                         <param>endtoend.*</param>
+                        <param>adapters.*</param>
                     </excludedTestClasses>
                     <timestampedReports>false</timestampedReports>
                     <outputFormats>
