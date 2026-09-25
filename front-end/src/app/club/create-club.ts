@@ -29,7 +29,10 @@ export class CreateClub {
         this.createdClub.set(name);
         this.creationFailed.set(false);
       },
-      error: () => this.creationFailed.set(true),
+      error: () => {
+        this.creationFailed.set(true);
+        this.createdClub.set(null);
+      },
     });
   }
 }
