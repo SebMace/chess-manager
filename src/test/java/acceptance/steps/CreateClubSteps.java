@@ -22,7 +22,7 @@ public class CreateClubSteps {
     @When("an administrator creates the club {string}")
     public void createClub(String name) { createdClubs.put(name, createClub.execute(name)); }
 
-    @Then("{string} is a club managed by Chess Manager")
+    @Then("{string} is a club managed by the application")
     public void clubIsManaged(String name) {
         Club club = clubs.find(createdClubs.get(name)).orElseThrow();
         assertEquals(name, club.name());

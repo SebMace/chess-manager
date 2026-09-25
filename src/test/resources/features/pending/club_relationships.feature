@@ -1,7 +1,7 @@
 # Prospect registration and license conversion are connected to application use cases.
 # A license affiliates the person for the current season.
 # Other prospect relationships end unless a partnership is explicitly requested.
-# External clubs and standalone partnership registration remain future scenarios.
+# Clubs not managed by the application and standalone partnership registration remain future scenarios.
 @club_management
 @relationships
 Feature: Describe a person's relationship with each club

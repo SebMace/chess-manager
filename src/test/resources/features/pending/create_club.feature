@@ -5,6 +5,6 @@ Feature: Create a club
   So that its members can then be registered in it
 
   @acceptance
-  Scenario: A created club is managed by Chess Manager
+  Scenario: A created club is managed by the application
     When an administrator creates the club "Montargis"
-    Then "Montargis" is a club managed by Chess Manager
+    Then "Montargis" is a club managed by the application
