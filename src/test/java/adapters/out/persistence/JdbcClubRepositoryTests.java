@@ -41,4 +41,12 @@ class JdbcClubRepositoryTests {
         assertEquals("Montargis", club.name());
         assertTrue(club.managedByApplication());
     }
+
+    @Test
+    void should_find_nothing_for_an_unknown_club() {
+        JdbcClubRepository clubs = new JdbcClubRepository(JdbcClient.create(dataSource));
+        ClubId unknown = new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000099"));
+
+        assertTrue(clubs.find(unknown).isEmpty());
+    }
 }
