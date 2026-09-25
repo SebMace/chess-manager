@@ -25,7 +25,10 @@ export class CreateClub {
   protected create(event: Event, name: string): void {
     event.preventDefault();
     this.clubs.create(name).subscribe({
-      next: () => this.createdClub.set(name),
+      next: () => {
+        this.createdClub.set(name);
+        this.creationFailed.set(false);
+      },
       error: () => this.creationFailed.set(true),
     });
   }
