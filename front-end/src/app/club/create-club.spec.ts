@@ -1,16 +1,22 @@
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { CreateClub } from './create-club';
 
 describe('CreateClub', () => {
-  it('tells the administrator that the club has been created', async () => {
-    TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] });
-    const fixture = TestBed.createComponent(CreateClub);
-    const server = TestBed.inject(HttpTestingController);
-    const page = fixture.nativeElement as HTMLElement;
-    await fixture.whenStable();
+  let fixture: ComponentFixture<CreateClub>;
+  let server: HttpTestingController;
+  let page: HTMLElement;
 
+  beforeEach(async () => {
+    TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] });
+    fixture = TestBed.createComponent(CreateClub);
+    server = TestBed.inject(HttpTestingController);
+    page = fixture.nativeElement as HTMLElement;
+    await fixture.whenStable();
+  });
+
+  it('tells the administrator that the club has been created', async () => {
     createClubNamed(page, 'Montargis');
 
     const request = server.expectOne({ method: 'POST', url: '/clubs' });
@@ -19,6 +25,17 @@ describe('CreateClub', () => {
     await fixture.whenStable();
 
     expect(page.textContent).toContain('Le club Montargis a été créé.');
+  });
+
+  it('tells the administrator that the club could not be created', async () => {
+    createClubNamed(page, 'Montargis');
+
+    server.expectOne({ method: 'POST', url: '/clubs' })
+      .flush(null, { status: 500, statusText: 'Internal Server Error' });
+    await fixture.whenStable();
+
+    expect(page.textContent).not.toContain('Le club Montargis a été créé.');
+    expect(page.textContent).toContain("Le club n'a pas pu être créé. Réessayez.");
   });
 });
 
