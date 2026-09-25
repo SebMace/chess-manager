@@ -182,6 +182,22 @@ layers:
 Use Given–When–Then vocabulary for business examples, whether or not a BDD framework is present.
 Do not introduce Cucumber or another test framework merely to obtain BDD syntax.
 
+Given–When–Then scenarios must remain strictly business-facing. This applies to `.feature` files,
+test names, and every example written in that form, including plans and proposals made in the
+conversation:
+
+- use only the ubiquitous language: actors, business actions, business facts and outcomes;
+- never mention HTTP verbs or status codes, URLs, JSON, SQL or tables, UI widgets such as buttons,
+  fields or pages, frameworks, containers, or test doubles;
+- put these technical details in step definitions, scenario drivers, adapters and test code;
+- the same scenario must stay true whether it is exercised through a use case, the REST API or the
+  user interface; if changing the delivery mechanism would change the wording, the wording is
+  technical.
+
+For example, write "When an administrator creates the club "Montargis" / Then the administrator is
+told that the club "Montargis" has been created", not "When I send POST /clubs / Then the response is
+201".
+
 Do not force an acceptance test for a purely internal refactoring or a tiny isolated domain rule
 when a focused unit test communicates the behavior more clearly.
 

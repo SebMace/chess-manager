@@ -110,6 +110,41 @@ skipped during tests, which use Testcontainers.
 curl -i -X POST localhost:8080/clubs -H 'Content-Type: application/json' -d '{"name":"Montargis"}'
 ```
 
+## Front-end (Angular)
+
+The Angular 22 application in `front-end/` is a separate npm project, not built by Maven.
+It shows a French screen where the administrator creates a club and is told whether the
+club has been created. It needs Node.js 22.22, 24.15 or 26 and npm.
+
+| File | Role |
+|---|---|
+| `src/app/club/create-club.ts` | `CreateClub` component: the form and the creation outcome. |
+| `src/app/club/clubs.ts` | `Clubs` port: what the club screens need, with no HTTP detail. |
+| `src/app/club/http-clubs.ts` | `HttpClubs` adapter: implements `Clubs` over the REST API. |
+| `src/app/app.config.ts` | Wires `Clubs` to `HttpClubs`. |
+
+The front-end holds no business rule; they stay in the back-end.
+
+With the back-end running (`mvn spring-boot:run`):
+
+```sh
+cd front-end
+npm ci
+npm start
+```
+
+Open <http://localhost:4200>. During development, `proxy.conf.json` forwards `/clubs`
+to the back-end on port 8080, so the browser only talks to port 4200 and the back-end
+needs no CORS configuration.
+
+Component tests use Vitest with jsdom (no browser); the server is simulated with
+Angular's `HttpTestingController`:
+
+```sh
+npm test -- --watch=false
+npm run build
+```
+
 ## Personal identity and FFE licenses
 
 Personal equality depends on `PersonId`, not names. A person can exist without a
@@ -136,6 +171,11 @@ All Cucumber dependencies are test-scoped; the domain has no framework dependenc
   alongside future specifications; `@acceptance` determines which scenarios run.
 - `RunCucumberTests`: selects scenarios tagged `@acceptance`; they form the build gate.
 - `acceptance/steps`: business-language steps using a scenario driver that calls application use cases.
+
+Scenarios speak only the business language: actors, business actions and outcomes. They never
+mention HTTP, URLs, status codes, JSON, SQL, screens, buttons or frameworks; those details
+belong to step definitions, drivers and adapters. A scenario must stay true whether it runs
+through a use case, the REST API or the user interface (see `AGENTS.md`, section 6).
 
 The build gate covers prospect details, rejection of a licensed prospect, rejection
 of membership without a license, default rupture of other prospect links for A and B
@@ -344,8 +384,13 @@ The job runs these steps in order:
 5. `.github/scripts/ci_report.py`, which writes the run summary and assembles the
    report site.
 
+A separate `Front-end tests and build` job uses Node.js 26 with a cache of npm
+dependencies. In `front-end/`, it installs the dependencies from the lockfile
+(`npm ci`), runs the component tests and builds the application. A failing test or
+build error fails this job.
+
 A compilation failure, failing test, architecture violation, failing build-gate
-scenario or PIT execution error fails the job. As in local development, no JaCoCo or
+scenario or PIT execution error fails the back-end job. As in local development, no JaCoCo or
 mutation-score threshold is enforced: a surviving mutant alone does not fail the job.
 
 Reports are available in three places:
