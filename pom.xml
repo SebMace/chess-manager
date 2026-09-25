@@ -6,6 +6,14 @@
          https://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>4.1.1</version>
+        <relativePath/>
+    </parent>
+
     <groupId>fr.sebmace</groupId>
     <artifactId>chess-manager</artifactId>
     <version>0.0.1-SNAPSHOT</version>
@@ -15,7 +23,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <cucumber.version>7.22.1</cucumber.version>
-        <junit.version>5.10.2</junit.version>
         <archunit.version>1.4.2</archunit.version>
         <jacoco.version>0.8.15</jacoco.version>
         <pitest.version>1.25.9</pitest.version>
@@ -24,19 +31,34 @@
         <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.junit</groupId>
-                <artifactId>junit-bom</artifactId>
-                <version>${junit.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
     <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webmvc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-flyway</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-postgresql</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <!-- Development only: starts compose.yaml when the application runs locally. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-docker-compose</artifactId>
+            <optional>true</optional>
+        </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
@@ -65,10 +87,34 @@
             <artifactId>junit-platform-suite</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -111,10 +157,13 @@
                     <targetTests>
                         <param>*Tests</param>
                     </targetTests>
-                    <!-- ArchUnit checks dependencies, not behavior; Cucumber repeats use-case tests more slowly. -->
+                    <!-- ArchUnit checks dependencies, not behavior; Cucumber repeats use-case tests more slowly;
+                         end-to-end and adapter tests start PostgreSQL, too slow to run for each mutation. -->
                     <excludedTestClasses>
                         <param>acceptance.*</param>
                         <param>architecture.*</param>
+                        <param>endtoend.*</param>
+                        <param>adapters.*</param>
                     </excludedTestClasses>
                     <timestampedReports>false</timestampedReports>
                     <outputFormats>

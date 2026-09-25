@@ -21,4 +21,17 @@ class DomainDependencyTests {
                 .because("the domain must remain independent of application orchestration and infrastructure")
                 .check(domainClasses);
     }
+
+    @Test
+    void core_should_not_depend_on_frameworks_or_adapters() {
+        JavaClasses coreClasses = new ClassFileImporter()
+                .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)
+                .importPackages("domain", "application");
+
+        noClasses().that().resideInAnyPackage("domain..", "application..")
+                .should().dependOnClassesThat()
+                .resideInAnyPackage("org.springframework..", "adapters..", "infrastructure..")
+                .because("the hexagon's core must not know about Spring or about the adapters around it")
+                .check(coreClasses);
+    }
 }
