@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { ClubApi } from './club-api';
 
 @Component({
   selector: 'app-create-club',
@@ -15,11 +15,11 @@ import { HttpClient } from '@angular/common/http';
   `,
 })
 export class CreateClub {
-  private readonly http = inject(HttpClient);
+  private readonly clubs = inject(ClubApi);
   protected readonly createdClub = signal<string | null>(null);
 
   protected create(event: Event, name: string): void {
     event.preventDefault();
-    this.http.post('/clubs', { name }).subscribe(() => this.createdClub.set(name));
+    this.clubs.create(name).subscribe(() => this.createdClub.set(name));
   }
 }
