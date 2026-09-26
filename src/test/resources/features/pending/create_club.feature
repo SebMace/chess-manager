@@ -23,3 +23,13 @@ Feature: Create a club
       | departmental committee | Loiret  |
       | commune                | Orléans |
     Then the club "U.S. Orléans.Echecs" is not created
+
+  @acceptance
+  Scenario: Two clubs cannot share the same FFE identifier
+    Given "Loiret" is a departmental committee of the FFE
+    And an administrator has created the club "U.S. Orléans.Echecs" with the FFE identifier "G45001" in the departmental committee "Loiret"
+    When an administrator creates the club "Échiquier Orléanais" with:
+      | departmental committee | Loiret |
+      | FFE identifier         | g45001 |
+    Then the club "Échiquier Orléanais" is not created
+    And the administrator is told that the FFE identifier "G45001" is already used

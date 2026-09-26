@@ -1,6 +1,7 @@
 package acceptance.steps;
 
 import application.club.CreateClub;
+import application.club.FfeClubIdAlreadyUsed;
 import club.InMemoryClubRepository;
 import domain.club.Club;
 import domain.club.vo.ClubId;
@@ -24,7 +25,7 @@ public class CreateClubSteps {
     private final CreateClub createClub = new CreateClub(clubs, () -> new ClubId(CREATED_CLUB_ID));
     private final Map<String, ClubId> createdClubs = new HashMap<>();
     private final Map<String, CommitteeCode> committees = new HashMap<>();
-    private final Map<String, IllegalArgumentException> refusals = new HashMap<>();
+    private final Map<String, RuntimeException> refusals = new HashMap<>();
 
     @Given("{string} is a departmental committee of the FFE")
     public void departmentalCommittee(String name) { committees.put(name, new CommitteeCode("45")); }
@@ -38,9 +39,20 @@ public class CreateClubSteps {
                     committees.get(club.get("departmental committee")),
                     ffeIdentifier == null ? null : new FfeClubId(ffeIdentifier),
                     club.get("commune")));
-        } catch (IllegalArgumentException refusal) {
+        } catch (IllegalArgumentException | FfeClubIdAlreadyUsed refusal) {
             refusals.put(name, refusal);
         }
+    }
+
+    @Given("an administrator has created the club {string} with the FFE identifier {string} in the departmental committee {string}")
+    public void clubCreated(String name, String ffeIdentifier, String committee) {
+        createdClubs.put(name, createClub.execute(name, committees.get(committee), new FfeClubId(ffeIdentifier), null));
+    }
+
+    @Then("the administrator is told that the FFE identifier {string} is already used")
+    public void ffeIdentifierAlreadyUsed(String ffeIdentifier) {
+        FfeClubIdAlreadyUsed refusal = assertInstanceOf(FfeClubIdAlreadyUsed.class, refusals.values().iterator().next());
+        assertEquals(new FfeClubId(ffeIdentifier), refusal.ffeClubId());
     }
 
     @Then("the club {string} is not created")
