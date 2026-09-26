@@ -105,6 +105,17 @@ class CreateClubEndToEndTests {
         assertEquals(409, response.statusCode());
     }
 
+    @Test
+    void the_communes_of_the_department_of_its_committee_are_offered_for_a_club() throws Exception {
+        HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/communes?committee=45")).GET().build();
+
+        HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+
+        assertEquals(200, response.statusCode());
+        assertTrue(response.body().contains("{\"code\":\"45232\",\"name\":\"Olivet\"}"), response.body());
+        assertFalse(response.body().contains("53169"));
+    }
+
     private ClubId createClub(String json) throws Exception {
         HttpResponse<Void> response = post(json);
 
