@@ -99,6 +99,11 @@ public class CreateClubSteps {
         assertEquals(names, consultedClubs.stream().map(ClubOfCommittee::name).toList());
     }
 
+    @Then("the administrator is told that no club is managed by the application in this committee")
+    public void noClubShown() {
+        assertTrue(consultedClubs.isEmpty());
+    }
+
     @Then("the administrator is not shown the club {string}")
     public void clubNotShown(String name) {
         assertTrue(consultedClubs.stream().noneMatch(club -> club.name().equals(name)));
