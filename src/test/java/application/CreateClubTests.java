@@ -31,4 +31,14 @@ class CreateClubTests {
         assertEquals(Optional.of(new FfeClubId("G45001")), club.ffeClubId());
         assertEquals(Optional.of("Orléans"), club.commune());
     }
+
+    @Test
+    void should_refuse_a_club_without_its_ffe_identifier() {
+        CreateClub createClub = new CreateClub(clubs, () -> clubId);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> createClub.execute("U.S. Orléans.Echecs", new CommitteeCode("45"), null, "Orléans"));
+
+        assertTrue(clubs.find(clubId).isEmpty());
+    }
 }
