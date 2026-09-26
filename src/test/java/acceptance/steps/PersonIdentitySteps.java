@@ -14,8 +14,8 @@ import clubmanagement.domain.person.vo.PersonId;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import person.InMemoryPersonRepository;
-import relationship.InMemoryClubRelationshipRepository;
+import clubmanagement.ports.InMemoryPersonRepository;
+import clubmanagement.ports.InMemoryClubRelationshipRepository;
 
 import java.util.UUID;
 
