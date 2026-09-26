@@ -1,6 +1,7 @@
 package application;
 
 import application.club.CreateClub;
+import application.club.FfeClubIdAlreadyUsed;
 import club.InMemoryClubRepository;
 import domain.club.Club;
 import domain.club.vo.ClubId;
@@ -40,5 +41,18 @@ class CreateClubTests {
                 () -> createClub.execute("U.S. Orléans.Echecs", new CommitteeCode("45"), null, "Orléans"));
 
         assertTrue(clubs.find(clubId).isEmpty());
+    }
+
+    @Test
+    void should_refuse_a_second_club_with_the_same_ffe_identifier() {
+        ClubId secondId = new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000003"));
+        new CreateClub(clubs, () -> clubId).execute("U.S. Orléans.Echecs", new CommitteeCode("45"), new FfeClubId("G45001"), "Orléans");
+        CreateClub createClub = new CreateClub(clubs, () -> secondId);
+
+        FfeClubIdAlreadyUsed refusal = assertThrows(FfeClubIdAlreadyUsed.class,
+                () -> createClub.execute("Échiquier Orléanais", new CommitteeCode("45"), new FfeClubId("g45001"), "Orléans"));
+
+        assertEquals(new FfeClubId("G45001"), refusal.ffeClubId());
+        assertTrue(clubs.find(secondId).isEmpty());
     }
 }
