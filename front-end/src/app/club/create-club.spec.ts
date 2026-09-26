@@ -7,6 +7,8 @@ import { HttpClubs } from './http-clubs';
 import { Commune, Communes } from '../commune/communes';
 import { HttpCommunes } from '../commune/http-communes';
 
+const REGISTERED_OFFICE = { 'Numéro et voie': '12 rue des Échecs', 'Code postal': '45000', 'Localité': 'Orléans' };
+
 const LOIRET: Commune[] = [
   { code: '45234', name: 'Orléans' },
   { code: '45232', name: 'Olivet' },
@@ -43,7 +45,7 @@ describe('CreateClub', () => {
   }
 
   async function createValidClub(name: string): Promise<void> {
-    fillFields(page, { 'Nom du club': name, 'Code du comité': '45', 'Identifiant FFE': 'G45001' });
+    fillFields(page, { 'Nom du club': name, 'Code du comité': '45', 'Identifiant FFE': 'G45001', ...REGISTERED_OFFICE });
     await chooseCommune('Orl', 'Orléans');
     buttonNamed(page, 'Créer le club').click();
   }
@@ -53,11 +55,17 @@ describe('CreateClub', () => {
     fill(fieldLabelled(page, 'Code du comité'), '45');
     fill(fieldLabelled(page, 'Identifiant FFE'), 'G45001');
     await chooseCommune('Orl', 'Orléans');
+    fillFields(page, REGISTERED_OFFICE);
     buttonNamed(page, 'Créer le club').click();
 
     const request = server.expectOne({ method: 'POST', url: '/clubs' });
-    expect(request.request.body).toEqual(
-      { name: 'U.S. Orléans.Echecs', committeeCode: '45', ffeClubId: 'G45001', communeCode: '45234' });
+    expect(request.request.body).toEqual({
+      name: 'U.S. Orléans.Echecs',
+      committeeCode: '45',
+      ffeClubId: 'G45001',
+      communeCode: '45234',
+      registeredOffice: { street: '12 rue des Échecs', postcode: '45000', town: 'Orléans' },
+    });
     request.flush(null, { status: 201, statusText: 'Created', headers: { Location: '/clubs/7' } });
     await fixture.whenStable();
 
@@ -76,7 +84,7 @@ describe('CreateClub', () => {
   });
 
   it('lets the administrator choose a commune with the keyboard', async () => {
-    fillFields(page, { 'Nom du club': 'U.S. Orléans.Echecs', 'Code du comité': '45', 'Identifiant FFE': 'G45001' });
+    fillFields(page, { 'Nom du club': 'U.S. Orléans.Echecs', 'Code du comité': '45', 'Identifiant FFE': 'G45001', ...REGISTERED_OFFICE });
     const commune = fieldLabelled(page, 'Commune');
     fill(commune, 'O');
     server.expectOne(request => request.url === '/communes').flush(LOIRET);
@@ -189,6 +197,18 @@ describe('CreateClub', () => {
 
     server.expectNone({ method: 'POST', url: '/clubs' });
     expect(page.textContent).toContain('La commune est obligatoire.');
+  });
+
+  it('tells the administrator that each part of the registered office is required', async () => {
+    fillFields(page, { 'Nom du club': 'U.S. Orléans.Echecs', 'Code du comité': '45', 'Identifiant FFE': 'G45001' });
+    await chooseCommune('Orl', 'Orléans');
+    buttonNamed(page, 'Créer le club').click();
+    await fixture.whenStable();
+
+    server.expectNone({ method: 'POST', url: '/clubs' });
+    expect(page.textContent).toContain('Le numéro et la voie sont obligatoires.');
+    expect(page.textContent).toContain('Le code postal est obligatoire.');
+    expect(page.textContent).toContain('La localité est obligatoire.');
   });
 
   it('tells the administrator to choose the commune among those offered', async () => {

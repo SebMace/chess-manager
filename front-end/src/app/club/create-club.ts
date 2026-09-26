@@ -3,7 +3,14 @@ import { Clubs, FfeClubIdAlreadyUsed, NewClub } from './clubs';
 import { Commune, Communes } from '../commune/communes';
 import { communesMatching } from '../commune/commune-search';
 
-const REQUIRED_INFORMATION = ['committeeCode', 'ffeClubId', 'communeCode'] as const satisfies readonly (keyof NewClub)[];
+const REQUIRED_INFORMATION = [
+  'committeeCode',
+  'ffeClubId',
+  'communeCode',
+  'registeredOfficeStreet',
+  'registeredOfficePostcode',
+  'registeredOfficeTown',
+] as const satisfies readonly (keyof NewClub)[];
 type RequiredInformation = (typeof REQUIRED_INFORMATION)[number];
 
 type CreationOutcome =
@@ -25,6 +32,9 @@ type CreationOutcome =
           committeeCode: committeeCode.value,
           ffeClubId: ffeClubId.value,
           communeCode: chosenCommune()?.code ?? '',
+          registeredOfficeStreet: officeStreet.value,
+          registeredOfficePostcode: officePostcode.value,
+          registeredOfficeTown: officeTown.value,
         })"
       >
         <fieldset>
@@ -102,6 +112,57 @@ type CreationOutcome =
                 <p id="commune-error" class="field-error">
                   {{ communeWritten() ? 'Choisissez la commune parmi celles proposées.' : 'La commune est obligatoire.' }}
                 </p>
+              }
+            </div>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Siège social</legend>
+          <div class="fields">
+            <div class="field field--wide">
+              <label for="office-street" class="required">Numéro et voie</label>
+              <input
+                id="office-street"
+                #officeStreet
+                aria-required="true"
+                autocomplete="address-line1"
+                placeholder="ex. 12 rue des Échecs"
+                [attr.aria-invalid]="missing().has('registeredOfficeStreet') || null"
+                [attr.aria-describedby]="missing().has('registeredOfficeStreet') ? 'office-street-error' : null"
+              />
+              @if (missing().has('registeredOfficeStreet')) {
+                <p id="office-street-error" class="field-error">Le numéro et la voie sont obligatoires.</p>
+              }
+            </div>
+            <div class="field">
+              <label for="office-postcode" class="required">Code postal</label>
+              <input
+                id="office-postcode"
+                #officePostcode
+                aria-required="true"
+                autocomplete="postal-code"
+                inputmode="numeric"
+                placeholder="ex. 45000"
+                [attr.aria-invalid]="missing().has('registeredOfficePostcode') || null"
+                [attr.aria-describedby]="missing().has('registeredOfficePostcode') ? 'office-postcode-error' : null"
+              />
+              @if (missing().has('registeredOfficePostcode')) {
+                <p id="office-postcode-error" class="field-error">Le code postal est obligatoire.</p>
+              }
+            </div>
+            <div class="field">
+              <label for="office-town" class="required">Localité</label>
+              <input
+                id="office-town"
+                #officeTown
+                aria-required="true"
+                autocomplete="address-level2"
+                placeholder="ex. Orléans"
+                [attr.aria-invalid]="missing().has('registeredOfficeTown') || null"
+                [attr.aria-describedby]="missing().has('registeredOfficeTown') ? 'office-town-error' : null"
+              />
+              @if (missing().has('registeredOfficeTown')) {
+                <p id="office-town-error" class="field-error">La localité est obligatoire.</p>
               }
             </div>
           </div>

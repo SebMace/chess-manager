@@ -10,6 +10,7 @@ import domain.club.Club;
 import domain.club.vo.ClubId;
 import domain.club.vo.CommitteeCode;
 import domain.club.vo.FfeClubId;
+import domain.club.vo.PostalAddress;
 import domain.commune.Commune;
 import domain.commune.CommuneCode;
 import io.cucumber.datatable.DataTable;
@@ -51,7 +52,8 @@ public class CreateClubSteps {
             createdClubs.put(name, createClub.execute(name,
                     committees.get(club.get("departmental committee")),
                     ffeIdentifier == null ? null : new FfeClubId(ffeIdentifier),
-                    commune(club.get("commune"))));
+                    commune(club.get("commune")),
+                    registeredOffice(club)));
         } catch (IllegalArgumentException | FfeClubIdAlreadyUsed | CommuneNotInCommitteeDepartment refusal) {
             refusals.put(name, refusal);
         }
@@ -61,7 +63,7 @@ public class CreateClubSteps {
     public void clubCreated(String name, DataTable information) {
         Map<String, String> club = information.asMap();
         createdClubs.put(name, createClub.execute(name, committees.get(club.get("departmental committee")),
-                new FfeClubId(club.get("FFE identifier")), commune(club.get("commune"))));
+                new FfeClubId(club.get("FFE identifier")), commune(club.get("commune")), registeredOffice(club)));
     }
 
     @When("an administrator looks for the communes of a club of the departmental committee {string}")
@@ -99,6 +101,19 @@ public class CreateClubSteps {
     @Then("the commune of {string} is {string}")
     public void clubCommune(String name, String commune) {
         assertEquals(commune(commune), createdClub(name).commune());
+    }
+
+    @Then("the registered office of {string} is:")
+    public void clubRegisteredOffice(String name, DataTable address) {
+        Map<String, String> office = address.asMap();
+        assertEquals(new PostalAddress(office.get("street"), office.get("postcode"), office.get("town")),
+                createdClub(name).registeredOffice());
+    }
+
+    private static PostalAddress registeredOffice(Map<String, String> club) {
+        String street = club.get("registered office street");
+        return street == null ? null : new PostalAddress(street,
+                club.get("registered office postcode"), club.get("registered office town"));
     }
 
     private static CommuneCode commune(String name) {

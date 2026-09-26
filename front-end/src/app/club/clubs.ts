@@ -6,6 +6,9 @@ export interface NewClub {
   committeeCode: string;
   ffeClubId: string;
   communeCode: string;
+  registeredOfficeStreet: string;
+  registeredOfficePostcode: string;
+  registeredOfficeTown: string;
 }
 
 /** Refusal: another club already uses this FFE identifier. */

@@ -5,6 +5,7 @@ import domain.club.Club;
 import domain.club.vo.ClubId;
 import domain.club.vo.CommitteeCode;
 import domain.club.vo.FfeClubId;
+import domain.club.vo.PostalAddress;
 import domain.commune.CommuneCode;
 
 import java.util.function.Supplier;
@@ -20,11 +21,12 @@ public class CreateClub {
         this.newClubId = newClubId;
     }
 
-    public ClubId execute(String name, CommitteeCode committee, FfeClubId ffeClubId, CommuneCode commune) {
+    public ClubId execute(String name, CommitteeCode committee, FfeClubId ffeClubId, CommuneCode commune,
+                          PostalAddress registeredOffice) {
         if (ffeClubId == null) throw new IllegalArgumentException("A club cannot be created without its FFE identifier");
         if (clubs.existsWithFfeClubId(ffeClubId)) throw new FfeClubIdAlreadyUsed(ffeClubId);
         ClubId id = newClubId.get();
-        Club club = new Club(id, name, true, committee, ffeClubId, commune);
+        Club club = new Club(id, name, true, committee, ffeClubId, commune, registeredOffice);
         boolean inCommitteeDepartment = communes.find(commune)
                 .filter(found -> found.isIn(committee.department()))
                 .isPresent();

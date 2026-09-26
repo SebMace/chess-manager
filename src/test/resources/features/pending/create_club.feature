@@ -8,33 +8,60 @@ Feature: Create a club
   Scenario: A club is created with its information
     Given "Loiret" is a departmental committee of the FFE
     When an administrator creates the club "U.S. Orléans.Echecs" with:
-      | departmental committee | Loiret  |
-      | FFE identifier         | G45001  |
-      | commune                | Orléans |
+      | departmental committee     | Loiret            |
+      | FFE identifier             | G45001            |
+      | commune                    | Orléans           |
+      | registered office street   | 12 rue des Échecs |
+      | registered office postcode | 45000             |
+      | registered office town     | Orléans           |
     Then "U.S. Orléans.Echecs" is a club managed by the application
     And "U.S. Orléans.Echecs" belongs to the departmental committee "Loiret"
     And the FFE identifier of "U.S. Orléans.Echecs" is "G45001"
     And the commune of "U.S. Orléans.Echecs" is "Orléans"
 
   @acceptance
+  Scenario: A club is created with its registered office
+    Given "Loiret" is a departmental committee of the FFE
+    When an administrator creates the club "U.S. Orléans.Echecs" with:
+      | departmental committee     | Loiret            |
+      | FFE identifier             | G45001            |
+      | commune                    | Orléans           |
+      | registered office street   | 12 rue des Échecs |
+      | registered office postcode | 45000             |
+      | registered office town     | Orléans           |
+    Then the registered office of "U.S. Orléans.Echecs" is:
+      | street   | 12 rue des Échecs |
+      | postcode | 45000             |
+      | town     | Orléans           |
+
+  @acceptance
   Scenario: A club cannot be created without its FFE identifier
     Given "Loiret" is a departmental committee of the FFE
     When an administrator creates the club "U.S. Orléans.Echecs" with:
-      | departmental committee | Loiret  |
-      | commune                | Orléans |
+      | departmental committee     | Loiret            |
+      | commune                    | Orléans           |
+      | registered office street   | 12 rue des Échecs |
+      | registered office postcode | 45000             |
+      | registered office town     | Orléans           |
     Then the club "U.S. Orléans.Echecs" is not created
 
   @acceptance
   Scenario: Two clubs cannot share the same FFE identifier
     Given "Loiret" is a departmental committee of the FFE
     And an administrator has created the club "U.S. Orléans.Echecs" with:
-      | departmental committee | Loiret  |
-      | FFE identifier         | G45001  |
-      | commune                | Orléans |
+      | departmental committee     | Loiret            |
+      | FFE identifier             | G45001            |
+      | commune                    | Orléans           |
+      | registered office street   | 12 rue des Échecs |
+      | registered office postcode | 45000             |
+      | registered office town     | Orléans           |
     When an administrator creates the club "Échiquier Orléanais" with:
-      | departmental committee | Loiret  |
-      | FFE identifier         | g45001  |
-      | commune                | Orléans |
+      | departmental committee     | Loiret            |
+      | FFE identifier             | g45001            |
+      | commune                    | Orléans           |
+      | registered office street   | 12 rue des Échecs |
+      | registered office postcode | 45000             |
+      | registered office town     | Orléans           |
     Then the club "Échiquier Orléanais" is not created
     And the administrator is told that the FFE identifier "G45001" is already used
 
@@ -42,17 +69,23 @@ Feature: Create a club
   Scenario: A club cannot be created without its commune
     Given "Loiret" is a departmental committee of the FFE
     When an administrator creates the club "U.S. Orléans.Echecs" with:
-      | departmental committee | Loiret |
-      | FFE identifier         | G45001 |
+      | departmental committee     | Loiret            |
+      | FFE identifier             | G45001            |
+      | registered office street   | 12 rue des Échecs |
+      | registered office postcode | 45000             |
+      | registered office town     | Orléans           |
     Then the club "U.S. Orléans.Echecs" is not created
 
   @acceptance
   Scenario: A club cannot be created in a commune outside the department of its committee
     Given "Loiret" is a departmental committee of the FFE
     When an administrator creates the club "Olivet – La Tour prend garde" with:
-      | departmental committee | Loiret           |
-      | FFE identifier         | G45002           |
-      | commune                | Olivet (Mayenne) |
+      | departmental committee     | Loiret            |
+      | FFE identifier             | G45002            |
+      | commune                    | Olivet (Mayenne)  |
+      | registered office street   | 12 rue des Échecs |
+      | registered office postcode | 45000             |
+      | registered office town     | Orléans           |
     Then the club "Olivet – La Tour prend garde" is not created
 
   @acceptance
@@ -62,3 +95,23 @@ Feature: Create a club
     Then the administrator is offered the commune "Olivet"
     And the administrator is offered the commune "Saint-Pryvé-Saint-Mesmin"
     And the administrator is not offered the commune "Olivet (Mayenne)"
+
+  @acceptance
+  Scenario: A club cannot be created without its registered office
+    Given "Loiret" is a departmental committee of the FFE
+    When an administrator creates the club "U.S. Orléans.Echecs" with:
+      | departmental committee | Loiret  |
+      | FFE identifier         | G45001  |
+      | commune                | Orléans |
+    Then the club "U.S. Orléans.Echecs" is not created
+
+  @acceptance
+  Scenario: A club cannot be created with an incomplete registered office
+    Given "Loiret" is a departmental committee of the FFE
+    When an administrator creates the club "U.S. Orléans.Echecs" with:
+      | departmental committee     | Loiret            |
+      | FFE identifier             | G45001            |
+      | commune                    | Orléans           |
+      | registered office street   | 12 rue des Échecs |
+      | registered office postcode | 45000             |
+    Then the club "U.S. Orléans.Echecs" is not created

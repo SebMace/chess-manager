@@ -13,6 +13,11 @@ export class HttpClubs implements Clubs {
       committeeCode: club.committeeCode,
       ffeClubId: club.ffeClubId,
       communeCode: club.communeCode,
+      registeredOffice: {
+        street: club.registeredOfficeStreet,
+        postcode: club.registeredOfficePostcode,
+        town: club.registeredOfficeTown,
+      },
     }).pipe(
       catchError((error: HttpErrorResponse) =>
         throwError(() => (error.status === 409 ? new FfeClubIdAlreadyUsed(club.ffeClubId) : error))),

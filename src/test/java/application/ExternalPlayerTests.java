@@ -5,6 +5,7 @@ import application.club.RegisterLicense;
 import club.InMemoryClubRepository;
 import domain.club.Club;
 import domain.club.vo.ClubId;
+import domain.club.vo.PostalAddress;
 import domain.commune.CommuneCode;
 import domain.club.vo.Season;
 import domain.member.vo.FfeId;
@@ -22,12 +23,13 @@ class ExternalPlayerTests {
     private final ClubId orleans = new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000002"));
     private final ClubId gien = new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000004"));
     private final PersonId person = new PersonId(UUID.fromString("00000000-0000-0000-0000-000000000001"));
+    private static final PostalAddress OFFICE = new PostalAddress("12 rue des Échecs", "45000", "Orléans");
     private final Season season = new Season(2026, 2027);
     private final FfeLicense license = new FfeLicense(new FfeId("A12345"), FfeLicenseType.A);
 
     @Test
     void should_recognize_external_affiliation_without_managing_the_club() {
-        clubs.save(new Club(gien, "Gien", false, new CommuneCode("45155")));
+        clubs.save(new Club(gien, "Gien", false, new CommuneCode("45155"), OFFICE));
         licensedAt(gien, season);
 
         assertTrue(isExternalPlayer(season));
@@ -37,7 +39,7 @@ class ExternalPlayerTests {
 
     @Test
     void should_not_consider_a_player_of_a_managed_club_as_external() {
-        clubs.save(new Club(orleans, "Orléans", true, new CommuneCode("45234")));
+        clubs.save(new Club(orleans, "Orléans", true, new CommuneCode("45234"), OFFICE));
         licensedAt(orleans, season);
 
         assertFalse(isExternalPlayer(season));
@@ -45,7 +47,7 @@ class ExternalPlayerTests {
 
     @Test
     void should_not_consider_a_player_external_for_a_season_without_affiliation() {
-        clubs.save(new Club(gien, "Gien", false, new CommuneCode("45155")));
+        clubs.save(new Club(gien, "Gien", false, new CommuneCode("45155"), OFFICE));
         licensedAt(gien, new Season(2025, 2026));
 
         assertFalse(isExternalPlayer(season));
