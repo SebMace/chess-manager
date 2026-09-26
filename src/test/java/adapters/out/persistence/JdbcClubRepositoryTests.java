@@ -7,6 +7,7 @@ import domain.club.vo.FfeClubId;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.testcontainers.junit.jupiter.Container;
@@ -76,6 +77,17 @@ class JdbcClubRepositoryTests {
 
         assertTrue(clubs.existsWithFfeClubId(new FfeClubId("G45002")));
         assertFalse(clubs.existsWithFfeClubId(new FfeClubId("G45999")));
+    }
+
+    @Test
+    void should_refuse_to_store_two_clubs_with_the_same_ffe_identifier() {
+        JdbcClubRepository clubs = new JdbcClubRepository(JdbcClient.create(dataSource));
+        clubs.save(new Club(new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000010")),
+                "MJC Chécy", true, new CommitteeCode("45"), new FfeClubId("G45003"), "Chécy"));
+
+        assertThrows(DataIntegrityViolationException.class, () -> clubs.save(new Club(
+                new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000011")),
+                "Chécy Échecs", true, new CommitteeCode("45"), new FfeClubId("G45003"), "Chécy")));
     }
 
     @Test
