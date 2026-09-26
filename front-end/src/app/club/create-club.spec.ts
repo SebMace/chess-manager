@@ -108,10 +108,7 @@ describe('CreateClub', () => {
 });
 
 function createClubWithoutCommittee(page: HTMLElement, name: string): void {
-  const field = fieldLabelled(page, 'Nom du club');
-  field.value = name;
-  field.dispatchEvent(new Event('input'));
-  buttonNamed(page, 'Créer le club').click();
+  createClub(page, { 'Nom du club': name });
 }
 
 function createClub(page: HTMLElement, fields: Record<string, string>): void {
@@ -120,9 +117,7 @@ function createClub(page: HTMLElement, fields: Record<string, string>): void {
 }
 
 function createClubInCommittee(page: HTMLElement, name: string, committee: string): void {
-  fill(fieldLabelled(page, 'Nom du club'), name);
-  fill(fieldLabelled(page, 'Code du comité'), committee);
-  buttonNamed(page, 'Créer le club').click();
+  createClub(page, { 'Nom du club': name, 'Code du comité': committee });
 }
 
 function fill(field: HTMLInputElement, value: string): void {
