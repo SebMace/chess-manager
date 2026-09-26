@@ -92,11 +92,12 @@ class JdbcClubRepositoryTests {
 
     @Test
     void should_refuse_to_store_a_club_without_its_commune() {
-        JdbcClubRepository clubs = new JdbcClubRepository(JdbcClient.create(dataSource));
+        JdbcClient jdbc = JdbcClient.create(dataSource);
 
-        assertThrows(DataIntegrityViolationException.class, () -> clubs.save(new Club(
-                new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000012")),
-                "Cercle d'Échecs de Pithiviers", true, new CommitteeCode("45"), new FfeClubId("G45007"), null)));
+        assertThrows(DataIntegrityViolationException.class, () -> jdbc.sql("""
+                        INSERT INTO club (id, name, managed_by_application, committee_code, ffe_club_id)
+                        VALUES ('00000000-0000-0000-0000-000000000012', 'Cercle d''Échecs de Pithiviers', TRUE, '45', 'G45007')""")
+                .update());
     }
 
     @Test
