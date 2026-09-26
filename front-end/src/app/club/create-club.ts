@@ -40,9 +40,9 @@ type CreationOutcome =
           registeredOfficeStreet: officeStreet.value,
           registeredOfficePostcode: officePostcode.value,
           registeredOfficeTown: officeTown.value,
-          playingVenueStreet: venueStreet.value,
-          playingVenuePostcode: venuePostcode.value,
-          playingVenueTown: venueTown.value,
+          playingVenueStreet: venueAtOffice() ? officeStreet.value : venue().street,
+          playingVenuePostcode: venueAtOffice() ? officePostcode.value : venue().postcode,
+          playingVenueTown: venueAtOffice() ? officeTown.value : venue().town,
         })"
       >
         <fieldset>
@@ -180,18 +180,49 @@ type CreationOutcome =
         <fieldset>
           <legend>Salle de jeu</legend>
           <div class="fields">
-            <div class="field field--wide">
-              <label for="venue-street">Numéro et voie</label>
-              <input id="venue-street" #venueStreet placeholder="ex. 5 rue du Roi" />
+            <div class="field field--wide field--check">
+              <input
+                id="venue-at-office"
+                type="checkbox"
+                #venueAtOfficeBox
+                [checked]="venueAtOffice()"
+                (change)="venueAtOffice.set(venueAtOfficeBox.checked)"
+              />
+              <label for="venue-at-office">La salle de jeu est au siège social</label>
             </div>
-            <div class="field">
-              <label for="venue-postcode">Code postal</label>
-              <input id="venue-postcode" #venuePostcode inputmode="numeric" placeholder="ex. 45100" />
-            </div>
-            <div class="field">
-              <label for="venue-town">Localité</label>
-              <input id="venue-town" #venueTown placeholder="ex. Orléans" />
-            </div>
+            @if (!venueAtOffice()) {
+              <div class="field field--wide">
+                <label for="venue-street">Numéro et voie</label>
+                <input
+                  id="venue-street"
+                  #venueStreet
+                  placeholder="ex. 5 rue du Roi"
+                  [value]="venue().street"
+                  (input)="describeVenue({ street: venueStreet.value })"
+                />
+              </div>
+              <div class="field">
+                <label for="venue-postcode">Code postal</label>
+                <input
+                  id="venue-postcode"
+                  #venuePostcode
+                  inputmode="numeric"
+                  placeholder="ex. 45100"
+                  [value]="venue().postcode"
+                  (input)="describeVenue({ postcode: venuePostcode.value })"
+                />
+              </div>
+              <div class="field">
+                <label for="venue-town">Localité</label>
+                <input
+                  id="venue-town"
+                  #venueTown
+                  placeholder="ex. Orléans"
+                  [value]="venue().town"
+                  (input)="describeVenue({ town: venueTown.value })"
+                />
+              </div>
+            }
           </div>
         </fieldset>
         <div class="actions">
@@ -216,6 +247,12 @@ export class CreateClub {
   protected readonly outcome = signal<CreationOutcome>({ kind: 'none' });
   protected readonly missing = signal<ReadonlySet<RequiredInformation>>(new Set());
   protected readonly postcodeMalformed = signal(false);
+  protected readonly venueAtOffice = signal(false);
+  protected readonly venue = signal({ street: '', postcode: '', town: '' });
+
+  protected describeVenue(part: Partial<{ street: string; postcode: string; town: string }>): void {
+    this.venue.update(venue => ({ ...venue, ...part }));
+  }
   private readonly communes = inject(Communes);
   private readonly communesOfCommittee = signal<readonly Commune[]>([]);
   private committeeOfCommunes = '';
