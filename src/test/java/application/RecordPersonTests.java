@@ -1,7 +1,7 @@
 package application;
 
-import application.person.RecordPerson;
-import application.person.UpdatePerson;
+import clubmanagement.recordperson.RecordPerson;
+import clubmanagement.updateperson.UpdatePerson;
 import clubmanagement.domain.member.vo.EloRating;
 import clubmanagement.domain.member.vo.FideId;
 import clubmanagement.domain.person.vo.PersonId;

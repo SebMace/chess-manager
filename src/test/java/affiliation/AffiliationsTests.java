@@ -2,7 +2,7 @@ package affiliation;
 
 import clubmanagement.domain.club.vo.ClubId;
 import clubmanagement.domain.club.vo.Season;
-import application.club.RegisterLicense;
+import clubmanagement.registerlicense.RegisterLicense;
 import clubmanagement.domain.club.ClubAffiliations;
 import relationship.InMemoryClubRelationshipRepository;
 import clubmanagement.domain.person.vo.PersonId;

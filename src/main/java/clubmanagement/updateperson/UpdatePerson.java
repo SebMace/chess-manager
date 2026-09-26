@@ -1,4 +1,4 @@
-package application.person;
+package clubmanagement.updateperson;
 
 import clubmanagement.ports.PersonRepository;
 import clubmanagement.domain.member.vo.EloRating;

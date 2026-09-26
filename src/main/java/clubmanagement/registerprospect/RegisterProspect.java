@@ -1,4 +1,4 @@
-package application.prospect;
+package clubmanagement.registerprospect;
 
 import clubmanagement.ports.ClubRelationshipRepository;
 import clubmanagement.ports.PersonRepository;

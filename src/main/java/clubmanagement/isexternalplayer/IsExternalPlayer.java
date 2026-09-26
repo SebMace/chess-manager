@@ -1,4 +1,4 @@
-package application.club;
+package clubmanagement.isexternalplayer;
 
 import clubmanagement.ports.ClubRelationshipRepository;
 import clubmanagement.ports.ClubRepository;

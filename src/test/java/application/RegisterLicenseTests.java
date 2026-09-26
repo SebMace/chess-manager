@@ -1,7 +1,7 @@
 package application;
 
 import static clubmanagement.domain.club.RelationshipStatus.*;
-import application.club.RegisterLicense;
+import clubmanagement.registerlicense.RegisterLicense;
 import clubmanagement.domain.club.ClubRelationship;
 import clubmanagement.domain.club.vo.ClubId;
 import clubmanagement.domain.club.vo.Season;

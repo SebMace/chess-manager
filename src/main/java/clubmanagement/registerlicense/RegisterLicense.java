@@ -1,4 +1,4 @@
-package application.club;
+package clubmanagement.registerlicense;
 
 import clubmanagement.ports.ClubRelationshipRepository;
 import clubmanagement.domain.club.ClubRelationship;

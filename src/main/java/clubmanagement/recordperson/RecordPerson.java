@@ -1,4 +1,4 @@
-package application.person;
+package clubmanagement.recordperson;
 
 import clubmanagement.ports.PersonRepository;
 import clubmanagement.domain.person.Person;

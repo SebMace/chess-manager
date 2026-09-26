@@ -1,11 +1,11 @@
 package acceptance.support;
 
-import application.club.RegisterLicense;
-import application.club.RegisterPartnership;
-import application.club.IsExternalPlayer;
+import clubmanagement.registerlicense.RegisterLicense;
+import clubmanagement.registerpartnership.RegisterPartnership;
+import clubmanagement.isexternalplayer.IsExternalPlayer;
 import club.InMemoryClubRepository;
-import application.person.RecordPerson;
-import application.prospect.RegisterProspect;
+import clubmanagement.recordperson.RecordPerson;
+import clubmanagement.registerprospect.RegisterProspect;
 import clubmanagement.domain.club.Club;
 import clubmanagement.domain.club.ClubAffiliations;
 import clubmanagement.domain.club.RelationshipStatus;

@@ -1,8 +1,8 @@
 package acceptance.steps;
 
-import application.person.RecordPerson;
-import application.person.UpdatePerson;
-import application.club.RegisterLicense;
+import clubmanagement.recordperson.RecordPerson;
+import clubmanagement.updateperson.UpdatePerson;
+import clubmanagement.registerlicense.RegisterLicense;
 import clubmanagement.domain.club.vo.ClubId;
 import clubmanagement.domain.club.vo.Season;
 import clubmanagement.domain.exceptions.FideIdAlreadyAssignedException;

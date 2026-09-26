@@ -158,7 +158,6 @@
                 <configuration>
                     <targetClasses>
                         <param>clubmanagement.*</param>
-                        <param>application.*</param>
                     </targetClasses>
                     <excludedClasses>
                         <param>clubmanagement.*.rest.*</param>

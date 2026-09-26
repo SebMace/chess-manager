@@ -1,7 +1,7 @@
 package application;
 
-import application.club.IsExternalPlayer;
-import application.club.RegisterLicense;
+import clubmanagement.isexternalplayer.IsExternalPlayer;
+import clubmanagement.registerlicense.RegisterLicense;
 import club.InMemoryClubRepository;
 import clubmanagement.domain.club.Club;
 import clubmanagement.domain.club.vo.ClubId;
