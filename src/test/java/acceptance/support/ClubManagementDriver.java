@@ -35,9 +35,9 @@ public class ClubManagementDriver {
     private final InMemoryPersonRepository people = new InMemoryPersonRepository();
     private final InMemoryClubRelationshipRepository relationships = new InMemoryClubRelationshipRepository();
     private final Map<String, Club> clubs = Map.of(
-            "Orléans", new Club(new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000002")), "Orléans", new CommuneCode("45234"), OFFICE),
-            "Olivet", new Club(new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000003")), "Olivet", new CommuneCode("45232"), OFFICE),
-            "Gien", new Club(new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000004")), "Gien", new CommuneCode("45155"), OFFICE));
+            "Orléans", new Club(new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000002")), "Orléans", new CommuneCode("45234"), OFFICE, OFFICE),
+            "Olivet", new Club(new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000003")), "Olivet", new CommuneCode("45232"), OFFICE, OFFICE),
+            "Gien", new Club(new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000004")), "Gien", new CommuneCode("45155"), OFFICE, OFFICE));
     private Season season = new Season(2026, 2027);
     private PersonId personId;
 
@@ -48,7 +48,7 @@ public class ClubManagementDriver {
     }
 
     public void defineClub(String name, boolean managed) {
-        clubRepository.save(new Club(clubId(name), name, managed, clubs.get(name).commune(), OFFICE));
+        clubRepository.save(new Club(clubId(name), name, managed, clubs.get(name).commune(), OFFICE, OFFICE));
     }
 
     public boolean isClubManaged(String name) { return clubRepository.find(clubId(name)).orElseThrow().managedByApplication(); }

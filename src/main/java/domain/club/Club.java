@@ -18,12 +18,13 @@ public final class Club {
     private final PostalAddress registeredOffice;
     private final PostalAddress playingVenue;
 
-    public Club(ClubId id, String name, CommuneCode commune, PostalAddress registeredOffice) {
-        this(id, name, false, commune, registeredOffice);
+    public Club(ClubId id, String name, CommuneCode commune, PostalAddress registeredOffice, PostalAddress playingVenue) {
+        this(id, name, false, commune, registeredOffice, playingVenue);
     }
 
-    public Club(ClubId id, String name, boolean managedByApplication, CommuneCode commune, PostalAddress registeredOffice) {
-        this(id, name, managedByApplication, null, null, commune, registeredOffice, null);
+    public Club(ClubId id, String name, boolean managedByApplication, CommuneCode commune,
+                PostalAddress registeredOffice, PostalAddress playingVenue) {
+        this(id, name, managedByApplication, null, null, commune, registeredOffice, playingVenue);
     }
 
     public Club(ClubId id, String name, boolean managedByApplication, CommitteeCode committee,
