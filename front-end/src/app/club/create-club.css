@@ -120,6 +120,28 @@ input[aria-invalid="true"] {
   color: var(--walnut-deep);
 }
 
+fieldset + fieldset {
+  margin-top: 1rem;
+}
+
+.field--check {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.field--check input {
+  width: 1.1rem;
+  height: 1.1rem;
+  margin: 0;
+  padding: 0;
+  accent-color: var(--walnut);
+}
+
+.field--check label {
+  font-weight: 500;
+}
+
 .field-error {
   margin: 0;
   font-size: 0.875rem;
