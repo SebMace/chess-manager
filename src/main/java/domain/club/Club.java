@@ -14,16 +14,12 @@ public final class Club {
     private final FfeClubId ffeClubId;
     private final String commune;
 
-    public Club(ClubId id, String name) {
-        this(id, name, false);
+    public Club(ClubId id, String name, String commune) {
+        this(id, name, false, commune);
     }
 
-    public Club(ClubId id, String name, boolean managedByApplication) {
-        this(id, name, managedByApplication, null);
-    }
-
-    public Club(ClubId id, String name, boolean managedByApplication, CommitteeCode committee) {
-        this(id, name, managedByApplication, committee, null, null);
+    public Club(ClubId id, String name, boolean managedByApplication, String commune) {
+        this(id, name, managedByApplication, null, null, commune);
     }
 
     public Club(ClubId id, String name, boolean managedByApplication, CommitteeCode committee,

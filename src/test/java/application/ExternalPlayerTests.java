@@ -26,7 +26,7 @@ class ExternalPlayerTests {
 
     @Test
     void should_recognize_external_affiliation_without_managing_the_club() {
-        clubs.save(new Club(gien, "Gien", false));
+        clubs.save(new Club(gien, "Gien", false, "Gien"));
         licensedAt(gien, season);
 
         assertTrue(isExternalPlayer(season));
@@ -36,7 +36,7 @@ class ExternalPlayerTests {
 
     @Test
     void should_not_consider_a_player_of_a_managed_club_as_external() {
-        clubs.save(new Club(orleans, "Orléans", true));
+        clubs.save(new Club(orleans, "Orléans", true, "Orléans"));
         licensedAt(orleans, season);
 
         assertFalse(isExternalPlayer(season));
@@ -44,7 +44,7 @@ class ExternalPlayerTests {
 
     @Test
     void should_not_consider_a_player_external_for_a_season_without_affiliation() {
-        clubs.save(new Club(gien, "Gien", false));
+        clubs.save(new Club(gien, "Gien", false, "Gien"));
         licensedAt(gien, new Season(2025, 2026));
 
         assertFalse(isExternalPlayer(season));
