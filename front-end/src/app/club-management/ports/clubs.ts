@@ -21,7 +21,15 @@ export class FfeClubIdAlreadyUsed extends Error {
   }
 }
 
+/** What an administrator is shown of a club of a departmental committee. */
+export interface ClubOfCommittee {
+  name: string;
+  commune: string;
+  ffeClubId: string;
+}
+
 /** Port: what the club screens need from the clubs managed by Chess Manager. */
 export abstract class Clubs {
   abstract create(club: NewClub): Observable<void>;
+  abstract ofCommittee(committeeCode: string): Observable<ClubOfCommittee[]>;
 }
