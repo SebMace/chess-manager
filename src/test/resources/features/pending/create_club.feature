@@ -115,3 +115,15 @@ Feature: Create a club
       | registered office street   | 12 rue des Échecs |
       | registered office postcode | 45000             |
     Then the club "U.S. Orléans.Echecs" is not created
+
+  @acceptance
+  Scenario: A club cannot be created with a registered office postcode that is not five digits
+    Given "Loiret" is a departmental committee of the FFE
+    When an administrator creates the club "U.S. Orléans.Echecs" with:
+      | departmental committee     | Loiret            |
+      | FFE identifier             | G45001            |
+      | commune                    | Orléans           |
+      | registered office street   | 12 rue des Échecs |
+      | registered office postcode | 4500              |
+      | registered office town     | Orléans           |
+    Then the club "U.S. Orléans.Echecs" is not created
