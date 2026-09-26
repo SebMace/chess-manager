@@ -31,6 +31,17 @@ describe('CreateClub', () => {
     expect(page.textContent).toContain('Le club Montargis a été créé.');
   });
 
+  it('creates the club in its departmental committee', async () => {
+    createClubInCommittee(page, 'U.S. Orléans.Echecs', '45');
+
+    const request = server.expectOne({ method: 'POST', url: '/clubs' });
+    expect(request.request.body).toEqual({ name: 'U.S. Orléans.Echecs', committeeCode: '45' });
+    request.flush(null, { status: 201, statusText: 'Created', headers: { Location: '/clubs/7' } });
+    await fixture.whenStable();
+
+    expect(page.textContent).toContain('Le club U.S. Orléans.Echecs a été créé.');
+  });
+
   it('tells the administrator that the club could not be created', async () => {
     createClubNamed(page, 'Montargis');
 
@@ -78,6 +89,17 @@ function createClubNamed(page: HTMLElement, name: string): void {
   field.value = name;
   field.dispatchEvent(new Event('input'));
   buttonNamed(page, 'Créer le club').click();
+}
+
+function createClubInCommittee(page: HTMLElement, name: string, committee: string): void {
+  fill(fieldLabelled(page, 'Nom du club'), name);
+  fill(fieldLabelled(page, 'Code du comité'), committee);
+  buttonNamed(page, 'Créer le club').click();
+}
+
+function fill(field: HTMLInputElement, value: string): void {
+  field.value = value;
+  field.dispatchEvent(new Event('input'));
 }
 
 function fieldLabelled(page: HTMLElement, text: string): HTMLInputElement {
