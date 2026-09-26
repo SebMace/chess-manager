@@ -75,6 +75,25 @@ describe('CreateClub', () => {
     expect(offeredCommunes(page)).toEqual(['Olivet']);
   });
 
+  it('lets the administrator choose a commune with the keyboard', async () => {
+    fillFields(page, { 'Nom du club': 'U.S. Orléans.Echecs', 'Code du comité': '45', 'Identifiant FFE': 'G45001' });
+    const commune = fieldLabelled(page, 'Commune');
+    fill(commune, 'O');
+    server.expectOne(request => request.url === '/communes').flush(LOIRET);
+    await fixture.whenStable();
+
+    press(commune, 'ArrowDown');
+    press(commune, 'ArrowDown');
+    await fixture.whenStable();
+    expect(commune.getAttribute('aria-activedescendant')).toBe(optionNamed(page, 'Orléans').id);
+
+    press(commune, 'Enter');
+    await fixture.whenStable();
+    buttonNamed(page, 'Créer le club').click();
+
+    expect(server.expectOne({ method: 'POST', url: '/clubs' }).request.body.communeCode).toBe('45234');
+  });
+
   it('tells the administrator that the club could not be created', async () => {
     await createValidClub('Montargis');
 
@@ -187,6 +206,10 @@ function optionNamed(page: HTMLElement, name: string): HTMLElement {
 
 function offeredCommunes(page: HTMLElement): string[] {
   return Array.from(page.querySelectorAll('[role="option"]')).map(option => option.textContent?.trim() ?? '');
+}
+
+function press(field: HTMLInputElement, key: string): void {
+  field.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }));
 }
 
 function fill(field: HTMLInputElement, value: string): void {
