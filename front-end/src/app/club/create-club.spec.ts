@@ -230,6 +230,19 @@ describe('CreateClub', () => {
     expect(page.textContent).toContain('La localité est obligatoire.');
   });
 
+  it('tells the administrator that each part of the playing venue is required unless it is the registered office', async () => {
+    fillFields(page, { 'Nom du club': 'U.S. Orléans.Echecs', 'Code du comité': '45', 'Identifiant FFE': 'G45001', ...REGISTERED_OFFICE });
+    await chooseCommune('Orl', 'Orléans');
+    buttonNamed(page, 'Créer le club').click();
+    await fixture.whenStable();
+
+    server.expectNone({ method: 'POST', url: '/clubs' });
+    const venue = groupNamed(page, 'Salle de jeu').textContent;
+    expect(venue).toContain('Le numéro et la voie sont obligatoires.');
+    expect(venue).toContain('Le code postal est obligatoire.');
+    expect(venue).toContain('La localité est obligatoire.');
+  });
+
   it('tells the administrator that a postcode is made of five digits', async () => {
     fillFields(page, { 'Nom du club': 'U.S. Orléans.Echecs', 'Code du comité': '45', 'Identifiant FFE': 'G45001' });
     await chooseCommune('Orl', 'Orléans');
@@ -313,9 +326,13 @@ function playsAtRegisteredOffice(page: HTMLElement): void {
 }
 
 function fieldInGroup(page: HTMLElement, group: string, text: string): HTMLInputElement {
+  return fieldLabelled(groupNamed(page, group), text);
+}
+
+function groupNamed(page: HTMLElement, group: string): HTMLFieldSetElement {
   const fieldset = Array.from(page.querySelectorAll('fieldset')).find(f => f.querySelector('legend')?.textContent?.trim() === group);
   if (!fieldset) throw new Error(`No group named "${group}"`);
-  return fieldLabelled(fieldset, text);
+  return fieldset;
 }
 
 function fieldLabelled(page: HTMLElement, text: string): HTMLInputElement {
