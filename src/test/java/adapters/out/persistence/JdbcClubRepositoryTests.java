@@ -68,6 +68,17 @@ class JdbcClubRepositoryTests {
     }
 
     @Test
+    void should_tell_whether_a_club_already_uses_an_ffe_identifier() {
+        JdbcClubRepository clubs = new JdbcClubRepository(JdbcClient.create(dataSource));
+        ClubId gien = new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000009"));
+
+        clubs.save(new Club(gien, "Echiquiers Berry-Sologne", true, new CommitteeCode("45"), new FfeClubId("G45002"), "Gien"));
+
+        assertTrue(clubs.existsWithFfeClubId(new FfeClubId("G45002")));
+        assertFalse(clubs.existsWithFfeClubId(new FfeClubId("G45999")));
+    }
+
+    @Test
     void should_find_nothing_for_an_unknown_club() {
         JdbcClubRepository clubs = new JdbcClubRepository(JdbcClient.create(dataSource));
         ClubId unknown = new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000099"));
