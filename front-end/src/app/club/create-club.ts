@@ -67,15 +67,29 @@ type CreationOutcome =
               <input
                 id="commune"
                 #commune
+                role="combobox"
                 aria-required="true"
+                aria-autocomplete="list"
+                aria-controls="commune-options"
+                autocomplete="off"
                 placeholder="ex. Orléans"
+                [attr.aria-expanded]="offeredCommunes().length > 0"
+                [attr.aria-activedescendant]="activeCommune() >= 0 ? 'commune-option-' + activeCommune() : null"
                 [attr.aria-invalid]="missing().has('communeCode') || null"
                 [attr.aria-describedby]="missing().has('communeCode') ? 'commune-error' : null"
                 (input)="typeCommune(commune.value, committeeCode.value)"
+                (keydown)="browseCommunes($event, commune)"
               />
               <ul id="commune-options" role="listbox" aria-label="Communes proposées">
                 @for (offered of offeredCommunes(); track offered.code) {
-                  <li role="option" (click)="chooseCommune(offered, commune)">{{ offered.name }}</li>
+                  <li
+                    role="option"
+                    [id]="'commune-option-' + $index"
+                    [attr.aria-selected]="$index === activeCommune()"
+                    (click)="chooseCommune(offered, commune)"
+                  >
+                    {{ offered.name }}
+                  </li>
                 }
               </ul>
               @if (missing().has('communeCode')) {
@@ -110,17 +124,32 @@ export class CreateClub {
   private committeeOfCommunes = '';
   private readonly typedCommune = signal('');
   protected readonly chosenCommune = signal<Commune | null>(null);
+  protected readonly activeCommune = signal(-1);
   protected readonly offeredCommunes = computed(() => communesMatching(this.communesOfCommittee(), this.typedCommune()));
+
+  protected browseCommunes(event: KeyboardEvent, field: HTMLInputElement): void {
+    const offered = this.offeredCommunes();
+    if (offered.length === 0) return;
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      this.activeCommune.update(active => Math.min(active + 1, offered.length - 1));
+    } else if (event.key === 'Enter' && this.activeCommune() >= 0) {
+      event.preventDefault();
+      this.chooseCommune(offered[this.activeCommune()], field);
+    }
+  }
 
   protected chooseCommune(commune: Commune, field: HTMLInputElement): void {
     this.chosenCommune.set(commune);
     this.typedCommune.set('');
+    this.activeCommune.set(-1);
     field.value = commune.name;
   }
 
   protected typeCommune(typed: string, committeeCode: string): void {
     this.chosenCommune.set(null);
     this.typedCommune.set(typed);
+    this.activeCommune.set(-1);
     if (!committeeCode || committeeCode === this.committeeOfCommunes) return;
     this.committeeOfCommunes = committeeCode;
     this.communes.ofCommittee(committeeCode).subscribe(communes => this.communesOfCommittee.set(communes));
