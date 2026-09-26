@@ -40,6 +40,9 @@ type CreationOutcome =
           registeredOfficeStreet: officeStreet.value,
           registeredOfficePostcode: officePostcode.value,
           registeredOfficeTown: officeTown.value,
+          playingVenueStreet: venueStreet.value,
+          playingVenuePostcode: venuePostcode.value,
+          playingVenueTown: venueTown.value,
         })"
       >
         <fieldset>
@@ -171,6 +174,23 @@ type CreationOutcome =
               @if (missing().has('registeredOfficeTown')) {
                 <p id="office-town-error" class="field-error">La localité est obligatoire.</p>
               }
+            </div>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Salle de jeu</legend>
+          <div class="fields">
+            <div class="field field--wide">
+              <label for="venue-street">Numéro et voie</label>
+              <input id="venue-street" #venueStreet placeholder="ex. 5 rue du Roi" />
+            </div>
+            <div class="field">
+              <label for="venue-postcode">Code postal</label>
+              <input id="venue-postcode" #venuePostcode inputmode="numeric" placeholder="ex. 45100" />
+            </div>
+            <div class="field">
+              <label for="venue-town">Localité</label>
+              <input id="venue-town" #venueTown placeholder="ex. Orléans" />
             </div>
           </div>
         </fieldset>

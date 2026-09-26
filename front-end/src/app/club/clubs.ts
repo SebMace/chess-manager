@@ -9,6 +9,9 @@ export interface NewClub {
   registeredOfficeStreet: string;
   registeredOfficePostcode: string;
   registeredOfficeTown: string;
+  playingVenueStreet: string;
+  playingVenuePostcode: string;
+  playingVenueTown: string;
 }
 
 /** Refusal: another club already uses this FFE identifier. */
