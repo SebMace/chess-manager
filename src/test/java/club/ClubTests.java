@@ -36,4 +36,10 @@ class ClubTests {
         ClubId id = new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000002"));
         assertThrows(IllegalArgumentException.class, () -> new Club(id, "Orléans", ORLEANS, null, OFFICE));
     }
+
+    @Test
+    void should_reject_a_club_without_its_playing_venue() {
+        ClubId id = new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000002"));
+        assertThrows(IllegalArgumentException.class, () -> new Club(id, "Orléans", ORLEANS, OFFICE, null));
+    }
 }
