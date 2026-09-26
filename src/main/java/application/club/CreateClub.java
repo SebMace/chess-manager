@@ -22,6 +22,8 @@ public class CreateClub {
     }
 
     public ClubId execute(String name, CommitteeCode committee) {
-        return execute(name);
+        ClubId id = newClubId.get();
+        clubs.save(new Club(id, name, true, committee));
+        return id;
     }
 }
