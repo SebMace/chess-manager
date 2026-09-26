@@ -51,7 +51,7 @@ class CreateClubEndToEndTests {
         assertTrue(club.managedByApplication());
         assertEquals(Optional.of(new CommitteeCode("45")), club.committee());
         assertEquals(Optional.of(new FfeClubId("G45001")), club.ffeClubId());
-        assertEquals(Optional.of("Orléans"), club.commune());
+        assertEquals("Orléans", club.commune());
     }
 
     @Test

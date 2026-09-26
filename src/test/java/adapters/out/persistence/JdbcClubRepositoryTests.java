@@ -65,7 +65,7 @@ class JdbcClubRepositoryTests {
 
         Club club = clubs.find(orleans).orElseThrow();
         assertEquals(Optional.of(new FfeClubId("G45001")), club.ffeClubId());
-        assertEquals(Optional.of("Orléans"), club.commune());
+        assertEquals("Orléans", club.commune());
     }
 
     @Test

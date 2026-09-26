@@ -39,7 +39,7 @@ public final class Club {
     public boolean managedByApplication() { return managedByApplication; }
     public Optional<CommitteeCode> committee() { return Optional.ofNullable(committee); }
     public Optional<FfeClubId> ffeClubId() { return Optional.ofNullable(ffeClubId); }
-    public Optional<String> commune() { return Optional.ofNullable(commune); }
+    public String commune() { return commune; }
 
     @Override
     public boolean equals(Object other) {

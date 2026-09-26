@@ -70,7 +70,7 @@ public class CreateClubSteps {
 
     @Then("the commune of {string} is {string}")
     public void clubCommune(String name, String commune) {
-        assertEquals(Optional.of(commune), createdClub(name).commune());
+        assertEquals(commune, createdClub(name).commune());
     }
 
     private Club createdClub(String name) { return clubs.find(createdClubs.get(name)).orElseThrow(); }
