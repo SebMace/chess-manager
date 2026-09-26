@@ -1,6 +1,7 @@
 package acceptance.steps;
 
 import clubmanagement.createclub.CommuneNotInCommitteeDepartment;
+import clubmanagement.clubsofcommittee.ClubsOfCommittee;
 import clubmanagement.communesofcommittee.CommunesOfCommittee;
 import clubmanagement.createclub.CreateClub;
 import clubmanagement.createclub.FfeClubIdAlreadyUsed;
@@ -40,6 +41,7 @@ public class CreateClubSteps {
     private final Map<String, CommitteeCode> committees = new HashMap<>();
     private final Map<String, RuntimeException> refusals = new HashMap<>();
     private List<Commune> offeredCommunes = List.of();
+    private List<Club> consultedClubs = List.of();
 
     @Given("{string} is a departmental committee of the FFE")
     public void departmentalCommittee(String name) { committees.put(name, new CommitteeCode("45")); }
@@ -70,6 +72,16 @@ public class CreateClubSteps {
     @When("an administrator looks for the communes of a club of the departmental committee {string}")
     public void lookForCommunes(String committee) {
         offeredCommunes = new CommunesOfCommittee(communes).execute(committees.get(committee));
+    }
+
+    @When("an administrator consults the clubs of the departmental committee {string}")
+    public void consultClubs(String committee) {
+        consultedClubs = new ClubsOfCommittee(clubs).execute(committees.get(committee));
+    }
+
+    @Then("the administrator is shown the club {string}")
+    public void clubShown(String name) {
+        assertTrue(consultedClubs.stream().anyMatch(club -> club.name().equals(name)));
     }
 
     @Then("the administrator is offered the commune {string}")
