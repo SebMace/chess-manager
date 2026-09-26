@@ -25,6 +25,9 @@ type CreationOutcome =
           committeeCode: committeeCode.value,
           ffeClubId: ffeClubId.value,
           communeCode: chosenCommune()?.code ?? '',
+          registeredOfficeStreet: officeStreet.value,
+          registeredOfficePostcode: officePostcode.value,
+          registeredOfficeTown: officeTown.value,
         })"
       >
         <fieldset>
@@ -103,6 +106,23 @@ type CreationOutcome =
                   {{ communeWritten() ? 'Choisissez la commune parmi celles proposées.' : 'La commune est obligatoire.' }}
                 </p>
               }
+            </div>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Siège social</legend>
+          <div class="fields">
+            <div class="field field--wide">
+              <label for="office-street">Numéro et voie</label>
+              <input id="office-street" #officeStreet autocomplete="address-line1" placeholder="ex. 12 rue des Échecs" />
+            </div>
+            <div class="field">
+              <label for="office-postcode">Code postal</label>
+              <input id="office-postcode" #officePostcode autocomplete="postal-code" inputmode="numeric" placeholder="ex. 45000" />
+            </div>
+            <div class="field">
+              <label for="office-town">Localité</label>
+              <input id="office-town" #officeTown autocomplete="address-level2" placeholder="ex. Orléans" />
             </div>
           </div>
         </fieldset>
