@@ -83,6 +83,18 @@ class JdbcClubRepositoryTests {
     }
 
     @Test
+    void should_find_a_saved_club_with_its_playing_venue() {
+        JdbcClubRepository clubs = new JdbcClubRepository(JdbcClient.create(dataSource));
+        ClubId olivet = new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000014"));
+        PostalAddress venue = new PostalAddress("8 rue des Tours", "45160", "Olivet");
+
+        clubs.save(new Club(olivet, "Olivet – La Tour prend garde", true, new CommitteeCode("45"), new FfeClubId("G45011"),
+                new CommuneCode("45298"), OFFICE, venue));
+
+        assertEquals(Optional.of(venue), clubs.find(olivet).orElseThrow().playingVenue());
+    }
+
+    @Test
     void should_tell_whether_a_club_already_uses_an_ffe_identifier() {
         JdbcClubRepository clubs = new JdbcClubRepository(JdbcClient.create(dataSource));
         ClubId gien = new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000009"));
