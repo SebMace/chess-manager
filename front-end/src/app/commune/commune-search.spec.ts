@@ -18,4 +18,8 @@ describe('communesMatching', () => {
   it('finds a commune by the beginnings of several words typed', () => {
     expect(communesMatching(LOIRET, 'saint-mes')).toEqual([SAINT_PRYVE]);
   });
+
+  it('understands St as Saint', () => {
+    expect(communesMatching(LOIRET, 'st pryve')).toEqual([SAINT_PRYVE]);
+  });
 });
