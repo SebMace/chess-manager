@@ -17,23 +17,12 @@ class CreateClubTests {
     private final InMemoryClubRepository clubs = new InMemoryClubRepository();
 
     @Test
-    void should_save_a_club_managed_by_the_application_under_a_new_identity() {
-        CreateClub createClub = new CreateClub(clubs, () -> clubId);
-
-        ClubId createdId = createClub.execute("Montargis");
-
-        assertEquals(clubId, createdId);
-        Club club = clubs.find(createdId).orElseThrow();
-        assertEquals("Montargis", club.name());
-        assertTrue(club.managedByApplication());
-    }
-
-    @Test
     void should_save_a_managed_club_in_its_departmental_committee() {
         CreateClub createClub = new CreateClub(clubs, () -> clubId);
 
         ClubId createdId = createClub.execute("U.S. Orléans.Echecs", new CommitteeCode("45"));
 
+        assertEquals(clubId, createdId);
         Club club = clubs.find(createdId).orElseThrow();
         assertEquals("U.S. Orléans.Echecs", club.name());
         assertTrue(club.managedByApplication());
