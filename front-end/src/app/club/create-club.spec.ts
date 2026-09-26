@@ -34,17 +34,30 @@ describe('CreateClub', () => {
     await fixture.whenStable();
   });
 
+  async function chooseCommune(typed: string, name: string): Promise<void> {
+    fill(fieldLabelled(page, 'Commune'), typed);
+    for (const request of server.match(request => request.url === '/communes')) request.flush(LOIRET);
+    await fixture.whenStable();
+    optionNamed(page, name).click();
+    await fixture.whenStable();
+  }
+
+  async function createValidClub(name: string): Promise<void> {
+    fillFields(page, { 'Nom du club': name, 'Code du comité': '45', 'Identifiant FFE': 'G45001' });
+    await chooseCommune('Orl', 'Orléans');
+    buttonNamed(page, 'Créer le club').click();
+  }
+
   it('tells the administrator that the club has been created with its information', async () => {
-    createClub(page, {
-      'Nom du club': 'U.S. Orléans.Echecs',
-      'Code du comité': '45',
-      'Identifiant FFE': 'G45001',
-      'Commune': 'Orléans',
-    });
+    fill(fieldLabelled(page, 'Nom du club'), 'U.S. Orléans.Echecs');
+    fill(fieldLabelled(page, 'Code du comité'), '45');
+    fill(fieldLabelled(page, 'Identifiant FFE'), 'G45001');
+    await chooseCommune('Orl', 'Orléans');
+    buttonNamed(page, 'Créer le club').click();
 
     const request = server.expectOne({ method: 'POST', url: '/clubs' });
     expect(request.request.body).toEqual(
-      { name: 'U.S. Orléans.Echecs', committeeCode: '45', ffeClubId: 'G45001', commune: 'Orléans' });
+      { name: 'U.S. Orléans.Echecs', committeeCode: '45', ffeClubId: 'G45001', communeCode: '45234' });
     request.flush(null, { status: 201, statusText: 'Created', headers: { Location: '/clubs/7' } });
     await fixture.whenStable();
 
@@ -63,7 +76,7 @@ describe('CreateClub', () => {
   });
 
   it('tells the administrator that the club could not be created', async () => {
-    createValidClub(page, 'Montargis');
+    await createValidClub('Montargis');
 
     server.expectOne({ method: 'POST', url: '/clubs' })
       .flush(null, { status: 500, statusText: 'Internal Server Error' });
@@ -74,12 +87,12 @@ describe('CreateClub', () => {
   });
 
   it('no longer tells the administrator that the club could not be created once it has been created', async () => {
-    createValidClub(page, 'Montargis');
+    await createValidClub('Montargis');
     server.expectOne({ method: 'POST', url: '/clubs' })
       .flush(null, { status: 500, statusText: 'Internal Server Error' });
     await fixture.whenStable();
 
-    createValidClub(page, 'Montargis');
+    await createValidClub('Montargis');
     server.expectOne({ method: 'POST', url: '/clubs' })
       .flush(null, { status: 201, statusText: 'Created', headers: { Location: '/clubs/6' } });
     await fixture.whenStable();
@@ -89,12 +102,12 @@ describe('CreateClub', () => {
   });
 
   it('no longer tells the administrator that a previous club has been created once a creation fails', async () => {
-    createValidClub(page, 'Montargis');
+    await createValidClub('Montargis');
     server.expectOne({ method: 'POST', url: '/clubs' })
       .flush(null, { status: 201, statusText: 'Created', headers: { Location: '/clubs/6' } });
     await fixture.whenStable();
 
-    createValidClub(page, 'Olivet');
+    await createValidClub('Olivet');
     server.expectOne({ method: 'POST', url: '/clubs' })
       .flush(null, { status: 500, statusText: 'Internal Server Error' });
     await fixture.whenStable();
@@ -115,7 +128,7 @@ describe('CreateClub', () => {
     createClubWithoutCommittee(page, 'Montargis');
     await fixture.whenStable();
 
-    createValidClub(page, 'Montargis');
+    await createValidClub('Montargis');
     server.expectOne({ method: 'POST', url: '/clubs' })
       .flush(null, { status: 201, statusText: 'Created', headers: { Location: '/clubs/6' } });
     await fixture.whenStable();
@@ -141,7 +154,7 @@ describe('CreateClub', () => {
   });
 
   it('tells the administrator that the FFE identifier is already used by another club', async () => {
-    createValidClub(page, 'Échiquier Orléanais');
+    await createValidClub('Échiquier Orléanais');
 
     server.expectOne({ method: 'POST', url: '/clubs' })
       .flush(null, { status: 409, statusText: 'Conflict' });
@@ -157,12 +170,19 @@ function createClubWithoutCommittee(page: HTMLElement, name: string): void {
 }
 
 function createClub(page: HTMLElement, fields: Record<string, string>): void {
-  for (const [label, value] of Object.entries(fields)) fill(fieldLabelled(page, label), value);
+  fillFields(page, fields);
   buttonNamed(page, 'Créer le club').click();
 }
 
-function createValidClub(page: HTMLElement, name: string): void {
-  createClub(page, { 'Nom du club': name, 'Code du comité': '45', 'Identifiant FFE': 'G45001', 'Commune': 'Orléans' });
+function fillFields(page: HTMLElement, fields: Record<string, string>): void {
+  for (const [label, value] of Object.entries(fields)) fill(fieldLabelled(page, label), value);
+}
+
+
+function optionNamed(page: HTMLElement, name: string): HTMLElement {
+  const option = Array.from(page.querySelectorAll<HTMLElement>('[role="option"]')).find(o => o.textContent?.trim() === name);
+  if (!option) throw new Error(`No commune offered named "${name}"`);
+  return option;
 }
 
 function offeredCommunes(page: HTMLElement): string[] {
