@@ -79,3 +79,9 @@ Feature: Consult the clubs of a departmental committee
       | Cercle fictif de Montargis |
       | échiquier fictif d'Olivet  |
       | U.S. Orléans.Echecs        |
+
+  @acceptance
+  Scenario: The administrator is told when no club has been created in the committee
+    Given "Loiret" is a departmental committee of the FFE
+    When an administrator consults the clubs of the departmental committee "Loiret"
+    Then the administrator is told that no club is managed by the application in this committee
