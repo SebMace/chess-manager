@@ -24,7 +24,12 @@ public class CreateClub {
         if (ffeClubId == null) throw new IllegalArgumentException("A club cannot be created without its FFE identifier");
         if (clubs.existsWithFfeClubId(ffeClubId)) throw new FfeClubIdAlreadyUsed(ffeClubId);
         ClubId id = newClubId.get();
-        clubs.save(new Club(id, name, true, committee, ffeClubId, commune));
+        Club club = new Club(id, name, true, committee, ffeClubId, commune);
+        boolean inCommitteeDepartment = communes.find(commune)
+                .filter(found -> found.department().equals(committee.department()))
+                .isPresent();
+        if (!inCommitteeDepartment) throw new CommuneNotInCommitteeDepartment(commune, committee);
+        clubs.save(club);
         return id;
     }
 }
