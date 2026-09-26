@@ -56,13 +56,13 @@ On finalise d'abord la création d'un club ; les slices sur les joueurs viendron
 - **Décisions** :
   - le filtre porte sur le comité départemental du club (en métropole, son code est le numéro du
     département), pas sur le département de la commune ;
-  - la liste est triée par nom de club, sans tenir compte des accents ni des majuscules.
-- **Questions ouvertes** :
-  - exclure explicitement les clubs non gérés dès maintenant, ou plus tard ;
-  - message quand aucun club n'est trouvé ;
-  - département inconnu ;
-  - acteur : administrateur ou visiteur cherchant un club (deux slices si deux intentions) ;
-  - affichage de l'identifiant FFE si la liste devient publique.
+  - la liste est triée par nom de club, sans tenir compte des accents ni des majuscules ;
+  - l'acteur est l'administrateur ; l'identifiant FFE est affiché ;
+  - quand aucun club n'a été créé dans le comité, un message le dit à l'administrateur ;
+  - un comité inconnu est traité de la même façon : aucun club, sans refus.
+- **Reporté** : l'exclusion explicite des clubs non gérés par l'application, jusqu'à ce que de
+  tels clubs puissent exister en base (aujourd'hui, seul *Create a club* crée des clubs, tous
+  gérés).
 
 ## Thèmes, à découper le moment venu
 
