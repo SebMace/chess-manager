@@ -94,6 +94,25 @@ describe('CreateClub', () => {
     expect(server.expectOne({ method: 'POST', url: '/clubs' }).request.body.communeCode).toBe('45234');
   });
 
+  it('lets the administrator go back up the offered communes and close them', async () => {
+    fill(fieldLabelled(page, 'Code du comité'), '45');
+    const commune = fieldLabelled(page, 'Commune');
+    fill(commune, 'O');
+    server.expectOne(request => request.url === '/communes').flush(LOIRET);
+    await fixture.whenStable();
+
+    press(commune, 'ArrowDown');
+    press(commune, 'ArrowDown');
+    press(commune, 'ArrowUp');
+    await fixture.whenStable();
+    expect(commune.getAttribute('aria-activedescendant')).toBe(optionNamed(page, 'Olivet').id);
+
+    press(commune, 'Escape');
+    await fixture.whenStable();
+    expect(offeredCommunes(page)).toEqual([]);
+    expect(commune.getAttribute('aria-expanded')).toBe('false');
+  });
+
   it('tells the administrator that the club could not be created', async () => {
     await createValidClub('Montargis');
 
