@@ -22,4 +22,8 @@ describe('communesMatching', () => {
   it('understands St as Saint', () => {
     expect(communesMatching(LOIRET, 'st pryve')).toEqual([SAINT_PRYVE]);
   });
+
+  it('offers the communes in alphabetical order', () => {
+    expect(communesMatching([ORLEANS, OLIVET], 'o')).toEqual([OLIVET, ORLEANS]);
+  });
 });
