@@ -7,7 +7,7 @@ import { Clubs } from './clubs';
 export class HttpClubs implements Clubs {
   private readonly http = inject(HttpClient);
 
-  create(name: string): Observable<void> {
-    return this.http.post<void>('/clubs', { name });
+  create(name: string, committeeCode: string): Observable<void> {
+    return this.http.post<void>('/clubs', committeeCode ? { name, committeeCode } : { name });
   }
 }
