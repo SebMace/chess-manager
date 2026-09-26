@@ -15,3 +15,11 @@ Feature: Create a club
     And "U.S. Orléans.Echecs" belongs to the departmental committee "Loiret"
     And the FFE identifier of "U.S. Orléans.Echecs" is "G45001"
     And the commune of "U.S. Orléans.Echecs" is "Orléans"
+
+  @acceptance
+  Scenario: A club cannot be created without its FFE identifier
+    Given "Loiret" is a departmental committee of the FFE
+    When an administrator creates the club "U.S. Orléans.Echecs" with:
+      | departmental committee | Loiret  |
+      | commune                | Orléans |
+    Then the club "U.S. Orléans.Echecs" is not created

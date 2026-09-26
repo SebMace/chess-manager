@@ -24,6 +24,7 @@ public class CreateClubSteps {
     private final CreateClub createClub = new CreateClub(clubs, () -> new ClubId(CREATED_CLUB_ID));
     private final Map<String, ClubId> createdClubs = new HashMap<>();
     private final Map<String, CommitteeCode> committees = new HashMap<>();
+    private final Map<String, IllegalArgumentException> refusals = new HashMap<>();
 
     @Given("{string} is a departmental committee of the FFE")
     public void departmentalCommittee(String name) { committees.put(name, new CommitteeCode("45")); }
@@ -31,10 +32,21 @@ public class CreateClubSteps {
     @When("an administrator creates the club {string} with:")
     public void createClubWith(String name, DataTable information) {
         Map<String, String> club = information.asMap();
-        createdClubs.put(name, createClub.execute(name,
-                committees.get(club.get("departmental committee")),
-                new FfeClubId(club.get("FFE identifier")),
-                club.get("commune")));
+        String ffeIdentifier = club.get("FFE identifier");
+        try {
+            createdClubs.put(name, createClub.execute(name,
+                    committees.get(club.get("departmental committee")),
+                    ffeIdentifier == null ? null : new FfeClubId(ffeIdentifier),
+                    club.get("commune")));
+        } catch (IllegalArgumentException refusal) {
+            refusals.put(name, refusal);
+        }
+    }
+
+    @Then("the club {string} is not created")
+    public void clubIsNotCreated(String name) {
+        assertNotNull(refusals.get(name), "the creation should have been refused");
+        assertNull(createdClubs.get(name));
     }
 
     @Then("the FFE identifier of {string} is {string}")
