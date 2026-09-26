@@ -25,7 +25,7 @@ public final class Club {
     public Club(ClubId id, String name, boolean managedByApplication, CommitteeCode committee,
                 FfeClubId ffeClubId, String commune) {
         if (id == null) throw new IllegalArgumentException("clubId cannot be null");
-        if (commune == null) throw new IllegalArgumentException("A club cannot exist without its commune");
+        if (commune == null || commune.isBlank()) throw new IllegalArgumentException("A club cannot exist without its commune");
         this.id = id;
         this.name = name;
         this.managedByApplication = managedByApplication;
