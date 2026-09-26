@@ -1,6 +1,9 @@
 package domain.club;
 
 import domain.club.vo.ClubId;
+import domain.club.vo.CommitteeCode;
+
+import java.util.Optional;
 
 public final class Club {
     private final ClubId id;
@@ -21,6 +24,7 @@ public final class Club {
     public ClubId id() { return id; }
     public String name() { return name; }
     public boolean managedByApplication() { return managedByApplication; }
+    public Optional<CommitteeCode> committee() { return Optional.empty(); }
 
     @Override
     public boolean equals(Object other) {
