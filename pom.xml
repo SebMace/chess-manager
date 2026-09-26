@@ -157,9 +157,13 @@
                 <version>${pitest.version}</version>
                 <configuration>
                     <targetClasses>
-                        <param>domain.*</param>
-                        <param>application.*</param>
+                        <param>clubmanagement.*</param>
                     </targetClasses>
+                    <excludedClasses>
+                        <param>clubmanagement.*.rest.*</param>
+                        <param>clubmanagement.persistence.*</param>
+                        <param>clubmanagement.insee.*</param>
+                    </excludedClasses>
                     <targetTests>
                         <param>*Tests</param>
                     </targetTests>
@@ -169,7 +173,8 @@
                         <param>acceptance.*</param>
                         <param>architecture.*</param>
                         <param>endtoend.*</param>
-                        <param>adapters.*</param>
+                        <param>clubmanagement.persistence.*</param>
+                        <param>clubmanagement.insee.*</param>
                     </excludedTestClasses>
                     <timestampedReports>false</timestampedReports>
                     <outputFormats>

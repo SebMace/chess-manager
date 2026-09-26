@@ -1,10 +1,10 @@
 package acceptance.steps;
 
 import acceptance.support.ClubManagementDriver;
-import domain.club.RelationshipStatus;
-import domain.club.vo.Season;
-import domain.member.vo.FfeLicense;
-import domain.person.vo.PersonId;
+import clubmanagement.domain.club.RelationshipStatus;
+import clubmanagement.domain.club.vo.Season;
+import clubmanagement.domain.member.vo.FfeLicense;
+import clubmanagement.domain.person.vo.PersonId;
 import java.util.Optional;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;

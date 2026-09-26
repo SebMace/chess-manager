@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CreateClub } from './club/create-club';
+import { CreateClub } from './club-management/create-club/create-club';
 
 @Component({
   imports: [CreateClub],

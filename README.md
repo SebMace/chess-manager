@@ -78,13 +78,14 @@ POST /clubs {"name": "Montargis"}  →  201 Created, Location: /clubs/<id>
 
 | Package | Role |
 |---|---|
-| `adapters.in.rest` | `ClubController` translates the HTTP request into a call to `CreateClub`. |
-| `application.club` | `CreateClub` saves a club managed by the application and returns its `ClubId`. |
-| `adapters.out.persistence` | `JdbcClubRepository` implements `ClubRepository` with SQL through Spring's `JdbcClient`. |
+| `clubmanagement.createclub.rest` | `CreateClubController` translates the HTTP request into a call to `CreateClub`. |
+| `clubmanagement.createclub` | `CreateClub` saves a club managed by the application and returns its `ClubId`. |
+| `clubmanagement.persistence` | `JdbcClubRepository` implements `ClubRepository` with SQL through Spring's `JdbcClient`. |
 | `infrastructure` | `ChessManagerApplication` starts Spring Boot; `ClubConfiguration` wires the objects explicitly. |
 
-`domain` and `application` carry no Spring annotation; Spring objects are declared as
-`@Bean`s in `infrastructure`. In production, `CreateClub` receives random UUIDs.
+The domain, the ports and the use cases carry no Spring annotation; Spring objects are
+declared as `@Bean`s in `infrastructure`. In production, `CreateClub` receives random UUIDs.
+See [Code organization: vertical slices](#code-organization-vertical-slices) for the whole layout.
 
 The database schema is versioned by Flyway in `src/main/resources/db/migration`
 (`V1__create_club_table.sql`). Flyway applies the missing migrations, in order, when the
@@ -126,10 +127,16 @@ club has been created. It needs Node.js 22.22, 24.15 or 26 and npm.
 
 | File | Role |
 |---|---|
-| `src/app/club/create-club.ts` | `CreateClub` component: the form and the creation outcome. |
-| `src/app/club/clubs.ts` | `Clubs` port: what the club screens need, with no HTTP detail. |
-| `src/app/club/http-clubs.ts` | `HttpClubs` adapter: implements `Clubs` over the REST API. |
-| `src/app/app.config.ts` | Wires `Clubs` to `HttpClubs`. |
+| `src/app/club-management/create-club/create-club.ts` | `CreateClub` component: the form and the creation outcome. |
+| `src/app/club-management/create-club/commune-search.ts` | The communes matching what the administrator types. |
+| `src/app/club-management/ports/clubs.ts` | `Clubs` port: what the club screens need, with no HTTP detail. |
+| `src/app/club-management/ports/communes.ts` | `Communes` port: the communes of a departmental committee. |
+| `src/app/club-management/http/http-clubs.ts` | `HttpClubs` adapter: implements `Clubs` over the REST API. |
+| `src/app/club-management/http/http-communes.ts` | `HttpCommunes` adapter: implements `Communes` over the REST API. |
+| `src/app/app.config.ts` | Wires `Clubs` to `HttpClubs` and `Communes` to `HttpCommunes`. |
+
+As in the back-end, each slice has its own folder named after its use case (`create-club`);
+the ports and their HTTP adapters are shared by the slices of Club Management.
 
 The front-end holds no business rule; they stay in the back-end.
 
@@ -165,9 +172,36 @@ invented federation-specific format. Invalid license requests preserve saved sta
 A valid license can replace the pair recorded for the same season, as in the previous
 model; restrictions on changing an FFE identifier have not been specified.
 
-The existing value objects remain in `domain/member/vo` to limit package movement.
+The existing value objects remain in `clubmanagement/domain/member/vo` to limit package movement.
 The former `Member` entity and `MemberId` have been replaced by `Person` and `PersonId`;
 license and affiliation behavior now belongs to club relationships.
+
+## Code organization: vertical slices
+
+The back-end is organized by vertical slice inside the Club Management bounded context.
+A slice is one use case, named after it, with its refusals and its inbound adapter:
+
+```
+clubmanagement/
+  domain/                  shared model: Club, ClubRelationship, Person, value objects
+  ports/                   shared ports: ClubRepository, ClubRelationshipRepository, Communes, PersonRepository
+  createclub/              CreateClub, its refusals, rest/CreateClubController
+  communesofcommittee/     CommunesOfCommittee, rest/CommunesOfCommitteeController
+  isexternalplayer/        IsExternalPlayer
+  recordperson/            RecordPerson
+  registerlicense/         RegisterLicense
+  registerpartnership/     RegisterPartnership
+  registerprospect/        RegisterProspect
+  updateperson/            UpdatePerson
+  persistence/             JdbcClubRepository, shared: it persists the Club aggregate
+  insee/                   InseeCommunes, shared: the INSEE communes reference
+infrastructure/            Spring Boot application, explicit wiring, development data
+```
+
+The domain model and the ports stay shared: an aggregate has one model, never one per
+slice. Unit tests live in the package of what they test; the in-memory fakes live beside
+the ports. Acceptance, architecture, end-to-end and infrastructure tests are
+cross-cutting. ArchUnit enforces these boundaries (see below).
 
 ## Acceptance specifications and Cucumber
 
@@ -309,10 +343,11 @@ and [Java coverage documentation](https://docs.sonarsource.com/sonarqube-cloud/e
 
 PIT 1.25.9, with its JUnit 5 plugin 1.2.3, checks whether tests detect small
 changes to production bytecode. Source files are not rewritten. It mutates every
-class in `domain` and `application` and runs every JUnit `*Tests` class against them,
-excluding `acceptance` (Cucumber repeats the use-case tests more slowly),
-`architecture` (ArchUnit checks dependencies, not behavior), and `adapters` and
-`endtoend` (they start PostgreSQL, too slowly to run for each mutation).
+class in `clubmanagement` except the adapters (`rest`, `persistence`, `insee`) and runs
+every JUnit `*Tests` class against them, excluding `acceptance` (Cucumber repeats the
+use-case tests more slowly), `architecture` (ArchUnit checks dependencies, not behavior),
+and the adapter and `endtoend` tests (they start PostgreSQL, too slowly to run for each
+mutation).
 
 With Maven running on Java 26:
 
@@ -350,27 +385,29 @@ and the [JUnit 5 plugin](https://github.com/pitest/pitest-junit5-plugin).
 ## Architecture tests with ArchUnit
 
 ArchUnit 1.4.2 runs through JUnit Jupiter as a test-only dependency.
-`architecture.DomainDependencyTests` checks that production classes in `domain..`
-do not depend on classes in `application..`, `infrastructure..`, `infra..` or
-`adapters..`. The `..` pattern includes subpackages. A second rule checks that
-`domain..` and `application..` do not depend on `org.springframework..`,
-`adapters..` or `infrastructure..`: the hexagon's core stays free of the framework
-and of the adapters around it.
+`architecture.ArchitectureTests` holds three rules over the production classes of
+`clubmanagement` (the `..` pattern includes subpackages):
+
+- `clubmanagement.domain..` depends on no other part of the context (slices, ports,
+  adapters) nor on `infrastructure..`;
+- outside the adapters (`..rest..`, `clubmanagement.persistence..`,
+  `clubmanagement.insee..`), no class depends on `org.springframework..`, on
+  `infrastructure..` or on an adapter: the hexagon's core stays free of the framework
+  and of the adapters around it;
+- the slices (`clubmanagement.(*)..`) do not depend on each other; they may all depend
+  on the shared `clubmanagement.domain` and `clubmanagement.ports`.
 
 The rules import compiled production classes, excluding test classes, and check
-dependencies such as field types, method signatures, annotations and calls. Application
-classes may depend on the domain; the reverse direction is forbidden.
+dependencies such as field types, method signatures, annotations and calls.
 
 Run the architecture rules with Maven on Java 26:
 
 ```sh
-mvn -Dtest=architecture.DomainDependencyTests test
+mvn -Dtest=architecture.ArchitectureTests test
 ```
 
 It also runs automatically with `mvn test` and `mvn verify`. Results appear in
-`target/surefire-reports`. These rules protect the named package boundaries; they
-do not yet enforce every hexagonal rule (for instance, between inbound and outbound
-adapters). Update the package patterns if the project's root packages change.
+`target/surefire-reports`. Update the adapter package patterns when an adapter is added.
 
 See the [ArchUnit user guide](https://www.archunit.org/userguide/html/000_Index.html).
 

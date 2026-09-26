@@ -1,6 +1,6 @@
 package infrastructure;
 
-import application.club.CreateClub;
+import clubmanagement.createclub.CreateClub;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;

@@ -1,0 +1,44 @@
+package clubmanagement.registerprospect;
+
+import clubmanagement.ports.ClubRelationshipRepository;
+import clubmanagement.ports.PersonRepository;
+import clubmanagement.domain.club.ClubRelationship;
+import clubmanagement.domain.club.ClubAffiliations;
+import clubmanagement.domain.club.vo.ClubId;
+import clubmanagement.domain.club.vo.Season;
+import clubmanagement.domain.person.Person;
+import clubmanagement.domain.person.vo.PersonId;
+
+import java.util.function.Supplier;
+
+/**
+ * Use case RegisterProspect
+ */
+public class RegisterProspect {
+    private final PersonRepository people;
+    private final ClubRelationshipRepository relationships;
+    private final Season currentSeason;
+    private final Supplier<PersonId> identities;
+
+    public RegisterProspect(PersonRepository people, ClubRelationshipRepository relationships,
+                            Season currentSeason, Supplier<PersonId> identities) {
+        this.people = people;
+        this.relationships = relationships;
+        this.currentSeason = currentSeason;
+        this.identities = identities;
+    }
+
+    public PersonId execute(ClubId clubId, String firstName, String lastName, String email) {
+        PersonId id = identities.get();
+        ClubRelationship relationship = new ClubRelationship(id, clubId);
+        people.save(new Person(id, firstName, lastName, email));
+        relationships.save(relationship);
+        return id;
+    }
+
+    public void execute(PersonId personId, ClubId clubId) {
+        people.find(personId).orElseThrow();
+        new ClubAffiliations(relationships.findByPerson(personId)).requireUnlicensed(currentSeason);
+        relationships.save(new ClubRelationship(personId, clubId));
+    }
+}
