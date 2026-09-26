@@ -4,6 +4,15 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { CreateClub } from './create-club';
 import { Clubs } from './clubs';
 import { HttpClubs } from './http-clubs';
+import { Commune, Communes } from '../commune/communes';
+import { HttpCommunes } from '../commune/http-communes';
+
+const LOIRET: Commune[] = [
+  { code: '45234', name: 'Orléans' },
+  { code: '45232', name: 'Olivet' },
+  { code: '45298', name: 'Saint-Pryvé-Saint-Mesmin' },
+  { code: '45188', name: 'Loury' },
+];
 
 describe('CreateClub', () => {
   let fixture: ComponentFixture<CreateClub>;
@@ -12,7 +21,12 @@ describe('CreateClub', () => {
 
   beforeEach(async () => {
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting(), { provide: Clubs, useClass: HttpClubs }],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: Clubs, useClass: HttpClubs },
+        { provide: Communes, useClass: HttpCommunes },
+      ],
     });
     fixture = TestBed.createComponent(CreateClub);
     server = TestBed.inject(HttpTestingController);
@@ -35,6 +49,17 @@ describe('CreateClub', () => {
     await fixture.whenStable();
 
     expect(page.textContent).toContain('Le club U.S. Orléans.Echecs a été créé.');
+  });
+
+  it('offers the communes of the department of the committee that start with the letters typed', async () => {
+    fill(fieldLabelled(page, 'Code du comité'), '45');
+    fill(fieldLabelled(page, 'Commune'), 'Ol');
+
+    server.expectOne(request => request.method === 'GET' && request.url === '/communes'
+      && request.params.get('committee') === '45').flush(LOIRET);
+    await fixture.whenStable();
+
+    expect(offeredCommunes(page)).toEqual(['Olivet']);
   });
 
   it('tells the administrator that the club could not be created', async () => {
@@ -138,6 +163,10 @@ function createClub(page: HTMLElement, fields: Record<string, string>): void {
 
 function createValidClub(page: HTMLElement, name: string): void {
   createClub(page, { 'Nom du club': name, 'Code du comité': '45', 'Identifiant FFE': 'G45001', 'Commune': 'Orléans' });
+}
+
+function offeredCommunes(page: HTMLElement): string[] {
+  return Array.from(page.querySelectorAll('[role="option"]')).map(option => option.textContent?.trim() ?? '');
 }
 
 function fill(field: HTMLInputElement, value: string): void {
