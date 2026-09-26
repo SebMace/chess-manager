@@ -18,7 +18,7 @@ public class CreateClub {
 
     public ClubId execute(String name, CommitteeCode committee, FfeClubId ffeClubId, String commune) {
         if (ffeClubId == null) throw new IllegalArgumentException("A club cannot be created without its FFE identifier");
-        if (commune == null) throw new IllegalArgumentException("A club cannot be created without its commune");
+        if (commune == null || commune.isBlank()) throw new IllegalArgumentException("A club cannot be created without its commune");
         if (clubs.existsWithFfeClubId(ffeClubId)) throw new FfeClubIdAlreadyUsed(ffeClubId);
         ClubId id = newClubId.get();
         clubs.save(new Club(id, name, true, committee, ffeClubId, commune));
