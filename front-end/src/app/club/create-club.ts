@@ -1,6 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { Clubs, FfeClubIdAlreadyUsed, NewClub } from './clubs';
 import { Commune, Communes } from '../commune/communes';
+import { communesMatching } from '../commune/commune-search';
 
 const REQUIRED_INFORMATION = ['committeeCode', 'ffeClubId', 'communeCode'] as const satisfies readonly (keyof NewClub)[];
 type RequiredInformation = (typeof REQUIRED_INFORMATION)[number];
@@ -109,10 +110,7 @@ export class CreateClub {
   private committeeOfCommunes = '';
   private readonly typedCommune = signal('');
   protected readonly chosenCommune = signal<Commune | null>(null);
-  protected readonly offeredCommunes = computed(() => {
-    const typed = this.typedCommune().toLowerCase();
-    return typed ? this.communesOfCommittee().filter(commune => commune.name.toLowerCase().startsWith(typed)) : [];
-  });
+  protected readonly offeredCommunes = computed(() => communesMatching(this.communesOfCommittee(), this.typedCommune()));
 
   protected chooseCommune(commune: Commune, field: HTMLInputElement): void {
     this.chosenCommune.set(commune);
