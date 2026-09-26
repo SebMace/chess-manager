@@ -1,8 +1,8 @@
 package application;
 
-import application.club.CreateClub;
-import application.club.CommuneNotInCommitteeDepartment;
-import application.club.FfeClubIdAlreadyUsed;
+import clubmanagement.createclub.CreateClub;
+import clubmanagement.createclub.CommuneNotInCommitteeDepartment;
+import clubmanagement.createclub.FfeClubIdAlreadyUsed;
 import club.InMemoryClubRepository;
 import commune.InMemoryCommunes;
 import clubmanagement.domain.club.Club;

@@ -1,4 +1,4 @@
-package application.club;
+package clubmanagement.createclub;
 
 import clubmanagement.domain.club.vo.CommitteeCode;
 import clubmanagement.domain.commune.CommuneCode;

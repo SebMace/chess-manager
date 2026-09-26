@@ -1,8 +1,8 @@
-package adapters.in.rest;
+package clubmanagement.createclub.rest;
 
-import application.club.CommuneNotInCommitteeDepartment;
-import application.club.CreateClub;
-import application.club.FfeClubIdAlreadyUsed;
+import clubmanagement.createclub.CommuneNotInCommitteeDepartment;
+import clubmanagement.createclub.CreateClub;
+import clubmanagement.createclub.FfeClubIdAlreadyUsed;
 import clubmanagement.domain.club.vo.ClubId;
 import clubmanagement.domain.club.vo.CommitteeCode;
 import clubmanagement.domain.club.vo.FfeClubId;
@@ -18,10 +18,10 @@ import org.springframework.web.bind.annotation.RestController;
 import java.net.URI;
 
 @RestController
-public class ClubController {
+public class CreateClubController {
     private final CreateClub createClub;
 
-    public ClubController(CreateClub createClub) {
+    public CreateClubController(CreateClub createClub) {
         this.createClub = createClub;
     }
 

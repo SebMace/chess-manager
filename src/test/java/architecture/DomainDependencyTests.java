@@ -26,11 +26,12 @@ class DomainDependencyTests {
     void core_should_not_depend_on_frameworks_or_adapters() {
         JavaClasses coreClasses = new ClassFileImporter()
                 .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)
-                .importPackages("clubmanagement.domain", "clubmanagement.ports", "application");
+                .importPackages("clubmanagement", "application");
 
-        noClasses().that().resideInAnyPackage("clubmanagement.domain..", "clubmanagement.ports..", "application..")
+        noClasses().that().resideInAnyPackage("clubmanagement..", "application..")
+                .and().resideOutsideOfPackage("..rest..")
                 .should().dependOnClassesThat()
-                .resideInAnyPackage("org.springframework..", "adapters..", "infrastructure..")
+                .resideInAnyPackage("org.springframework..", "adapters..", "infrastructure..", "..rest..")
                 .because("the hexagon's core must not know about Spring or about the adapters around it")
                 .check(coreClasses);
     }

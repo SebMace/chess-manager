@@ -1,12 +1,12 @@
 package infrastructure;
 
-import adapters.in.rest.ClubController;
+import clubmanagement.createclub.rest.CreateClubController;
 import adapters.in.rest.CommuneController;
 import adapters.out.insee.InseeCommunes;
 import adapters.out.persistence.JdbcClubRepository;
 import clubmanagement.ports.ClubRepository;
 import application.club.CommunesOfCommittee;
-import application.club.CreateClub;
+import clubmanagement.createclub.CreateClub;
 import clubmanagement.ports.Communes;
 import clubmanagement.domain.club.vo.ClubId;
 import org.springframework.context.annotation.Bean;
@@ -33,8 +33,8 @@ class ClubConfiguration {
     }
 
     @Bean
-    ClubController clubController(CreateClub createClub) {
-        return new ClubController(createClub);
+    CreateClubController createClubController(CreateClub createClub) {
+        return new CreateClubController(createClub);
     }
 
     @Bean
