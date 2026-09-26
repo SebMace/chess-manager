@@ -6,8 +6,13 @@ export function communesMatching(communes: readonly Commune[], typed: string): C
   if (typedWords.length === 0) return [];
   return communes.filter(commune => {
     const nameWords = words(commune.name);
-    return typedWords.every(typedWord => nameWords.some(word => word.startsWith(typedWord)));
+    return typedWords.every(typedWord => nameWords.some(word => begins(word, typedWord)));
   });
+}
+
+// "St" is the usual abbreviation of "Saint", yet it may also begin a word such as "Strasbourg".
+function begins(word: string, typedWord: string): boolean {
+  return word.startsWith(typedWord) || (typedWord === 'st' && word === 'saint');
 }
 
 function words(text: string): string[] {
