@@ -3,6 +3,7 @@ package adapters.out.persistence;
 import domain.club.Club;
 import domain.club.vo.ClubId;
 import domain.club.vo.CommitteeCode;
+import domain.club.vo.FfeClubId;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -52,6 +53,18 @@ class JdbcClubRepositoryTests {
         clubs.save(new Club(orleans, "U.S. Orléans.Echecs", true, new CommitteeCode("45")));
 
         assertEquals(Optional.of(new CommitteeCode("45")), clubs.find(orleans).orElseThrow().committee());
+    }
+
+    @Test
+    void should_find_a_saved_club_with_its_ffe_identity() {
+        JdbcClubRepository clubs = new JdbcClubRepository(JdbcClient.create(dataSource));
+        ClubId orleans = new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000008"));
+
+        clubs.save(new Club(orleans, "U.S. Orléans.Echecs", true, new CommitteeCode("45"), new FfeClubId("G45001"), "Orléans"));
+
+        Club club = clubs.find(orleans).orElseThrow();
+        assertEquals(Optional.of(new FfeClubId("G45001")), club.ffeClubId());
+        assertEquals(Optional.of("Orléans"), club.commune());
     }
 
     @Test
