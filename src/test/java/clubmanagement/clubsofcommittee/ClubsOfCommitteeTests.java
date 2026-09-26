@@ -38,4 +38,21 @@ class ClubsOfCommitteeTests {
 
         assertEquals(List.of(new ClubOfCommittee("Cercle fictif d'Olivet", "Olivet", new FfeClubId("G45998"))), found);
     }
+
+    @Test
+    void should_list_the_clubs_in_the_order_of_their_names_whatever_their_accents_and_capitals() {
+        save("00000000-0000-0000-0000-000000000003", "U.S. Orléans.Echecs", "G45001");
+        save("00000000-0000-0000-0000-000000000004", "échiquier fictif d'Olivet", "G45998");
+        save("00000000-0000-0000-0000-000000000005", "Cercle fictif de Montargis", "G45997");
+
+        List<ClubOfCommittee> found = clubsOfCommittee.execute(new CommitteeCode("45"));
+
+        assertEquals(List.of("Cercle fictif de Montargis", "échiquier fictif d'Olivet", "U.S. Orléans.Echecs"),
+                found.stream().map(ClubOfCommittee::name).toList());
+    }
+
+    private void save(String id, String name, String ffeClubId) {
+        clubs.save(new Club(new ClubId(UUID.fromString(id)), name, true, new CommitteeCode("45"),
+                new FfeClubId(ffeClubId), InMemoryCommunes.ORLEANS.code(), OFFICE, OFFICE));
+    }
 }

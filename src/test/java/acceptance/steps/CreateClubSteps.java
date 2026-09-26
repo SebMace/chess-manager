@@ -94,6 +94,11 @@ public class CreateClubSteps {
         assertTrue(consultedClubs.contains(new ClubOfCommittee(name, commune, new FfeClubId(ffeIdentifier))));
     }
 
+    @Then("the administrator is shown the clubs in this order:")
+    public void clubsShownInOrder(List<String> names) {
+        assertEquals(names, consultedClubs.stream().map(ClubOfCommittee::name).toList());
+    }
+
     @Then("the administrator is not shown the club {string}")
     public void clubNotShown(String name) {
         assertTrue(consultedClubs.stream().noneMatch(club -> club.name().equals(name)));
