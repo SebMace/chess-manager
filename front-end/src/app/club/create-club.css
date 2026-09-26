@@ -1,0 +1,147 @@
+.card {
+  background: var(--ivory);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 12px 32px rgb(59 42 32 / 0.12);
+  padding: 1.75rem;
+}
+
+h2 {
+  margin: 0 0 1.25rem;
+  font-size: 1.5rem;
+  color: var(--walnut-deep);
+}
+
+fieldset {
+  margin: 0;
+  padding: 1.25rem 1.25rem 1.5rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+legend {
+  padding: 0 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--walnut);
+}
+
+.fields {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem 1.25rem;
+}
+
+@media (min-width: 40rem) {
+  .fields {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .field--wide {
+    grid-column: 1 / -1;
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+label {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+label.required::after {
+  content: " *";
+  color: var(--danger);
+}
+
+input {
+  font: inherit;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #cdbfa9;
+  border-radius: 6px;
+  background: #fff;
+  color: var(--ink);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+input::placeholder {
+  color: #a89a8b;
+}
+
+input:focus-visible {
+  outline: none;
+  border-color: var(--focus);
+  box-shadow: 0 0 0 3px rgb(181 136 99 / 0.35);
+}
+
+input[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+
+.field-error {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--danger);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+
+button {
+  font: inherit;
+  font-weight: 600;
+  padding: 0.7rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  background: var(--walnut);
+  color: var(--ivory);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+button:hover {
+  background: var(--walnut-deep);
+}
+
+button:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+@media (max-width: 39.99rem) {
+  .card {
+    padding: 1.25rem;
+  }
+
+  button {
+    width: 100%;
+  }
+}
+
+.notice {
+  margin: 1.25rem 0 0;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  border-left: 4px solid;
+}
+
+.notice--success {
+  background: var(--success-bg);
+  border-color: var(--success);
+  color: var(--success);
+}
+
+.notice--failure {
+  background: var(--danger-bg);
+  border-color: var(--danger);
+  color: var(--danger);
+}
