@@ -29,6 +29,7 @@ public final class Club {
                 FfeClubId ffeClubId, CommuneCode commune, PostalAddress registeredOffice) {
         if (id == null) throw new IllegalArgumentException("clubId cannot be null");
         if (commune == null) throw new IllegalArgumentException("A club cannot exist without its commune");
+        if (registeredOffice == null) throw new IllegalArgumentException("A club cannot exist without its registered office");
         this.id = id;
         this.name = name;
         this.managedByApplication = managedByApplication;
