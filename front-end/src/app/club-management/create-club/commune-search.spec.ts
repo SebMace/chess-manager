@@ -1,4 +1,4 @@
-import { Commune } from '../club-management/ports/communes';
+import { Commune } from '../ports/communes';
 import { communesMatching } from './commune-search';
 
 const ORLEANS: Commune = { code: '45234', name: 'Orléans' };

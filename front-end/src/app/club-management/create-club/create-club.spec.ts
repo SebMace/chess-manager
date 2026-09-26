@@ -2,10 +2,10 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { CreateClub } from './create-club';
-import { Clubs } from '../club-management/ports/clubs';
-import { HttpClubs } from '../club-management/http/http-clubs';
-import { Commune, Communes } from '../club-management/ports/communes';
-import { HttpCommunes } from '../club-management/http/http-communes';
+import { Clubs } from '../ports/clubs';
+import { HttpClubs } from '../http/http-clubs';
+import { Commune, Communes } from '../ports/communes';
+import { HttpCommunes } from '../http/http-communes';
 
 const REGISTERED_OFFICE = { 'Numéro et voie': '12 rue des Échecs', 'Code postal': '45000', 'Localité': 'Orléans' };
 

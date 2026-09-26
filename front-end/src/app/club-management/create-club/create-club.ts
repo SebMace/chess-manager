@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { Clubs, FfeClubIdAlreadyUsed, NewClub } from '../club-management/ports/clubs';
-import { Commune, Communes } from '../club-management/ports/communes';
-import { communesMatching } from '../commune/commune-search';
+import { Clubs, FfeClubIdAlreadyUsed, NewClub } from '../ports/clubs';
+import { Commune, Communes } from '../ports/communes';
+import { communesMatching } from './commune-search';
 
 const REQUIRED_INFORMATION = [
   'committeeCode',
