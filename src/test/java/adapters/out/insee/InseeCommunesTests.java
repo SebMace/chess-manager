@@ -5,6 +5,7 @@ import domain.commune.CommuneCode;
 import domain.commune.DepartmentCode;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -27,5 +28,14 @@ class InseeCommunesTests {
     @Test
     void should_find_nothing_for_an_unknown_code() {
         assertEquals(Optional.empty(), communes.find(new CommuneCode("99999")));
+    }
+
+    @Test
+    void should_list_the_communes_of_a_department() {
+        List<Commune> loiret = communes.inDepartment(new DepartmentCode("45"));
+
+        assertEquals(325, loiret.size());
+        assertTrue(loiret.contains(new Commune(new CommuneCode("45232"), "Olivet", new DepartmentCode("45"))));
+        assertTrue(loiret.stream().allMatch(commune -> commune.isIn(new DepartmentCode("45"))));
     }
 }

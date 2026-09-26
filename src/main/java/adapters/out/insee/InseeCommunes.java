@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -49,5 +50,10 @@ public class InseeCommunes implements Communes {
     @Override
     public Optional<Commune> find(CommuneCode code) {
         return Optional.ofNullable(communes.get(code));
+    }
+
+    @Override
+    public List<Commune> inDepartment(DepartmentCode department) {
+        return List.of();
     }
 }

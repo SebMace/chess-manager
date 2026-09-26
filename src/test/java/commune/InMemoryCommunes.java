@@ -5,6 +5,7 @@ import domain.commune.Commune;
 import domain.commune.CommuneCode;
 import domain.commune.DepartmentCode;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -30,5 +31,10 @@ public class InMemoryCommunes implements Communes {
 
     private static Commune loiret(String code, String name) {
         return new Commune(new CommuneCode(code), name, new DepartmentCode("45"));
+    }
+
+    @Override
+    public List<Commune> inDepartment(DepartmentCode department) {
+        return List.of();
     }
 }
