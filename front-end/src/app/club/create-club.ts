@@ -93,7 +93,9 @@ type CreationOutcome =
                 }
               </ul>
               @if (missing().has('communeCode')) {
-                <p id="commune-error" class="field-error">La commune est obligatoire.</p>
+                <p id="commune-error" class="field-error">
+                  {{ communeWritten() ? 'Choisissez la commune parmi celles proposées.' : 'La commune est obligatoire.' }}
+                </p>
               }
             </div>
           </div>
@@ -125,6 +127,7 @@ export class CreateClub {
   private readonly typedCommune = signal('');
   protected readonly chosenCommune = signal<Commune | null>(null);
   protected readonly activeCommune = signal(-1);
+  protected readonly communeWritten = signal(false);
   protected readonly offeredCommunes = computed(() => communesMatching(this.communesOfCommittee(), this.typedCommune()));
 
   protected browseCommunes(event: KeyboardEvent, field: HTMLInputElement): void {
@@ -154,6 +157,7 @@ export class CreateClub {
 
   protected typeCommune(typed: string, committeeCode: string): void {
     this.chosenCommune.set(null);
+    this.communeWritten.set(typed.trim().length > 0);
     this.typedCommune.set(typed);
     this.activeCommune.set(-1);
     if (!committeeCode || committeeCode === this.committeeOfCommunes) return;
