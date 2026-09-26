@@ -26,7 +26,7 @@ public class CreateClub {
         ClubId id = newClubId.get();
         Club club = new Club(id, name, true, committee, ffeClubId, commune);
         boolean inCommitteeDepartment = communes.find(commune)
-                .filter(found -> found.department().equals(committee.department()))
+                .filter(found -> found.isIn(committee.department()))
                 .isPresent();
         if (!inCommitteeDepartment) throw new CommuneNotInCommitteeDepartment(commune, committee);
         clubs.save(club);
