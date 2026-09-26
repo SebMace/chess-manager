@@ -54,6 +54,16 @@ class CreateClubTests {
     }
 
     @Test
+    void should_refuse_a_club_with_a_blank_commune() {
+        CreateClub createClub = new CreateClub(clubs, () -> clubId);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> createClub.execute("U.S. Orléans.Echecs", new CommitteeCode("45"), new FfeClubId("G45001"), "   "));
+
+        assertTrue(clubs.find(clubId).isEmpty());
+    }
+
+    @Test
     void should_refuse_a_second_club_with_the_same_ffe_identifier() {
         ClubId secondId = new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000003"));
         new CreateClub(clubs, () -> clubId).execute("U.S. Orléans.Echecs", new CommitteeCode("45"), new FfeClubId("G45001"), "Orléans");
