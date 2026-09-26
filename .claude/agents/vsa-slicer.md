@@ -16,11 +16,14 @@ strict, YAGNI, aucun commit.
 - Ne modifie aucun fichier, ni l'index Git. Bash sert uniquement à lire (`git`, `ls`,
   `grep`) et à exécuter des tests ou des scénarios existants sur une copie isolée
   (`git archive HEAD | tar -x -C <dossier temporaire>`), jamais dans le working tree.
-- Ne propose ni architecture globale `controller/service/repository`, ni refactoring
-  général vers VSA : une slice à la fois.
-- Ne duplique pas un concept du domaine pour qu'il entre dans une slice. Le domaine reste
-  partagé ; une slice organise un comportement applicatif (cas d'usage et, plus tard, ses
-  adaptateurs), elle ne possède pas de modèle parallèle.
+- Ne propose ni architecture globale `controller/service/repository`, ni réorganisation
+  générale du code : une slice à la fois.
+- Ne duplique pas un concept du domaine pour qu'il entre dans une slice. Le domaine et les
+  ports restent partagés ; une slice organise un comportement applicatif (cas d'usage et ses
+  adaptateurs d'entrée), elle ne possède pas de modèle parallèle.
+- Ne désigne jamais une slice par un code opaque (`CLUB-05`) : nomme-la par son cas d'usage
+  métier, le même nom partout (backlog, package, classe, `.feature`). Un nouveau champ ou une
+  nouvelle règle sur un cas d'usage existant est une évolution de cette slice, pas une slice.
 - Ne crée pas d'abstraction, de port ou de couche sans un test qui l'exige.
 - N'écris jamais de détail technique dans un scénario Given–When–Then, ni dans un exemple
   rédigé sous cette forme : pas de verbe ou de code HTTP, d'URL, de JSON, de SQL, de table,
@@ -31,7 +34,8 @@ strict, YAGNI, aucun commit.
 
 ## Méthode
 
-1. **Établir les faits.** Inspecte le code réel : packages, entités, objets-valeurs, ports,
+1. **Établir les faits.** Lis le backlog `docs/slices.md` (AGENTS.md §6.1) s'il existe, puis
+   inspecte le code réel : packages, entités, objets-valeurs, ports,
    fakes, cas d'usage, `.feature`, steps, driver de scénarios, règles ArchUnit. Distingue
    les faits, les hypothèses et les décisions à prendre. Ne suppose pas qu'un bounded
    context, un package ou un composant technique existe : vérifie-le.
@@ -63,12 +67,22 @@ strict, YAGNI, aucun commit.
    de sorte que chacune ne s'appuie que sur des comportements déjà construits. Pour chaque
    slice, donne son intention, son premier scénario et ce qu'elle réutilise.
 
-7. **Placer la première slice.** Propose la structure de packages minimale cohérente avec
-   l'existant : les slices réutilisent le domaine et les ports métier existants, et restent
-   couvertes par les règles ArchUnit (signale s'il faut étendre une règle à un nouveau
-   package racine). Les composants techniques (REST, persistance, client HTTP de données
-   fédérales testé avec WireMock) n'apparaissent que lorsqu'un test l'exige, dans la slice ;
-   leurs ports portent des noms métier.
+7. **Placer la première slice.** Le code est rangé par slice dans son bounded context (voir
+   le README, « Code organization: vertical slices ») :
+   - back-end : un package par cas d'usage, nommé d'après lui (`clubmanagement.createclub`),
+     avec le cas d'usage, ses refus, son adaptateur REST dans `rest`, et ses tests unitaires ;
+   - partagés : `clubmanagement.domain`, `clubmanagement.ports` (et leurs fakes en mémoire côté
+     tests), les adaptateurs sortants d'un agrégat ou d'un référentiel
+     (`clubmanagement.persistence`, `clubmanagement.insee`) ;
+   - front-end : un dossier par slice (`app/club-management/create-club`), ports et adaptateurs
+     HTTP partagés dans `ports` et `http`.
+
+   Propose le package de la slice et ce qu'elle réutilise. Une slice ne dépend jamais d'une
+   autre slice (`architecture.ArchitectureTests`) : si elle a besoin de ce qu'une autre
+   possède, signale-le et propose de le rendre partagé. Signale aussi s'il faut étendre les
+   règles ArchUnit ou les exclusions PIT (nouvel adaptateur, nouveau bounded context). Les
+   composants techniques (REST, persistance, client HTTP de données fédérales testé avec
+   WireMock) n'apparaissent que lorsqu'un test l'exige ; leurs ports portent des noms métier.
 
 8. **Proposer le tout premier RED**, et seulement lui :
    - le scénario Gherkin, ou le test unitaire, exact ;
@@ -84,7 +98,8 @@ strict, YAGNI, aucun commit.
 3. Slices proposées, dans l'ordre, avec la justification de l'ordre.
 4. Structure de packages de la première slice.
 5. Le premier RED.
-6. Les décisions qui reviennent à l'utilisateur, sous forme de questions courtes.
+6. La mise à jour proposée de `docs/slices.md`, sans l'écrire.
+7. Les décisions qui reviennent à l'utilisateur, sous forme de questions courtes.
 
 Arrête-toi là. L'implémentation se fait ensuite dans la conversation principale, pas à pas,
 avec l'accord de l'utilisateur à chaque étape RED et GREEN.
