@@ -38,7 +38,7 @@ class JdbcClubRepositoryTests {
     void should_find_a_saved_club_managed_by_the_application() {
         JdbcClubRepository clubs = new JdbcClubRepository(JdbcClient.create(dataSource));
 
-        clubs.save(new Club(montargis, "Montargis", true));
+        clubs.save(new Club(montargis, "Montargis", true, new CommitteeCode("45"), new FfeClubId("G45004"), "Montargis"));
 
         Club club = clubs.find(montargis).orElseThrow();
         assertEquals(montargis, club.id());
@@ -51,7 +51,7 @@ class JdbcClubRepositoryTests {
         JdbcClubRepository clubs = new JdbcClubRepository(JdbcClient.create(dataSource));
         ClubId orleans = new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000007"));
 
-        clubs.save(new Club(orleans, "U.S. Orléans.Echecs", true, new CommitteeCode("45")));
+        clubs.save(new Club(orleans, "U.S. Orléans.Echecs", true, new CommitteeCode("45"), new FfeClubId("G45005"), "Orléans"));
 
         assertEquals(Optional.of(new CommitteeCode("45")), clubs.find(orleans).orElseThrow().committee());
     }

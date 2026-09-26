@@ -44,9 +44,11 @@ public class CreateClubSteps {
         }
     }
 
-    @Given("an administrator has created the club {string} with the FFE identifier {string} in the departmental committee {string}")
-    public void clubCreated(String name, String ffeIdentifier, String committee) {
-        createdClubs.put(name, createClub.execute(name, committees.get(committee), new FfeClubId(ffeIdentifier), null));
+    @Given("an administrator has created the club {string} with:")
+    public void clubCreated(String name, DataTable information) {
+        Map<String, String> club = information.asMap();
+        createdClubs.put(name, createClub.execute(name, committees.get(club.get("departmental committee")),
+                new FfeClubId(club.get("FFE identifier")), club.get("commune")));
     }
 
     @Then("the administrator is told that the FFE identifier {string} is already used")
