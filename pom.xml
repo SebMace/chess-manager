@@ -114,6 +114,12 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <!-- mvn spring-boot:run starts from the demonstration data (see DevelopmentData). -->
+                    <profiles>
+                        <profile>dev</profile>
+                    </profiles>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
