@@ -5,6 +5,8 @@ import clubmanagement.communesofcommittee.rest.CommunesOfCommitteeController;
 import clubmanagement.insee.InseeCommunes;
 import clubmanagement.persistence.JdbcClubRepository;
 import clubmanagement.ports.ClubRepository;
+import clubmanagement.clubsofcommittee.ClubsOfCommittee;
+import clubmanagement.clubsofcommittee.rest.ClubsOfCommitteeController;
 import clubmanagement.communesofcommittee.CommunesOfCommittee;
 import clubmanagement.createclub.CreateClub;
 import clubmanagement.ports.Communes;
@@ -45,5 +47,15 @@ class ClubConfiguration {
     @Bean
     CommunesOfCommitteeController communesOfCommitteeController(CommunesOfCommittee communesOfCommittee) {
         return new CommunesOfCommitteeController(communesOfCommittee);
+    }
+
+    @Bean
+    ClubsOfCommittee clubsOfCommittee(ClubRepository clubs, Communes communes) {
+        return new ClubsOfCommittee(clubs, communes);
+    }
+
+    @Bean
+    ClubsOfCommitteeController clubsOfCommitteeController(ClubsOfCommittee clubsOfCommittee) {
+        return new ClubsOfCommitteeController(clubsOfCommittee);
     }
 }
