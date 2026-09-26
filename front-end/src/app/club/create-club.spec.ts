@@ -76,6 +76,19 @@ describe('CreateClub', () => {
     expect(page.textContent).toContain('Le club U.S. Orléans.Echecs a été créé.');
   });
 
+  it('lets the administrator say that the club plays at its registered office', async () => {
+    fillFields(page, { 'Nom du club': 'U.S. Orléans.Echecs', 'Code du comité': '45', 'Identifiant FFE': 'G45001', ...REGISTERED_OFFICE });
+    await chooseCommune('Orl', 'Orléans');
+    checkboxLabelled(page, 'La salle de jeu est au siège social').click();
+    await fixture.whenStable();
+
+    expect(() => fieldInGroup(page, 'Salle de jeu', 'Numéro et voie')).toThrow();
+    buttonNamed(page, 'Créer le club').click();
+
+    expect(server.expectOne({ method: 'POST', url: '/clubs' }).request.body.playingVenue)
+      .toEqual({ street: '12 rue des Échecs', postcode: '45000', town: 'Orléans' });
+  });
+
   it('offers the communes of the department of the committee that start with the letters typed', async () => {
     fill(fieldLabelled(page, 'Code du comité'), '45');
     fill(fieldLabelled(page, 'Commune'), 'Ol');
@@ -290,6 +303,10 @@ function press(field: HTMLInputElement, key: string): void {
 function fill(field: HTMLInputElement, value: string): void {
   field.value = value;
   field.dispatchEvent(new Event('input'));
+}
+
+function checkboxLabelled(page: HTMLElement, text: string): HTMLInputElement {
+  return fieldLabelled(page, text);
 }
 
 function fieldInGroup(page: HTMLElement, group: string, text: string): HTMLInputElement {
