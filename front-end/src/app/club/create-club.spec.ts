@@ -98,6 +98,14 @@ describe('CreateClub', () => {
     expect(page.textContent).toContain('Le club Montargis a été créé.');
     expect(page.textContent).not.toContain('Le code du comité est obligatoire.');
   });
+
+  it('tells the administrator that the FFE identifier is required', async () => {
+    createClub(page, { 'Nom du club': 'U.S. Orléans.Echecs', 'Code du comité': '45' });
+    await fixture.whenStable();
+
+    server.expectNone({ method: 'POST', url: '/clubs' });
+    expect(page.textContent).toContain("L'identifiant FFE est obligatoire.");
+  });
 });
 
 function createClubWithoutCommittee(page: HTMLElement, name: string): void {
