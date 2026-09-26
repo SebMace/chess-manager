@@ -2,6 +2,7 @@ package application.club;
 
 import domain.club.Club;
 import domain.club.vo.ClubId;
+import domain.club.vo.CommitteeCode;
 
 import java.util.function.Supplier;
 
@@ -14,9 +15,9 @@ public class CreateClub {
         this.newClubId = newClubId;
     }
 
-    public ClubId execute(String name) {
+    public ClubId execute(String name, CommitteeCode committee) {
         ClubId id = newClubId.get();
-        clubs.save(new Club(id, name, true));
+        clubs.save(new Club(id, name, true, committee));
         return id;
     }
 }

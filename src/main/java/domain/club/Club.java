@@ -1,26 +1,36 @@
 package domain.club;
 
 import domain.club.vo.ClubId;
+import domain.club.vo.CommitteeCode;
+
+import java.util.Optional;
 
 public final class Club {
     private final ClubId id;
     private final String name;
     private final boolean managedByApplication;
+    private final CommitteeCode committee;
 
     public Club(ClubId id, String name) {
         this(id, name, false);
     }
 
     public Club(ClubId id, String name, boolean managedByApplication) {
+        this(id, name, managedByApplication, null);
+    }
+
+    public Club(ClubId id, String name, boolean managedByApplication, CommitteeCode committee) {
         if (id == null) throw new IllegalArgumentException("clubId cannot be null");
         this.id = id;
         this.name = name;
         this.managedByApplication = managedByApplication;
+        this.committee = committee;
     }
 
     public ClubId id() { return id; }
     public String name() { return name; }
     public boolean managedByApplication() { return managedByApplication; }
+    public Optional<CommitteeCode> committee() { return Optional.ofNullable(committee); }
 
     @Override
     public boolean equals(Object other) {

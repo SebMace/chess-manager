@@ -3,6 +3,7 @@ package adapters.out.persistence;
 import application.club.ClubRepository;
 import domain.club.Club;
 import domain.club.vo.ClubId;
+import domain.club.vo.CommitteeCode;
 import org.springframework.jdbc.core.simple.JdbcClient;
 
 import java.util.Optional;
@@ -17,21 +18,29 @@ public class JdbcClubRepository implements ClubRepository {
 
     @Override
     public Optional<Club> find(ClubId clubId) {
-        return jdbc.sql("SELECT id, name, managed_by_application FROM club WHERE id = :id")
+        return jdbc.sql("SELECT id, name, managed_by_application, committee_code FROM club WHERE id = :id")
                 .param("id", clubId.clubId())
                 .query((row, rowNumber) -> new Club(
                         new ClubId(row.getObject("id", UUID.class)),
                         row.getString("name"),
-                        row.getBoolean("managed_by_application")))
+                        row.getBoolean("managed_by_application"),
+                        committee(row.getString("committee_code"))))
                 .optional();
     }
 
     @Override
     public void save(Club club) {
-        jdbc.sql("INSERT INTO club (id, name, managed_by_application) VALUES (:id, :name, :managed)")
+        jdbc.sql("""
+                        INSERT INTO club (id, name, managed_by_application, committee_code)
+                        VALUES (:id, :name, :managed, :committee)""")
                 .param("id", club.id().clubId())
                 .param("name", club.name())
                 .param("managed", club.managedByApplication())
+                .param("committee", club.committee().map(CommitteeCode::value).orElse(null))
                 .update();
+    }
+
+    private static CommitteeCode committee(String code) {
+        return code == null ? null : new CommitteeCode(code);
     }
 }

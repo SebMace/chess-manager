@@ -9,9 +9,18 @@ type CreationOutcome =
 @Component({
   selector: 'app-create-club',
   template: `
-    <form (submit)="create($event, clubName.value)">
+    <form (submit)="create($event, clubName.value, committeeCode.value)">
       <label for="club-name">Nom du club</label>
       <input id="club-name" #clubName />
+      <label for="committee-code">Code du comité</label>
+      <input
+        id="committee-code"
+        #committeeCode
+        [attr.aria-describedby]="committeeRequired() ? 'committee-code-error' : null"
+      />
+      @if (committeeRequired()) {
+        <p id="committee-code-error">Le code du comité est obligatoire.</p>
+      }
       <button type="submit">Créer le club</button>
     </form>
     @let result = outcome();
@@ -25,10 +34,16 @@ type CreationOutcome =
 export class CreateClub {
   private readonly clubs = inject(Clubs);
   protected readonly outcome = signal<CreationOutcome>({ kind: 'none' });
+  protected readonly committeeRequired = signal(false);
 
-  protected create(event: Event, name: string): void {
+  protected create(event: Event, name: string, committeeCode: string): void {
     event.preventDefault();
-    this.clubs.create(name).subscribe({
+    if (!committeeCode) {
+      this.committeeRequired.set(true);
+      return;
+    }
+    this.committeeRequired.set(false);
+    this.clubs.create(name, committeeCode).subscribe({
       next: () => this.outcome.set({ kind: 'created', club: name }),
       error: () => this.outcome.set({ kind: 'failed' }),
     });
