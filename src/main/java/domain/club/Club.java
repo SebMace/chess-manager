@@ -16,17 +16,19 @@ public final class Club {
     private final FfeClubId ffeClubId;
     private final CommuneCode commune;
     private final PostalAddress registeredOffice;
+    private final PostalAddress playingVenue;
 
     public Club(ClubId id, String name, CommuneCode commune, PostalAddress registeredOffice) {
         this(id, name, false, commune, registeredOffice);
     }
 
     public Club(ClubId id, String name, boolean managedByApplication, CommuneCode commune, PostalAddress registeredOffice) {
-        this(id, name, managedByApplication, null, null, commune, registeredOffice);
+        this(id, name, managedByApplication, null, null, commune, registeredOffice, null);
     }
 
     public Club(ClubId id, String name, boolean managedByApplication, CommitteeCode committee,
-                FfeClubId ffeClubId, CommuneCode commune, PostalAddress registeredOffice) {
+                FfeClubId ffeClubId, CommuneCode commune, PostalAddress registeredOffice,
+                PostalAddress playingVenue) {
         if (id == null) throw new IllegalArgumentException("clubId cannot be null");
         if (commune == null) throw new IllegalArgumentException("A club cannot exist without its commune");
         if (registeredOffice == null) throw new IllegalArgumentException("A club cannot exist without its registered office");
@@ -37,6 +39,7 @@ public final class Club {
         this.ffeClubId = ffeClubId;
         this.commune = commune;
         this.registeredOffice = registeredOffice;
+        this.playingVenue = playingVenue;
     }
 
     public ClubId id() { return id; }
@@ -46,7 +49,7 @@ public final class Club {
     public Optional<FfeClubId> ffeClubId() { return Optional.ofNullable(ffeClubId); }
     public CommuneCode commune() { return commune; }
     public PostalAddress registeredOffice() { return registeredOffice; }
-    public Optional<PostalAddress> playingVenue() { return Optional.empty(); }
+    public Optional<PostalAddress> playingVenue() { return Optional.ofNullable(playingVenue); }
 
     @Override
     public boolean equals(Object other) {

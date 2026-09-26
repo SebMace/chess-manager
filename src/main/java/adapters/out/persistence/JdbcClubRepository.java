@@ -35,7 +35,8 @@ public class JdbcClubRepository implements ClubRepository {
                         new CommuneCode(row.getString("commune_code")),
                         new PostalAddress(row.getString("registered_office_street"),
                                 row.getString("registered_office_postcode"),
-                                row.getString("registered_office_town"))))
+                                row.getString("registered_office_town")),
+                        null))
                 .optional();
     }
 
