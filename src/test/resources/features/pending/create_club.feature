@@ -5,7 +5,7 @@ Feature: Create a club
   So that its members can then be registered in it
 
   @acceptance
-  Scenario: A created club keeps its information
+  Scenario: A club is created with its information
     Given "Loiret" is a departmental committee of the FFE
     When an administrator creates the club "U.S. Orléans.Echecs" with:
       | departmental committee | Loiret  |
