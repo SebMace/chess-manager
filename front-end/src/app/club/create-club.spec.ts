@@ -21,10 +21,10 @@ describe('CreateClub', () => {
   });
 
   it('tells the administrator that the club has been created', async () => {
-    createClubNamed(page, 'Montargis');
+    createClubInCommittee(page, 'Montargis', '45');
 
     const request = server.expectOne({ method: 'POST', url: '/clubs' });
-    expect(request.request.body).toEqual({ name: 'Montargis' });
+    expect(request.request.body).toEqual({ name: 'Montargis', committeeCode: '45' });
     request.flush(null, { status: 201, statusText: 'Created', headers: { Location: '/clubs/6' } });
     await fixture.whenStable();
 
@@ -43,7 +43,7 @@ describe('CreateClub', () => {
   });
 
   it('tells the administrator that the club could not be created', async () => {
-    createClubNamed(page, 'Montargis');
+    createClubInCommittee(page, 'Montargis', '45');
 
     server.expectOne({ method: 'POST', url: '/clubs' })
       .flush(null, { status: 500, statusText: 'Internal Server Error' });
@@ -54,12 +54,12 @@ describe('CreateClub', () => {
   });
 
   it('no longer tells the administrator that the club could not be created once it has been created', async () => {
-    createClubNamed(page, 'Montargis');
+    createClubInCommittee(page, 'Montargis', '45');
     server.expectOne({ method: 'POST', url: '/clubs' })
       .flush(null, { status: 500, statusText: 'Internal Server Error' });
     await fixture.whenStable();
 
-    createClubNamed(page, 'Montargis');
+    createClubInCommittee(page, 'Montargis', '45');
     server.expectOne({ method: 'POST', url: '/clubs' })
       .flush(null, { status: 201, statusText: 'Created', headers: { Location: '/clubs/6' } });
     await fixture.whenStable();
@@ -69,12 +69,12 @@ describe('CreateClub', () => {
   });
 
   it('no longer tells the administrator that a previous club has been created once a creation fails', async () => {
-    createClubNamed(page, 'Montargis');
+    createClubInCommittee(page, 'Montargis', '45');
     server.expectOne({ method: 'POST', url: '/clubs' })
       .flush(null, { status: 201, statusText: 'Created', headers: { Location: '/clubs/6' } });
     await fixture.whenStable();
 
-    createClubNamed(page, 'Olivet');
+    createClubInCommittee(page, 'Olivet', '45');
     server.expectOne({ method: 'POST', url: '/clubs' })
       .flush(null, { status: 500, statusText: 'Internal Server Error' });
     await fixture.whenStable();
@@ -82,9 +82,17 @@ describe('CreateClub', () => {
     expect(page.textContent).toContain("Le club n'a pas pu être créé. Réessayez.");
     expect(page.textContent).not.toContain('Le club Montargis a été créé.');
   });
+
+  it('tells the administrator that the departmental committee is required', async () => {
+    createClubWithoutCommittee(page, 'Montargis');
+    await fixture.whenStable();
+
+    server.expectNone({ method: 'POST', url: '/clubs' });
+    expect(page.textContent).toContain('Le code du comité est obligatoire.');
+  });
 });
 
-function createClubNamed(page: HTMLElement, name: string): void {
+function createClubWithoutCommittee(page: HTMLElement, name: string): void {
   const field = fieldLabelled(page, 'Nom du club');
   field.value = name;
   field.dispatchEvent(new Event('input'));
