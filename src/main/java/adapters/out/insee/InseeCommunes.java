@@ -54,6 +54,6 @@ public class InseeCommunes implements Communes {
 
     @Override
     public List<Commune> inDepartment(DepartmentCode department) {
-        return List.of();
+        return communes.values().stream().filter(commune -> commune.isIn(department)).toList();
     }
 }
