@@ -16,12 +16,6 @@ public class CreateClub {
         this.newClubId = newClubId;
     }
 
-    public ClubId execute(String name, CommitteeCode committee) {
-        ClubId id = newClubId.get();
-        clubs.save(new Club(id, name, true, committee));
-        return id;
-    }
-
     public ClubId execute(String name, CommitteeCode committee, FfeClubId ffeClubId, String commune) {
         ClubId id = newClubId.get();
         clubs.save(new Club(id, name, true, committee, ffeClubId, commune));

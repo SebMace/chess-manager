@@ -30,7 +30,7 @@ public class CreateClubSteps {
 
     @When("an administrator creates the club {string} in the departmental committee {string}")
     public void createClubInCommittee(String name, String committee) {
-        createdClubs.put(name, createClub.execute(name, committees.get(committee)));
+        createdClubs.put(name, createClub.execute(name, committees.get(committee), null, null));
     }
 
     @When("an administrator creates the club {string} with:")

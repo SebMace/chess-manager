@@ -21,7 +21,7 @@ class CreateClubTests {
     void should_save_a_managed_club_in_its_departmental_committee() {
         CreateClub createClub = new CreateClub(clubs, () -> clubId);
 
-        ClubId createdId = createClub.execute("U.S. Orléans.Echecs", new CommitteeCode("45"));
+        ClubId createdId = createClub.execute("U.S. Orléans.Echecs", new CommitteeCode("45"), null, null);
 
         assertEquals(clubId, createdId);
         Club club = clubs.find(createdId).orElseThrow();
