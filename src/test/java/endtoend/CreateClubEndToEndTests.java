@@ -5,6 +5,7 @@ import domain.club.Club;
 import domain.club.vo.ClubId;
 import domain.club.vo.CommitteeCode;
 import domain.club.vo.FfeClubId;
+import domain.commune.CommuneCode;
 import infrastructure.ChessManagerApplication;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,14 +45,14 @@ class CreateClubEndToEndTests {
     @Test
     void an_administrator_creates_a_club_with_its_information() throws Exception {
         Club club = clubs.find(createClub("""
-                {"name": "U.S. Orléans.Echecs", "committeeCode": "45", "ffeClubId": "G45001", "commune": "Orléans"}"""))
+                {"name": "U.S. Orléans.Echecs", "committeeCode": "45", "ffeClubId": "G45001", "communeCode": "45234"}"""))
                 .orElseThrow();
 
         assertEquals("U.S. Orléans.Echecs", club.name());
         assertTrue(club.managedByApplication());
         assertEquals(Optional.of(new CommitteeCode("45")), club.committee());
         assertEquals(Optional.of(new FfeClubId("G45001")), club.ffeClubId());
-        assertEquals("Orléans", club.commune());
+        assertEquals(new CommuneCode("45234"), club.commune());
     }
 
     @Test
@@ -64,7 +65,7 @@ class CreateClubEndToEndTests {
     @Test
     void a_club_cannot_be_created_without_its_ffe_identifier() throws Exception {
         HttpResponse<Void> response = post("""
-                {"name": "U.S. Orléans.Echecs", "committeeCode": "45", "commune": "Orléans"}""");
+                {"name": "U.S. Orléans.Echecs", "committeeCode": "45", "communeCode": "45234"}""");
 
         assertEquals(400, response.statusCode());
     }
@@ -72,7 +73,7 @@ class CreateClubEndToEndTests {
     @Test
     void a_club_cannot_be_created_with_a_blank_ffe_identifier() throws Exception {
         HttpResponse<Void> response = post("""
-                {"name": "U.S. Orléans.Echecs", "committeeCode": "45", "ffeClubId": "   ", "commune": "Orléans"}""");
+                {"name": "U.S. Orléans.Echecs", "committeeCode": "45", "ffeClubId": "   ", "communeCode": "45234"}""");
 
         assertEquals(400, response.statusCode());
     }
@@ -86,14 +87,33 @@ class CreateClubEndToEndTests {
     }
 
     @Test
+    void a_club_cannot_be_created_in_a_commune_outside_the_department_of_its_committee() throws Exception {
+        HttpResponse<Void> response = post("""
+                {"name": "Olivet – La Tour prend garde", "committeeCode": "45", "ffeClubId": "G45007", "communeCode": "53169"}""");
+
+        assertEquals(400, response.statusCode());
+    }
+
+    @Test
     void a_second_club_cannot_use_the_same_ffe_identifier() throws Exception {
         createClub("""
-                {"name": "Echiquier du Gâtinais", "committeeCode": "45", "ffeClubId": "G45100", "commune": "Montargis"}""");
+                {"name": "Echiquier du Gâtinais", "committeeCode": "45", "ffeClubId": "G45100", "communeCode": "45208"}""");
 
         HttpResponse<Void> response = post("""
-                {"name": "Gâtinais Échecs", "committeeCode": "45", "ffeClubId": "g45100", "commune": "Montargis"}""");
+                {"name": "Gâtinais Échecs", "committeeCode": "45", "ffeClubId": "g45100", "communeCode": "45208"}""");
 
         assertEquals(409, response.statusCode());
+    }
+
+    @Test
+    void the_communes_of_the_department_of_its_committee_are_offered_for_a_club() throws Exception {
+        HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/communes?committee=45")).GET().build();
+
+        HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+
+        assertEquals(200, response.statusCode());
+        assertTrue(response.body().contains("{\"code\":\"45232\",\"name\":\"Olivet\"}"), response.body());
+        assertFalse(response.body().contains("53169"));
     }
 
     private ClubId createClub(String json) throws Exception {

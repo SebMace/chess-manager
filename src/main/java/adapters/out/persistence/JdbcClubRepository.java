@@ -5,6 +5,7 @@ import domain.club.Club;
 import domain.club.vo.ClubId;
 import domain.club.vo.CommitteeCode;
 import domain.club.vo.FfeClubId;
+import domain.commune.CommuneCode;
 import org.springframework.jdbc.core.simple.JdbcClient;
 
 import java.util.Optional;
@@ -19,7 +20,7 @@ public class JdbcClubRepository implements ClubRepository {
 
     @Override
     public Optional<Club> find(ClubId clubId) {
-        return jdbc.sql("SELECT id, name, managed_by_application, committee_code, ffe_club_id, commune FROM club WHERE id = :id")
+        return jdbc.sql("SELECT id, name, managed_by_application, committee_code, ffe_club_id, commune_code FROM club WHERE id = :id")
                 .param("id", clubId.clubId())
                 .query((row, rowNumber) -> new Club(
                         new ClubId(row.getObject("id", UUID.class)),
@@ -27,21 +28,21 @@ public class JdbcClubRepository implements ClubRepository {
                         row.getBoolean("managed_by_application"),
                         committee(row.getString("committee_code")),
                         ffeClubId(row.getString("ffe_club_id")),
-                        row.getString("commune")))
+                        new CommuneCode(row.getString("commune_code"))))
                 .optional();
     }
 
     @Override
     public void save(Club club) {
         jdbc.sql("""
-                        INSERT INTO club (id, name, managed_by_application, committee_code, ffe_club_id, commune)
+                        INSERT INTO club (id, name, managed_by_application, committee_code, ffe_club_id, commune_code)
                         VALUES (:id, :name, :managed, :committee, :ffeClubId, :commune)""")
                 .param("id", club.id().clubId())
                 .param("name", club.name())
                 .param("managed", club.managedByApplication())
                 .param("committee", club.committee().map(CommitteeCode::value).orElse(null))
                 .param("ffeClubId", club.ffeClubId().map(FfeClubId::value).orElse(null))
-                .param("commune", club.commune())
+                .param("commune", club.commune().value())
                 .update();
     }
 

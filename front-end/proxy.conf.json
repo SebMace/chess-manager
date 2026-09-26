@@ -2,5 +2,9 @@
   "/clubs": {
     "target": "http://localhost:8080",
     "secure": false
+  },
+  "/communes": {
+    "target": "http://localhost:8080",
+    "secure": false
   }
 }

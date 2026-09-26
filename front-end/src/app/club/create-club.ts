@@ -1,7 +1,9 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { Clubs, FfeClubIdAlreadyUsed, NewClub } from './clubs';
+import { Commune, Communes } from '../commune/communes';
+import { communesMatching } from '../commune/commune-search';
 
-const REQUIRED_INFORMATION = ['committeeCode', 'ffeClubId', 'commune'] as const satisfies readonly (keyof NewClub)[];
+const REQUIRED_INFORMATION = ['committeeCode', 'ffeClubId', 'communeCode'] as const satisfies readonly (keyof NewClub)[];
 type RequiredInformation = (typeof REQUIRED_INFORMATION)[number];
 
 type CreationOutcome =
@@ -22,7 +24,7 @@ type CreationOutcome =
           name: clubName.value,
           committeeCode: committeeCode.value,
           ffeClubId: ffeClubId.value,
-          commune: commune.value,
+          communeCode: chosenCommune()?.code ?? '',
         })"
       >
         <fieldset>
@@ -60,18 +62,46 @@ type CreationOutcome =
                 <p id="ffe-club-id-error" class="field-error">L'identifiant FFE est obligatoire.</p>
               }
             </div>
-            <div class="field field--wide">
+            <div class="field field--wide commune">
               <label for="commune" class="required">Commune</label>
               <input
                 id="commune"
                 #commune
+                role="combobox"
                 aria-required="true"
+                aria-autocomplete="list"
+                aria-controls="commune-options"
+                autocomplete="off"
                 placeholder="ex. Orléans"
-                [attr.aria-invalid]="missing().has('commune') || null"
-                [attr.aria-describedby]="missing().has('commune') ? 'commune-error' : null"
+                [attr.aria-expanded]="offeredCommunes().length > 0"
+                [attr.aria-activedescendant]="activeCommune() >= 0 ? 'commune-option-' + activeCommune() : null"
+                [attr.aria-invalid]="missing().has('communeCode') || null"
+                [attr.aria-describedby]="missing().has('communeCode') ? 'commune-error' : null"
+                (input)="typeCommune(commune.value, committeeCode.value)"
+                (keydown)="browseCommunes($event, commune)"
               />
-              @if (missing().has('commune')) {
-                <p id="commune-error" class="field-error">La commune est obligatoire.</p>
+              <ul
+                id="commune-options"
+                role="listbox"
+                aria-label="Communes proposées"
+                class="commune-options"
+                [hidden]="offeredCommunes().length === 0"
+              >
+                @for (offered of offeredCommunes(); track offered.code) {
+                  <li
+                    role="option"
+                    [id]="'commune-option-' + $index"
+                    [attr.aria-selected]="$index === activeCommune()"
+                    (click)="chooseCommune(offered, commune)"
+                  >
+                    {{ offered.name }}
+                  </li>
+                }
+              </ul>
+              @if (missing().has('communeCode')) {
+                <p id="commune-error" class="field-error">
+                  {{ communeWritten() ? 'Choisissez la commune parmi celles proposées.' : 'La commune est obligatoire.' }}
+                </p>
               }
             </div>
           </div>
@@ -97,6 +127,49 @@ export class CreateClub {
   private readonly clubs = inject(Clubs);
   protected readonly outcome = signal<CreationOutcome>({ kind: 'none' });
   protected readonly missing = signal<ReadonlySet<RequiredInformation>>(new Set());
+  private readonly communes = inject(Communes);
+  private readonly communesOfCommittee = signal<readonly Commune[]>([]);
+  private committeeOfCommunes = '';
+  private readonly typedCommune = signal('');
+  protected readonly chosenCommune = signal<Commune | null>(null);
+  protected readonly activeCommune = signal(-1);
+  protected readonly communeWritten = signal(false);
+  protected readonly offeredCommunes = computed(() => communesMatching(this.communesOfCommittee(), this.typedCommune()));
+
+  protected browseCommunes(event: KeyboardEvent, field: HTMLInputElement): void {
+    const offered = this.offeredCommunes();
+    if (offered.length === 0) return;
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      this.activeCommune.update(active => Math.min(active + 1, offered.length - 1));
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      this.activeCommune.update(active => Math.max(active - 1, 0));
+    } else if (event.key === 'Escape') {
+      this.typedCommune.set('');
+      this.activeCommune.set(-1);
+    } else if (event.key === 'Enter' && this.activeCommune() >= 0) {
+      event.preventDefault();
+      this.chooseCommune(offered[this.activeCommune()], field);
+    }
+  }
+
+  protected chooseCommune(commune: Commune, field: HTMLInputElement): void {
+    this.chosenCommune.set(commune);
+    this.typedCommune.set('');
+    this.activeCommune.set(-1);
+    field.value = commune.name;
+  }
+
+  protected typeCommune(typed: string, committeeCode: string): void {
+    this.chosenCommune.set(null);
+    this.communeWritten.set(typed.trim().length > 0);
+    this.typedCommune.set(typed);
+    this.activeCommune.set(-1);
+    if (!committeeCode || committeeCode === this.committeeOfCommunes) return;
+    this.committeeOfCommunes = committeeCode;
+    this.communes.ofCommittee(committeeCode).subscribe(communes => this.communesOfCommittee.set(communes));
+  }
 
   protected create(event: Event, club: NewClub): void {
     event.preventDefault();

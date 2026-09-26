@@ -1,18 +1,24 @@
 package acceptance.steps;
 
+import application.club.CommuneNotInCommitteeDepartment;
+import application.club.CommunesOfCommittee;
 import application.club.CreateClub;
 import application.club.FfeClubIdAlreadyUsed;
 import club.InMemoryClubRepository;
+import commune.InMemoryCommunes;
 import domain.club.Club;
 import domain.club.vo.ClubId;
 import domain.club.vo.CommitteeCode;
 import domain.club.vo.FfeClubId;
+import domain.commune.Commune;
+import domain.commune.CommuneCode;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -21,11 +27,18 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class CreateClubSteps {
     private static final UUID CREATED_CLUB_ID = UUID.fromString("00000000-0000-0000-0000-000000000006");
+    private static final Map<String, CommuneCode> COMMUNES = Map.of(
+            "Orléans", InMemoryCommunes.ORLEANS.code(),
+            "Olivet", InMemoryCommunes.OLIVET.code(),
+            "Saint-Pryvé-Saint-Mesmin", InMemoryCommunes.SAINT_PRYVE_SAINT_MESMIN.code(),
+            "Olivet (Mayenne)", InMemoryCommunes.OLIVET_IN_MAYENNE.code());
     private final InMemoryClubRepository clubs = new InMemoryClubRepository();
-    private final CreateClub createClub = new CreateClub(clubs, () -> new ClubId(CREATED_CLUB_ID));
+    private final InMemoryCommunes communes = new InMemoryCommunes();
+    private final CreateClub createClub = new CreateClub(clubs, communes, () -> new ClubId(CREATED_CLUB_ID));
     private final Map<String, ClubId> createdClubs = new HashMap<>();
     private final Map<String, CommitteeCode> committees = new HashMap<>();
     private final Map<String, RuntimeException> refusals = new HashMap<>();
+    private List<Commune> offeredCommunes = List.of();
 
     @Given("{string} is a departmental committee of the FFE")
     public void departmentalCommittee(String name) { committees.put(name, new CommitteeCode("45")); }
@@ -38,8 +51,8 @@ public class CreateClubSteps {
             createdClubs.put(name, createClub.execute(name,
                     committees.get(club.get("departmental committee")),
                     ffeIdentifier == null ? null : new FfeClubId(ffeIdentifier),
-                    club.get("commune")));
-        } catch (IllegalArgumentException | FfeClubIdAlreadyUsed refusal) {
+                    commune(club.get("commune"))));
+        } catch (IllegalArgumentException | FfeClubIdAlreadyUsed | CommuneNotInCommitteeDepartment refusal) {
             refusals.put(name, refusal);
         }
     }
@@ -48,7 +61,22 @@ public class CreateClubSteps {
     public void clubCreated(String name, DataTable information) {
         Map<String, String> club = information.asMap();
         createdClubs.put(name, createClub.execute(name, committees.get(club.get("departmental committee")),
-                new FfeClubId(club.get("FFE identifier")), club.get("commune")));
+                new FfeClubId(club.get("FFE identifier")), commune(club.get("commune"))));
+    }
+
+    @When("an administrator looks for the communes of a club of the departmental committee {string}")
+    public void lookForCommunes(String committee) {
+        offeredCommunes = new CommunesOfCommittee(communes).execute(committees.get(committee));
+    }
+
+    @Then("the administrator is offered the commune {string}")
+    public void communeOffered(String commune) {
+        assertTrue(offeredCommunes.stream().anyMatch(offered -> offered.code().equals(commune(commune))));
+    }
+
+    @Then("the administrator is not offered the commune {string}")
+    public void communeNotOffered(String commune) {
+        assertTrue(offeredCommunes.stream().noneMatch(offered -> offered.code().equals(commune(commune))));
     }
 
     @Then("the administrator is told that the FFE identifier {string} is already used")
@@ -70,7 +98,11 @@ public class CreateClubSteps {
 
     @Then("the commune of {string} is {string}")
     public void clubCommune(String name, String commune) {
-        assertEquals(commune, createdClub(name).commune());
+        assertEquals(commune(commune), createdClub(name).commune());
+    }
+
+    private static CommuneCode commune(String name) {
+        return name == null ? null : COMMUNES.get(name);
     }
 
     private Club createdClub(String name) { return clubs.find(createdClubs.get(name)).orElseThrow(); }

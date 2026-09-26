@@ -84,6 +84,42 @@ input[aria-invalid="true"] {
   border-color: var(--danger);
 }
 
+.commune {
+  position: relative;
+}
+
+.commune-options {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  max-height: 15rem;
+  margin: 0.25rem 0 0;
+  padding: 0.25rem 0;
+  overflow-y: auto;
+  list-style: none;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgb(59 42 32 / 0.18);
+}
+
+.commune-options[hidden] {
+  display: none;
+}
+
+.commune-options [role="option"] {
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+}
+
+.commune-options [role="option"]:hover,
+.commune-options [role="option"][aria-selected="true"] {
+  background: var(--square-light);
+  color: var(--walnut-deep);
+}
+
 .field-error {
   margin: 0;
   font-size: 0.875rem;

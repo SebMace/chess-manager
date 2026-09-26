@@ -5,7 +5,7 @@ export interface NewClub {
   name: string;
   committeeCode: string;
   ffeClubId: string;
-  commune: string;
+  communeCode: string;
 }
 
 /** Refusal: another club already uses this FFE identifier. */
