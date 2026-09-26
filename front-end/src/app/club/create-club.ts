@@ -42,6 +42,7 @@ export class CreateClub {
       this.committeeRequired.set(true);
       return;
     }
+    this.committeeRequired.set(false);
     this.clubs.create(name, committeeCode).subscribe({
       next: () => this.outcome.set({ kind: 'created', club: name }),
       error: () => this.outcome.set({ kind: 'failed' }),
