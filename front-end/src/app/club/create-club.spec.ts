@@ -199,6 +199,18 @@ describe('CreateClub', () => {
     expect(page.textContent).toContain('La commune est obligatoire.');
   });
 
+  it('tells the administrator that each part of the registered office is required', async () => {
+    fillFields(page, { 'Nom du club': 'U.S. Orléans.Echecs', 'Code du comité': '45', 'Identifiant FFE': 'G45001' });
+    await chooseCommune('Orl', 'Orléans');
+    buttonNamed(page, 'Créer le club').click();
+    await fixture.whenStable();
+
+    server.expectNone({ method: 'POST', url: '/clubs' });
+    expect(page.textContent).toContain('Le numéro et la voie sont obligatoires.');
+    expect(page.textContent).toContain('Le code postal est obligatoire.');
+    expect(page.textContent).toContain('La localité est obligatoire.');
+  });
+
   it('tells the administrator to choose the commune among those offered', async () => {
     fillFields(page, { 'Nom du club': 'U.S. Orléans.Echecs', 'Code du comité': '45', 'Identifiant FFE': 'G45001' });
     fill(fieldLabelled(page, 'Commune'), 'Orl');
