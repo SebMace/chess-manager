@@ -109,8 +109,10 @@ class JdbcClubRepositoryTests {
         JdbcClient jdbc = JdbcClient.create(dataSource);
 
         assertThrows(DataIntegrityViolationException.class, () -> jdbc.sql("""
-                        INSERT INTO club (id, name, managed_by_application, committee_code, ffe_club_id)
-                        VALUES ('00000000-0000-0000-0000-000000000012', 'Cercle d''Échecs de Pithiviers', TRUE, '45', 'G45007')""")
+                        INSERT INTO club (id, name, managed_by_application, committee_code, ffe_club_id,
+                                          registered_office_street, registered_office_postcode, registered_office_town)
+                        VALUES ('00000000-0000-0000-0000-000000000012', 'Cercle d''Échecs de Pithiviers', TRUE, '45', 'G45007',
+                                '1 rue de la Gare', '45300', 'Pithiviers')""")
                 .update());
     }
 
