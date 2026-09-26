@@ -1,7 +1,7 @@
 package acceptance.steps;
 
 import clubmanagement.createclub.CommuneNotInCommitteeDepartment;
-import application.club.CommunesOfCommittee;
+import clubmanagement.communesofcommittee.CommunesOfCommittee;
 import clubmanagement.createclub.CreateClub;
 import clubmanagement.createclub.FfeClubIdAlreadyUsed;
 import club.InMemoryClubRepository;

@@ -1,6 +1,6 @@
-package adapters.in.rest;
+package clubmanagement.communesofcommittee.rest;
 
-import application.club.CommunesOfCommittee;
+import clubmanagement.communesofcommittee.CommunesOfCommittee;
 import clubmanagement.domain.club.vo.CommitteeCode;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -9,10 +9,10 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-public class CommuneController {
+public class CommunesOfCommitteeController {
     private final CommunesOfCommittee communesOfCommittee;
 
-    public CommuneController(CommunesOfCommittee communesOfCommittee) {
+    public CommunesOfCommitteeController(CommunesOfCommittee communesOfCommittee) {
         this.communesOfCommittee = communesOfCommittee;
     }
 

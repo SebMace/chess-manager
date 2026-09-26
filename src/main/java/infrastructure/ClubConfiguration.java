@@ -1,11 +1,11 @@
 package infrastructure;
 
 import clubmanagement.createclub.rest.CreateClubController;
-import adapters.in.rest.CommuneController;
+import clubmanagement.communesofcommittee.rest.CommunesOfCommitteeController;
 import adapters.out.insee.InseeCommunes;
 import adapters.out.persistence.JdbcClubRepository;
 import clubmanagement.ports.ClubRepository;
-import application.club.CommunesOfCommittee;
+import clubmanagement.communesofcommittee.CommunesOfCommittee;
 import clubmanagement.createclub.CreateClub;
 import clubmanagement.ports.Communes;
 import clubmanagement.domain.club.vo.ClubId;
@@ -43,7 +43,7 @@ class ClubConfiguration {
     }
 
     @Bean
-    CommuneController communeController(CommunesOfCommittee communesOfCommittee) {
-        return new CommuneController(communesOfCommittee);
+    CommunesOfCommitteeController communesOfCommitteeController(CommunesOfCommittee communesOfCommittee) {
+        return new CommunesOfCommitteeController(communesOfCommittee);
     }
 }
