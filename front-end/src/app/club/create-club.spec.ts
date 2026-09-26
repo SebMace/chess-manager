@@ -106,6 +106,17 @@ describe('CreateClub', () => {
     server.expectNone({ method: 'POST', url: '/clubs' });
     expect(page.textContent).toContain("L'identifiant FFE est obligatoire.");
   });
+
+  it('tells the administrator that the FFE identifier is already used by another club', async () => {
+    createValidClub(page, 'Échiquier Orléanais');
+
+    server.expectOne({ method: 'POST', url: '/clubs' })
+      .flush(null, { status: 409, statusText: 'Conflict' });
+    await fixture.whenStable();
+
+    expect(page.textContent).toContain('Un club avec l\'identifiant FFE G45001 existe déjà.');
+    expect(page.textContent).not.toContain("Le club n'a pas pu être créé. Réessayez.");
+  });
 });
 
 function createClubWithoutCommittee(page: HTMLElement, name: string): void {
