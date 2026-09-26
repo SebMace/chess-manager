@@ -10,4 +10,8 @@ describe('communesMatching', () => {
   it('finds a commune whatever the accents and capitals typed', () => {
     expect(communesMatching(LOIRET, 'ORLE')).toEqual([ORLEANS]);
   });
+
+  it('finds a commune by the beginning of any word of its name', () => {
+    expect(communesMatching(LOIRET, 'pryv')).toEqual([SAINT_PRYVE]);
+  });
 });
