@@ -95,3 +95,12 @@ Feature: Create a club
     Then the administrator is offered the commune "Olivet"
     And the administrator is offered the commune "Saint-Pryvé-Saint-Mesmin"
     And the administrator is not offered the commune "Olivet (Mayenne)"
+
+  @acceptance
+  Scenario: A club cannot be created without its registered office
+    Given "Loiret" is a departmental committee of the FFE
+    When an administrator creates the club "U.S. Orléans.Echecs" with:
+      | departmental committee | Loiret  |
+      | FFE identifier         | G45001  |
+      | commune                | Orléans |
+    Then the club "U.S. Orléans.Echecs" is not created
