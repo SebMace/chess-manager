@@ -43,8 +43,18 @@ type CreationOutcome =
               }
             </div>
             <div class="field">
-              <label for="ffe-club-id">Identifiant FFE</label>
-              <input id="ffe-club-id" #ffeClubId placeholder="ex. G45001" />
+              <label for="ffe-club-id" class="required">Identifiant FFE</label>
+              <input
+                id="ffe-club-id"
+                #ffeClubId
+                aria-required="true"
+                placeholder="ex. G45001"
+                [attr.aria-invalid]="ffeClubIdRequired() || null"
+                [attr.aria-describedby]="ffeClubIdRequired() ? 'ffe-club-id-error' : null"
+              />
+              @if (ffeClubIdRequired()) {
+                <p id="ffe-club-id-error" class="field-error">L'identifiant FFE est obligatoire.</p>
+              }
             </div>
             <div class="field field--wide">
               <label for="commune">Commune</label>
@@ -69,14 +79,13 @@ export class CreateClub {
   private readonly clubs = inject(Clubs);
   protected readonly outcome = signal<CreationOutcome>({ kind: 'none' });
   protected readonly committeeRequired = signal(false);
+  protected readonly ffeClubIdRequired = signal(false);
 
   protected create(event: Event, club: NewClub): void {
     event.preventDefault();
-    if (!club.committeeCode) {
-      this.committeeRequired.set(true);
-      return;
-    }
-    this.committeeRequired.set(false);
+    this.committeeRequired.set(!club.committeeCode);
+    this.ffeClubIdRequired.set(!club.ffeClubId);
+    if (this.committeeRequired() || this.ffeClubIdRequired()) return;
     this.clubs.create(club).subscribe({
       next: () => this.outcome.set({ kind: 'created', club: club.name }),
       error: () => this.outcome.set({ kind: 'failed' }),
