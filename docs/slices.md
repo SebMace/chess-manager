@@ -53,9 +53,11 @@ On finalise d'abord la création d'un club ; les slices sur les joueurs viendron
 - **Intention** : à partir d'un numéro de département, l'administrateur retrouve les clubs gérés
   par l'application, avec leur nom, leur commune et leur identifiant FFE. C'est le point d'entrée
   de l'application.
+- **Décisions** :
+  - le filtre porte sur le comité départemental du club (en métropole, son code est le numéro du
+    département), pas sur le département de la commune ;
+  - la liste est triée par nom de club, sans tenir compte des accents ni des majuscules.
 - **Questions ouvertes** :
-  - filtrer par comité du club ou par département de la commune ;
-  - ordre de la liste ;
   - exclure explicitement les clubs non gérés dès maintenant, ou plus tard ;
   - message quand aucun club n'est trouvé ;
   - département inconnu ;
