@@ -29,7 +29,6 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class CreateClubSteps {
-    private static final UUID CREATED_CLUB_ID = UUID.fromString("00000000-0000-0000-0000-000000000006");
     private static final Map<String, CommitteeCode> COMMITTEES = Map.of(
             "Loiret", new CommitteeCode("45"),
             "Mayenne", new CommitteeCode("53"));
@@ -40,7 +39,8 @@ public class CreateClubSteps {
             "Olivet (Mayenne)", InMemoryCommunes.OLIVET_IN_MAYENNE.code());
     private final InMemoryClubRepository clubs = new InMemoryClubRepository();
     private final InMemoryCommunes communes = new InMemoryCommunes();
-    private final CreateClub createClub = new CreateClub(clubs, communes, () -> new ClubId(CREATED_CLUB_ID));
+    private final CreateClub createClub = new CreateClub(clubs, communes, this::nextClubId);
+    private long createdClubCount;
     private final Map<String, ClubId> createdClubs = new HashMap<>();
     private final Map<String, CommitteeCode> committees = new HashMap<>();
     private final Map<String, RuntimeException> refusals = new HashMap<>();
@@ -160,6 +160,8 @@ public class CreateClubSteps {
     private static CommuneCode commune(String name) {
         return name == null ? null : COMMUNES.get(name);
     }
+
+    private ClubId nextClubId() { return new ClubId(new UUID(0, ++createdClubCount)); }
 
     private Club createdClub(String name) { return clubs.find(createdClubs.get(name)).orElseThrow(); }
 
