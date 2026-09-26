@@ -1,8 +1,10 @@
 package acceptance.steps;
 
+import application.club.CommuneNotInCommitteeDepartment;
 import application.club.CreateClub;
 import application.club.FfeClubIdAlreadyUsed;
 import club.InMemoryClubRepository;
+import commune.InMemoryCommunes;
 import domain.club.Club;
 import domain.club.vo.ClubId;
 import domain.club.vo.CommitteeCode;
@@ -26,7 +28,7 @@ public class CreateClubSteps {
             "Orléans", new CommuneCode("45234"),
             "Olivet (Mayenne)", new CommuneCode("53169"));
     private final InMemoryClubRepository clubs = new InMemoryClubRepository();
-    private final CreateClub createClub = new CreateClub(clubs, () -> new ClubId(CREATED_CLUB_ID));
+    private final CreateClub createClub = new CreateClub(clubs, new InMemoryCommunes(), () -> new ClubId(CREATED_CLUB_ID));
     private final Map<String, ClubId> createdClubs = new HashMap<>();
     private final Map<String, CommitteeCode> committees = new HashMap<>();
     private final Map<String, RuntimeException> refusals = new HashMap<>();
@@ -43,7 +45,7 @@ public class CreateClubSteps {
                     committees.get(club.get("departmental committee")),
                     ffeIdentifier == null ? null : new FfeClubId(ffeIdentifier),
                     commune(club.get("commune"))));
-        } catch (IllegalArgumentException | FfeClubIdAlreadyUsed refusal) {
+        } catch (IllegalArgumentException | FfeClubIdAlreadyUsed | CommuneNotInCommitteeDepartment refusal) {
             refusals.put(name, refusal);
         }
     }

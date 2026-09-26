@@ -1,5 +1,6 @@
 package application.club;
 
+import application.commune.Communes;
 import domain.club.Club;
 import domain.club.vo.ClubId;
 import domain.club.vo.CommitteeCode;
@@ -10,10 +11,12 @@ import java.util.function.Supplier;
 
 public class CreateClub {
     private final ClubRepository clubs;
+    private final Communes communes;
     private final Supplier<ClubId> newClubId;
 
-    public CreateClub(ClubRepository clubs, Supplier<ClubId> newClubId) {
+    public CreateClub(ClubRepository clubs, Communes communes, Supplier<ClubId> newClubId) {
         this.clubs = clubs;
+        this.communes = communes;
         this.newClubId = newClubId;
     }
 

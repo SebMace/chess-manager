@@ -1,9 +1,11 @@
 package infrastructure;
 
 import adapters.in.rest.ClubController;
+import adapters.out.insee.InseeCommunes;
 import adapters.out.persistence.JdbcClubRepository;
 import application.club.ClubRepository;
 import application.club.CreateClub;
+import application.commune.Communes;
 import domain.club.vo.ClubId;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,8 +21,13 @@ class ClubConfiguration {
     }
 
     @Bean
-    CreateClub createClub(ClubRepository clubs) {
-        return new CreateClub(clubs, () -> new ClubId(UUID.randomUUID()));
+    Communes communes() {
+        return InseeCommunes.fromOfficialGeographicCode();
+    }
+
+    @Bean
+    CreateClub createClub(ClubRepository clubs, Communes communes) {
+        return new CreateClub(clubs, communes, () -> new ClubId(UUID.randomUUID()));
     }
 
     @Bean
