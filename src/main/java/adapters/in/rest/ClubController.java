@@ -28,7 +28,7 @@ public class ClubController {
     public ResponseEntity<Void> create(@RequestBody CreateClubRequest request) {
         if (request.committeeCode() == null) return ResponseEntity.badRequest().build();
         ClubId id = createClub.execute(request.name(), new CommitteeCode(request.committeeCode()),
-                new FfeClubId(request.ffeClubId()), new CommuneCode(request.communeCode()));
+                new FfeClubId(request.ffeClubId()), new CommuneCode(request.communeCode()), null);
         return ResponseEntity.created(URI.create("/clubs/" + id.clubId())).build();
     }
 

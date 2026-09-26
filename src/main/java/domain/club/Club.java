@@ -3,6 +3,7 @@ package domain.club;
 import domain.club.vo.ClubId;
 import domain.club.vo.CommitteeCode;
 import domain.club.vo.FfeClubId;
+import domain.club.vo.PostalAddress;
 import domain.commune.CommuneCode;
 
 import java.util.Optional;
@@ -41,6 +42,7 @@ public final class Club {
     public Optional<CommitteeCode> committee() { return Optional.ofNullable(committee); }
     public Optional<FfeClubId> ffeClubId() { return Optional.ofNullable(ffeClubId); }
     public CommuneCode commune() { return commune; }
+    public Optional<PostalAddress> registeredOffice() { return Optional.empty(); }
 
     @Override
     public boolean equals(Object other) {
