@@ -3,6 +3,7 @@ package adapters.in.rest;
 import application.club.CreateClub;
 import domain.club.vo.ClubId;
 import domain.club.vo.CommitteeCode;
+import domain.club.vo.FfeClubId;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,10 +22,11 @@ public class ClubController {
     @PostMapping("/clubs")
     public ResponseEntity<Void> create(@RequestBody CreateClubRequest request) {
         if (request.committeeCode() == null) return ResponseEntity.badRequest().build();
-        ClubId id = createClub.execute(request.name(), new CommitteeCode(request.committeeCode()));
+        ClubId id = createClub.execute(request.name(), new CommitteeCode(request.committeeCode()),
+                request.ffeClubId() == null ? null : new FfeClubId(request.ffeClubId()), request.commune());
         return ResponseEntity.created(URI.create("/clubs/" + id.clubId())).build();
     }
 
-    public record CreateClubRequest(String name, String committeeCode) {
+    public record CreateClubRequest(String name, String committeeCode, String ffeClubId, String commune) {
     }
 }
