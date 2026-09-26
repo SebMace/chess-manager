@@ -56,6 +56,9 @@ describe('CreateClub', () => {
     fill(fieldLabelled(page, 'Identifiant FFE'), 'G45001');
     await chooseCommune('Orl', 'Orléans');
     fillFields(page, REGISTERED_OFFICE);
+    fill(fieldInGroup(page, 'Salle de jeu', 'Numéro et voie'), '5 rue du Roi');
+    fill(fieldInGroup(page, 'Salle de jeu', 'Code postal'), '45100');
+    fill(fieldInGroup(page, 'Salle de jeu', 'Localité'), 'Orléans');
     buttonNamed(page, 'Créer le club').click();
 
     const request = server.expectOne({ method: 'POST', url: '/clubs' });
@@ -65,6 +68,7 @@ describe('CreateClub', () => {
       ffeClubId: 'G45001',
       communeCode: '45234',
       registeredOffice: { street: '12 rue des Échecs', postcode: '45000', town: 'Orléans' },
+      playingVenue: { street: '5 rue du Roi', postcode: '45100', town: 'Orléans' },
     });
     request.flush(null, { status: 201, statusText: 'Created', headers: { Location: '/clubs/7' } });
     await fixture.whenStable();
@@ -286,6 +290,12 @@ function press(field: HTMLInputElement, key: string): void {
 function fill(field: HTMLInputElement, value: string): void {
   field.value = value;
   field.dispatchEvent(new Event('input'));
+}
+
+function fieldInGroup(page: HTMLElement, group: string, text: string): HTMLInputElement {
+  const fieldset = Array.from(page.querySelectorAll('fieldset')).find(f => f.querySelector('legend')?.textContent?.trim() === group);
+  if (!fieldset) throw new Error(`No group named "${group}"`);
+  return fieldLabelled(fieldset, text);
 }
 
 function fieldLabelled(page: HTMLElement, text: string): HTMLInputElement {
