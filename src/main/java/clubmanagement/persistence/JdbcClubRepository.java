@@ -9,6 +9,7 @@ import clubmanagement.domain.club.vo.PostalAddress;
 import clubmanagement.domain.commune.CommuneCode;
 import org.springframework.jdbc.core.simple.JdbcClient;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -73,6 +74,30 @@ public class JdbcClubRepository implements ClubRepository {
                 .param("ffeClubId", ffeClubId.value())
                 .query(Boolean.class)
                 .single();
+    }
+
+    @Override
+    public List<Club> inCommittee(CommitteeCode committee) {
+        return jdbc.sql("""
+                        SELECT id, name, managed_by_application, committee_code, ffe_club_id, commune_code,
+                               registered_office_street, registered_office_postcode, registered_office_town,
+                               playing_venue_street, playing_venue_postcode, playing_venue_town
+                        FROM club WHERE committee_code = :committee""")
+                .param("committee", committee.value())
+                .query((row, rowNumber) -> new Club(
+                        new ClubId(row.getObject("id", UUID.class)),
+                        row.getString("name"),
+                        row.getBoolean("managed_by_application"),
+                        committee(row.getString("committee_code")),
+                        ffeClubId(row.getString("ffe_club_id")),
+                        new CommuneCode(row.getString("commune_code")),
+                        new PostalAddress(row.getString("registered_office_street"),
+                                row.getString("registered_office_postcode"),
+                                row.getString("registered_office_town")),
+                        new PostalAddress(row.getString("playing_venue_street"),
+                                row.getString("playing_venue_postcode"),
+                                row.getString("playing_venue_town"))))
+                .list();
     }
 
     private static CommitteeCode committee(String code) {
