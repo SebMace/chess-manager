@@ -5,6 +5,7 @@ import application.club.FfeClubIdAlreadyUsed;
 import domain.club.vo.ClubId;
 import domain.club.vo.CommitteeCode;
 import domain.club.vo.FfeClubId;
+import domain.commune.CommuneCode;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -26,7 +27,7 @@ public class ClubController {
     public ResponseEntity<Void> create(@RequestBody CreateClubRequest request) {
         if (request.committeeCode() == null) return ResponseEntity.badRequest().build();
         ClubId id = createClub.execute(request.name(), new CommitteeCode(request.committeeCode()),
-                new FfeClubId(request.ffeClubId()), request.commune());
+                new FfeClubId(request.ffeClubId()), new CommuneCode(request.commune()));
         return ResponseEntity.created(URI.create("/clubs/" + id.clubId())).build();
     }
 

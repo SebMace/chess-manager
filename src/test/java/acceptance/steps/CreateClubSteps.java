@@ -7,6 +7,7 @@ import domain.club.Club;
 import domain.club.vo.ClubId;
 import domain.club.vo.CommitteeCode;
 import domain.club.vo.FfeClubId;
+import domain.commune.CommuneCode;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -21,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class CreateClubSteps {
     private static final UUID CREATED_CLUB_ID = UUID.fromString("00000000-0000-0000-0000-000000000006");
+    private static final Map<String, CommuneCode> COMMUNES = Map.of("Orléans", new CommuneCode("45234"));
     private final InMemoryClubRepository clubs = new InMemoryClubRepository();
     private final CreateClub createClub = new CreateClub(clubs, () -> new ClubId(CREATED_CLUB_ID));
     private final Map<String, ClubId> createdClubs = new HashMap<>();
@@ -38,7 +40,7 @@ public class CreateClubSteps {
             createdClubs.put(name, createClub.execute(name,
                     committees.get(club.get("departmental committee")),
                     ffeIdentifier == null ? null : new FfeClubId(ffeIdentifier),
-                    club.get("commune")));
+                    commune(club.get("commune"))));
         } catch (IllegalArgumentException | FfeClubIdAlreadyUsed refusal) {
             refusals.put(name, refusal);
         }
@@ -48,7 +50,7 @@ public class CreateClubSteps {
     public void clubCreated(String name, DataTable information) {
         Map<String, String> club = information.asMap();
         createdClubs.put(name, createClub.execute(name, committees.get(club.get("departmental committee")),
-                new FfeClubId(club.get("FFE identifier")), club.get("commune")));
+                new FfeClubId(club.get("FFE identifier")), commune(club.get("commune"))));
     }
 
     @Then("the administrator is told that the FFE identifier {string} is already used")
@@ -70,7 +72,11 @@ public class CreateClubSteps {
 
     @Then("the commune of {string} is {string}")
     public void clubCommune(String name, String commune) {
-        assertEquals(commune, createdClub(name).commune());
+        assertEquals(commune(commune), createdClub(name).commune());
+    }
+
+    private static CommuneCode commune(String name) {
+        return name == null ? null : COMMUNES.get(name);
     }
 
     private Club createdClub(String name) { return clubs.find(createdClubs.get(name)).orElseThrow(); }

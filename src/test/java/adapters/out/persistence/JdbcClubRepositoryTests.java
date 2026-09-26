@@ -4,6 +4,7 @@ import domain.club.Club;
 import domain.club.vo.ClubId;
 import domain.club.vo.CommitteeCode;
 import domain.club.vo.FfeClubId;
+import domain.commune.CommuneCode;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -38,7 +39,7 @@ class JdbcClubRepositoryTests {
     void should_find_a_saved_club_managed_by_the_application() {
         JdbcClubRepository clubs = new JdbcClubRepository(JdbcClient.create(dataSource));
 
-        clubs.save(new Club(montargis, "Montargis", true, new CommitteeCode("45"), new FfeClubId("G45004"), "Montargis"));
+        clubs.save(new Club(montargis, "Montargis", true, new CommitteeCode("45"), new FfeClubId("G45004"), new CommuneCode("45208")));
 
         Club club = clubs.find(montargis).orElseThrow();
         assertEquals(montargis, club.id());
@@ -51,7 +52,7 @@ class JdbcClubRepositoryTests {
         JdbcClubRepository clubs = new JdbcClubRepository(JdbcClient.create(dataSource));
         ClubId orleans = new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000007"));
 
-        clubs.save(new Club(orleans, "U.S. Orléans.Echecs", true, new CommitteeCode("45"), new FfeClubId("G45005"), "Orléans"));
+        clubs.save(new Club(orleans, "U.S. Orléans.Echecs", true, new CommitteeCode("45"), new FfeClubId("G45005"), new CommuneCode("45234")));
 
         assertEquals(Optional.of(new CommitteeCode("45")), clubs.find(orleans).orElseThrow().committee());
     }
@@ -61,11 +62,11 @@ class JdbcClubRepositoryTests {
         JdbcClubRepository clubs = new JdbcClubRepository(JdbcClient.create(dataSource));
         ClubId orleans = new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000008"));
 
-        clubs.save(new Club(orleans, "U.S. Orléans.Echecs", true, new CommitteeCode("45"), new FfeClubId("G45001"), "Orléans"));
+        clubs.save(new Club(orleans, "U.S. Orléans.Echecs", true, new CommitteeCode("45"), new FfeClubId("G45001"), new CommuneCode("45234")));
 
         Club club = clubs.find(orleans).orElseThrow();
         assertEquals(Optional.of(new FfeClubId("G45001")), club.ffeClubId());
-        assertEquals("Orléans", club.commune());
+        assertEquals(new CommuneCode("45234"), club.commune());
     }
 
     @Test
@@ -73,7 +74,7 @@ class JdbcClubRepositoryTests {
         JdbcClubRepository clubs = new JdbcClubRepository(JdbcClient.create(dataSource));
         ClubId gien = new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000009"));
 
-        clubs.save(new Club(gien, "Echiquiers Berry-Sologne", true, new CommitteeCode("45"), new FfeClubId("G45002"), "Gien"));
+        clubs.save(new Club(gien, "Echiquiers Berry-Sologne", true, new CommitteeCode("45"), new FfeClubId("G45002"), new CommuneCode("45155")));
 
         assertTrue(clubs.existsWithFfeClubId(new FfeClubId("G45002")));
         assertFalse(clubs.existsWithFfeClubId(new FfeClubId("G45999")));
@@ -83,11 +84,11 @@ class JdbcClubRepositoryTests {
     void should_refuse_to_store_two_clubs_with_the_same_ffe_identifier() {
         JdbcClubRepository clubs = new JdbcClubRepository(JdbcClient.create(dataSource));
         clubs.save(new Club(new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000010")),
-                "MJC Chécy", true, new CommitteeCode("45"), new FfeClubId("G45003"), "Chécy"));
+                "MJC Chécy", true, new CommitteeCode("45"), new FfeClubId("G45003"), new CommuneCode("45089")));
 
         assertThrows(DataIntegrityViolationException.class, () -> clubs.save(new Club(
                 new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000011")),
-                "Chécy Échecs", true, new CommitteeCode("45"), new FfeClubId("G45003"), "Chécy")));
+                "Chécy Échecs", true, new CommitteeCode("45"), new FfeClubId("G45003"), new CommuneCode("45089"))));
     }
 
     @Test

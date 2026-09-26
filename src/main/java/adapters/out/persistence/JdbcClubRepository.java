@@ -5,6 +5,7 @@ import domain.club.Club;
 import domain.club.vo.ClubId;
 import domain.club.vo.CommitteeCode;
 import domain.club.vo.FfeClubId;
+import domain.commune.CommuneCode;
 import org.springframework.jdbc.core.simple.JdbcClient;
 
 import java.util.Optional;
@@ -27,7 +28,7 @@ public class JdbcClubRepository implements ClubRepository {
                         row.getBoolean("managed_by_application"),
                         committee(row.getString("committee_code")),
                         ffeClubId(row.getString("ffe_club_id")),
-                        row.getString("commune")))
+                        new CommuneCode(row.getString("commune"))))
                 .optional();
     }
 
@@ -41,7 +42,7 @@ public class JdbcClubRepository implements ClubRepository {
                 .param("managed", club.managedByApplication())
                 .param("committee", club.committee().map(CommitteeCode::value).orElse(null))
                 .param("ffeClubId", club.ffeClubId().map(FfeClubId::value).orElse(null))
-                .param("commune", club.commune())
+                .param("commune", club.commune().value())
                 .update();
     }
 
