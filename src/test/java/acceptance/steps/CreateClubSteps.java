@@ -119,6 +119,7 @@ public class CreateClubSteps {
     }
 
     private static PostalAddress playingVenue(Map<String, String> club) {
+        if ("at the registered office".equals(club.get("playing venue"))) return registeredOffice(club);
         String street = club.get("playing venue street");
         return street == null ? null : new PostalAddress(street,
                 club.get("playing venue postcode"), club.get("playing venue town"));
