@@ -20,4 +20,9 @@ class ClubTests {
     void should_reject_a_club_without_an_identity() {
         assertThrows(IllegalArgumentException.class, () -> new Club(null, "Orléans", "Orléans"));
     }
+    @Test
+    void should_reject_a_club_without_its_commune() {
+        ClubId id = new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000002"));
+        assertThrows(IllegalArgumentException.class, () -> new Club(id, "Orléans", null));
+    }
 }
