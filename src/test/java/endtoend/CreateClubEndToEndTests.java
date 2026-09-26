@@ -160,6 +160,11 @@ class CreateClubEndToEndTests {
         assertFalse(response.body().contains("53169"));
     }
 
+    @Test
+    void no_demonstration_club_is_created_outside_the_development_profile() {
+        assertFalse(clubs.existsWithFfeClubId(new FfeClubId("DEMO01")));
+    }
+
     private ClubId createClub(String json) throws Exception {
         HttpResponse<Void> response = post(json);
 
