@@ -20,18 +20,7 @@ describe('CreateClub', () => {
     await fixture.whenStable();
   });
 
-  it('tells the administrator that the club has been created', async () => {
-    createClubInCommittee(page, 'Montargis', '45');
-
-    const request = server.expectOne({ method: 'POST', url: '/clubs' });
-    expect(request.request.body).toEqual({ name: 'Montargis', committeeCode: '45' });
-    request.flush(null, { status: 201, statusText: 'Created', headers: { Location: '/clubs/6' } });
-    await fixture.whenStable();
-
-    expect(page.textContent).toContain('Le club Montargis a été créé.');
-  });
-
-  it('creates the club in its departmental committee', async () => {
+  it('tells the administrator that the club has been created in its departmental committee', async () => {
     createClubInCommittee(page, 'U.S. Orléans.Echecs', '45');
 
     const request = server.expectOne({ method: 'POST', url: '/clubs' });
