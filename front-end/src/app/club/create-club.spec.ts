@@ -53,11 +53,17 @@ describe('CreateClub', () => {
     fill(fieldLabelled(page, 'Code du comité'), '45');
     fill(fieldLabelled(page, 'Identifiant FFE'), 'G45001');
     await chooseCommune('Orl', 'Orléans');
+    fillFields(page, { 'Numéro et voie': '12 rue des Échecs', 'Code postal': '45000', 'Localité': 'Orléans' });
     buttonNamed(page, 'Créer le club').click();
 
     const request = server.expectOne({ method: 'POST', url: '/clubs' });
-    expect(request.request.body).toEqual(
-      { name: 'U.S. Orléans.Echecs', committeeCode: '45', ffeClubId: 'G45001', communeCode: '45234' });
+    expect(request.request.body).toEqual({
+      name: 'U.S. Orléans.Echecs',
+      committeeCode: '45',
+      ffeClubId: 'G45001',
+      communeCode: '45234',
+      registeredOffice: { street: '12 rue des Échecs', postcode: '45000', town: 'Orléans' },
+    });
     request.flush(null, { status: 201, statusText: 'Created', headers: { Location: '/clubs/7' } });
     await fixture.whenStable();
 
