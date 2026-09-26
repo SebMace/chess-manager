@@ -14,21 +14,18 @@ public final class Club {
     private final FfeClubId ffeClubId;
     private final String commune;
 
-    public Club(ClubId id, String name) {
-        this(id, name, false);
+    public Club(ClubId id, String name, String commune) {
+        this(id, name, false, commune);
     }
 
-    public Club(ClubId id, String name, boolean managedByApplication) {
-        this(id, name, managedByApplication, null);
-    }
-
-    public Club(ClubId id, String name, boolean managedByApplication, CommitteeCode committee) {
-        this(id, name, managedByApplication, committee, null, null);
+    public Club(ClubId id, String name, boolean managedByApplication, String commune) {
+        this(id, name, managedByApplication, null, null, commune);
     }
 
     public Club(ClubId id, String name, boolean managedByApplication, CommitteeCode committee,
                 FfeClubId ffeClubId, String commune) {
         if (id == null) throw new IllegalArgumentException("clubId cannot be null");
+        if (commune == null || commune.isBlank()) throw new IllegalArgumentException("A club cannot exist without its commune");
         this.id = id;
         this.name = name;
         this.managedByApplication = managedByApplication;
@@ -42,7 +39,7 @@ public final class Club {
     public boolean managedByApplication() { return managedByApplication; }
     public Optional<CommitteeCode> committee() { return Optional.ofNullable(committee); }
     public Optional<FfeClubId> ffeClubId() { return Optional.ofNullable(ffeClubId); }
-    public Optional<String> commune() { return Optional.ofNullable(commune); }
+    public String commune() { return commune; }
 
     @Override
     public boolean equals(Object other) {

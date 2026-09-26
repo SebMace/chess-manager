@@ -5,7 +5,7 @@ Feature: Create a club
   So that its members can then be registered in it
 
   @acceptance
-  Scenario: A created club keeps its information
+  Scenario: A club is created with its information
     Given "Loiret" is a departmental committee of the FFE
     When an administrator creates the club "U.S. Orléans.Echecs" with:
       | departmental committee | Loiret  |
@@ -27,9 +27,21 @@ Feature: Create a club
   @acceptance
   Scenario: Two clubs cannot share the same FFE identifier
     Given "Loiret" is a departmental committee of the FFE
-    And an administrator has created the club "U.S. Orléans.Echecs" with the FFE identifier "G45001" in the departmental committee "Loiret"
+    And an administrator has created the club "U.S. Orléans.Echecs" with:
+      | departmental committee | Loiret  |
+      | FFE identifier         | G45001  |
+      | commune                | Orléans |
     When an administrator creates the club "Échiquier Orléanais" with:
-      | departmental committee | Loiret |
-      | FFE identifier         | g45001 |
+      | departmental committee | Loiret  |
+      | FFE identifier         | g45001  |
+      | commune                | Orléans |
     Then the club "Échiquier Orléanais" is not created
     And the administrator is told that the FFE identifier "G45001" is already used
+
+  @acceptance
+  Scenario: A club cannot be created without its commune
+    Given "Loiret" is a departmental committee of the FFE
+    When an administrator creates the club "U.S. Orléans.Echecs" with:
+      | departmental committee | Loiret |
+      | FFE identifier         | G45001 |
+    Then the club "U.S. Orléans.Echecs" is not created

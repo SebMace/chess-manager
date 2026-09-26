@@ -30,7 +30,7 @@ class CreateClubTests {
         assertTrue(club.managedByApplication());
         assertEquals(Optional.of(new CommitteeCode("45")), club.committee());
         assertEquals(Optional.of(new FfeClubId("G45001")), club.ffeClubId());
-        assertEquals(Optional.of("Orléans"), club.commune());
+        assertEquals("Orléans", club.commune());
     }
 
     @Test
@@ -39,6 +39,26 @@ class CreateClubTests {
 
         assertThrows(IllegalArgumentException.class,
                 () -> createClub.execute("U.S. Orléans.Echecs", new CommitteeCode("45"), null, "Orléans"));
+
+        assertTrue(clubs.find(clubId).isEmpty());
+    }
+
+    @Test
+    void should_refuse_a_club_without_its_commune() {
+        CreateClub createClub = new CreateClub(clubs, () -> clubId);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> createClub.execute("U.S. Orléans.Echecs", new CommitteeCode("45"), new FfeClubId("G45001"), null));
+
+        assertTrue(clubs.find(clubId).isEmpty());
+    }
+
+    @Test
+    void should_refuse_a_club_with_a_blank_commune() {
+        CreateClub createClub = new CreateClub(clubs, () -> clubId);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> createClub.execute("U.S. Orléans.Echecs", new CommitteeCode("45"), new FfeClubId("G45001"), "   "));
 
         assertTrue(clubs.find(clubId).isEmpty());
     }

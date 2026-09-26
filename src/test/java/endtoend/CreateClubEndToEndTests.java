@@ -51,7 +51,7 @@ class CreateClubEndToEndTests {
         assertTrue(club.managedByApplication());
         assertEquals(Optional.of(new CommitteeCode("45")), club.committee());
         assertEquals(Optional.of(new FfeClubId("G45001")), club.ffeClubId());
-        assertEquals(Optional.of("Orléans"), club.commune());
+        assertEquals("Orléans", club.commune());
     }
 
     @Test
@@ -72,7 +72,15 @@ class CreateClubEndToEndTests {
     @Test
     void a_club_cannot_be_created_with_a_blank_ffe_identifier() throws Exception {
         HttpResponse<Void> response = post("""
-                {"name": "U.S. Orléans.Echecs", "committeeCode": "45", "ffeClubId": "   "}""");
+                {"name": "U.S. Orléans.Echecs", "committeeCode": "45", "ffeClubId": "   ", "commune": "Orléans"}""");
+
+        assertEquals(400, response.statusCode());
+    }
+
+    @Test
+    void a_club_cannot_be_created_without_its_commune() throws Exception {
+        HttpResponse<Void> response = post("""
+                {"name": "Échiquier Orléanais", "committeeCode": "45", "ffeClubId": "G45006"}""");
 
         assertEquals(400, response.statusCode());
     }
@@ -80,10 +88,10 @@ class CreateClubEndToEndTests {
     @Test
     void a_second_club_cannot_use_the_same_ffe_identifier() throws Exception {
         createClub("""
-                {"name": "Echiquier du Gâtinais", "committeeCode": "45", "ffeClubId": "G45100"}""");
+                {"name": "Echiquier du Gâtinais", "committeeCode": "45", "ffeClubId": "G45100", "commune": "Montargis"}""");
 
         HttpResponse<Void> response = post("""
-                {"name": "Gâtinais Échecs", "committeeCode": "45", "ffeClubId": "g45100"}""");
+                {"name": "Gâtinais Échecs", "committeeCode": "45", "ffeClubId": "g45100", "commune": "Montargis"}""");
 
         assertEquals(409, response.statusCode());
     }

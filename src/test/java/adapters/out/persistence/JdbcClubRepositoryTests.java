@@ -38,7 +38,7 @@ class JdbcClubRepositoryTests {
     void should_find_a_saved_club_managed_by_the_application() {
         JdbcClubRepository clubs = new JdbcClubRepository(JdbcClient.create(dataSource));
 
-        clubs.save(new Club(montargis, "Montargis", true));
+        clubs.save(new Club(montargis, "Montargis", true, new CommitteeCode("45"), new FfeClubId("G45004"), "Montargis"));
 
         Club club = clubs.find(montargis).orElseThrow();
         assertEquals(montargis, club.id());
@@ -51,7 +51,7 @@ class JdbcClubRepositoryTests {
         JdbcClubRepository clubs = new JdbcClubRepository(JdbcClient.create(dataSource));
         ClubId orleans = new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000007"));
 
-        clubs.save(new Club(orleans, "U.S. Orléans.Echecs", true, new CommitteeCode("45")));
+        clubs.save(new Club(orleans, "U.S. Orléans.Echecs", true, new CommitteeCode("45"), new FfeClubId("G45005"), "Orléans"));
 
         assertEquals(Optional.of(new CommitteeCode("45")), clubs.find(orleans).orElseThrow().committee());
     }
@@ -65,7 +65,7 @@ class JdbcClubRepositoryTests {
 
         Club club = clubs.find(orleans).orElseThrow();
         assertEquals(Optional.of(new FfeClubId("G45001")), club.ffeClubId());
-        assertEquals(Optional.of("Orléans"), club.commune());
+        assertEquals("Orléans", club.commune());
     }
 
     @Test
@@ -88,6 +88,16 @@ class JdbcClubRepositoryTests {
         assertThrows(DataIntegrityViolationException.class, () -> clubs.save(new Club(
                 new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000011")),
                 "Chécy Échecs", true, new CommitteeCode("45"), new FfeClubId("G45003"), "Chécy")));
+    }
+
+    @Test
+    void should_refuse_to_store_a_club_without_its_commune() {
+        JdbcClient jdbc = JdbcClient.create(dataSource);
+
+        assertThrows(DataIntegrityViolationException.class, () -> jdbc.sql("""
+                        INSERT INTO club (id, name, managed_by_application, committee_code, ffe_club_id)
+                        VALUES ('00000000-0000-0000-0000-000000000012', 'Cercle d''Échecs de Pithiviers', TRUE, '45', 'G45007')""")
+                .update());
     }
 
     @Test

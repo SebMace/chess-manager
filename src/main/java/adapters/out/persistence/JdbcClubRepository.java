@@ -41,7 +41,7 @@ public class JdbcClubRepository implements ClubRepository {
                 .param("managed", club.managedByApplication())
                 .param("committee", club.committee().map(CommitteeCode::value).orElse(null))
                 .param("ffeClubId", club.ffeClubId().map(FfeClubId::value).orElse(null))
-                .param("commune", club.commune().orElse(null))
+                .param("commune", club.commune())
                 .update();
     }
 

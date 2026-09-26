@@ -10,14 +10,24 @@ class ClubTests {
     @Test
     void should_identify_a_club_independently_of_its_name() {
         ClubId id = new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000002"));
-        Club club = new Club(id, "Orléans");
+        Club club = new Club(id, "Orléans", "Orléans");
         assertEquals(id, club.id());
         assertEquals("Orléans", club.name());
-        assertEquals(club, new Club(id, "Orléans Échecs"));
-        assertNotEquals(club, new Club(new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000003")), "Orléans"));
+        assertEquals(club, new Club(id, "Orléans Échecs", "Orléans"));
+        assertNotEquals(club, new Club(new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000003")), "Orléans", "Orléans"));
     }
     @Test
     void should_reject_a_club_without_an_identity() {
-        assertThrows(IllegalArgumentException.class, () -> new Club(null, "Orléans"));
+        assertThrows(IllegalArgumentException.class, () -> new Club(null, "Orléans", "Orléans"));
+    }
+    @Test
+    void should_reject_a_club_without_its_commune() {
+        ClubId id = new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000002"));
+        assertThrows(IllegalArgumentException.class, () -> new Club(id, "Orléans", null));
+    }
+    @Test
+    void should_reject_a_club_with_a_blank_commune() {
+        ClubId id = new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000002"));
+        assertThrows(IllegalArgumentException.class, () -> new Club(id, "Orléans", "   "));
     }
 }
