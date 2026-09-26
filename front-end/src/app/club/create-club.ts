@@ -1,6 +1,9 @@
 import { Component, inject, signal } from '@angular/core';
 import { Clubs, FfeClubIdAlreadyUsed, NewClub } from './clubs';
 
+const REQUIRED_INFORMATION = ['committeeCode', 'ffeClubId', 'commune'] as const satisfies readonly (keyof NewClub)[];
+type RequiredInformation = (typeof REQUIRED_INFORMATION)[number];
+
 type CreationOutcome =
   | { kind: 'none' }
   | { kind: 'created'; club: string }
@@ -36,10 +39,10 @@ type CreationOutcome =
                 #committeeCode
                 aria-required="true"
                 placeholder="ex. 45"
-                [attr.aria-invalid]="committeeRequired() || null"
-                [attr.aria-describedby]="committeeRequired() ? 'committee-code-error' : null"
+                [attr.aria-invalid]="missing().has('committeeCode') || null"
+                [attr.aria-describedby]="missing().has('committeeCode') ? 'committee-code-error' : null"
               />
-              @if (committeeRequired()) {
+              @if (missing().has('committeeCode')) {
                 <p id="committee-code-error" class="field-error">Le code du comité est obligatoire.</p>
               }
             </div>
@@ -50,10 +53,10 @@ type CreationOutcome =
                 #ffeClubId
                 aria-required="true"
                 placeholder="ex. G45001"
-                [attr.aria-invalid]="ffeClubIdRequired() || null"
-                [attr.aria-describedby]="ffeClubIdRequired() ? 'ffe-club-id-error' : null"
+                [attr.aria-invalid]="missing().has('ffeClubId') || null"
+                [attr.aria-describedby]="missing().has('ffeClubId') ? 'ffe-club-id-error' : null"
               />
-              @if (ffeClubIdRequired()) {
+              @if (missing().has('ffeClubId')) {
                 <p id="ffe-club-id-error" class="field-error">L'identifiant FFE est obligatoire.</p>
               }
             </div>
@@ -64,10 +67,10 @@ type CreationOutcome =
                 #commune
                 aria-required="true"
                 placeholder="ex. Orléans"
-                [attr.aria-invalid]="communeRequired() || null"
-                [attr.aria-describedby]="communeRequired() ? 'commune-error' : null"
+                [attr.aria-invalid]="missing().has('commune') || null"
+                [attr.aria-describedby]="missing().has('commune') ? 'commune-error' : null"
               />
-              @if (communeRequired()) {
+              @if (missing().has('commune')) {
                 <p id="commune-error" class="field-error">La commune est obligatoire.</p>
               }
             </div>
@@ -93,16 +96,12 @@ type CreationOutcome =
 export class CreateClub {
   private readonly clubs = inject(Clubs);
   protected readonly outcome = signal<CreationOutcome>({ kind: 'none' });
-  protected readonly committeeRequired = signal(false);
-  protected readonly ffeClubIdRequired = signal(false);
-  protected readonly communeRequired = signal(false);
+  protected readonly missing = signal<ReadonlySet<RequiredInformation>>(new Set());
 
   protected create(event: Event, club: NewClub): void {
     event.preventDefault();
-    this.committeeRequired.set(!club.committeeCode);
-    this.ffeClubIdRequired.set(!club.ffeClubId);
-    this.communeRequired.set(!club.commune);
-    if (this.committeeRequired() || this.ffeClubIdRequired() || this.communeRequired()) return;
+    this.missing.set(new Set(REQUIRED_INFORMATION.filter((information) => !club[information])));
+    if (this.missing().size > 0) return;
     this.clubs.create(club).subscribe({
       next: () => this.outcome.set({ kind: 'created', club: club.name }),
       error: (refusal: unknown) =>
