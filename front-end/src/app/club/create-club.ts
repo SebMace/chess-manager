@@ -2,7 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { Clubs, FfeClubIdAlreadyUsed, NewClub } from './clubs';
 import { Commune, Communes } from '../commune/communes';
 
-const REQUIRED_INFORMATION = ['committeeCode', 'ffeClubId', 'commune'] as const satisfies readonly (keyof NewClub)[];
+const REQUIRED_INFORMATION = ['committeeCode', 'ffeClubId', 'communeCode'] as const satisfies readonly (keyof NewClub)[];
 type RequiredInformation = (typeof REQUIRED_INFORMATION)[number];
 
 type CreationOutcome =
@@ -23,7 +23,7 @@ type CreationOutcome =
           name: clubName.value,
           committeeCode: committeeCode.value,
           ffeClubId: ffeClubId.value,
-          commune: commune.value,
+          communeCode: chosenCommune()?.code ?? '',
         })"
       >
         <fieldset>
@@ -68,16 +68,16 @@ type CreationOutcome =
                 #commune
                 aria-required="true"
                 placeholder="ex. Orléans"
-                [attr.aria-invalid]="missing().has('commune') || null"
-                [attr.aria-describedby]="missing().has('commune') ? 'commune-error' : null"
+                [attr.aria-invalid]="missing().has('communeCode') || null"
+                [attr.aria-describedby]="missing().has('communeCode') ? 'commune-error' : null"
                 (input)="typeCommune(commune.value, committeeCode.value)"
               />
               <ul id="commune-options" role="listbox" aria-label="Communes proposées">
                 @for (offered of offeredCommunes(); track offered.code) {
-                  <li role="option">{{ offered.name }}</li>
+                  <li role="option" (click)="chooseCommune(offered, commune)">{{ offered.name }}</li>
                 }
               </ul>
-              @if (missing().has('commune')) {
+              @if (missing().has('communeCode')) {
                 <p id="commune-error" class="field-error">La commune est obligatoire.</p>
               }
             </div>
@@ -108,12 +108,20 @@ export class CreateClub {
   private readonly communesOfCommittee = signal<readonly Commune[]>([]);
   private committeeOfCommunes = '';
   private readonly typedCommune = signal('');
+  protected readonly chosenCommune = signal<Commune | null>(null);
   protected readonly offeredCommunes = computed(() => {
     const typed = this.typedCommune().toLowerCase();
     return typed ? this.communesOfCommittee().filter(commune => commune.name.toLowerCase().startsWith(typed)) : [];
   });
 
+  protected chooseCommune(commune: Commune, field: HTMLInputElement): void {
+    this.chosenCommune.set(commune);
+    this.typedCommune.set('');
+    field.value = commune.name;
+  }
+
   protected typeCommune(typed: string, committeeCode: string): void {
+    this.chosenCommune.set(null);
     this.typedCommune.set(typed);
     if (!committeeCode || committeeCode === this.committeeOfCommunes) return;
     this.committeeOfCommunes = committeeCode;
