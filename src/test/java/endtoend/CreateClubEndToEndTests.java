@@ -42,20 +42,14 @@ class CreateClubEndToEndTests {
     }
 
     @Test
-    void an_administrator_creates_a_club_in_its_departmental_committee() throws Exception {
-        Club club = clubs.find(createClub("{\"name\": \"U.S. Orléans.Echecs\", \"committeeCode\": \"45\"}")).orElseThrow();
-
-        assertEquals("U.S. Orléans.Echecs", club.name());
-        assertTrue(club.managedByApplication());
-        assertEquals(Optional.of(new CommitteeCode("45")), club.committee());
-    }
-
-    @Test
-    void an_administrator_creates_a_club_with_its_ffe_identity() throws Exception {
+    void an_administrator_creates_a_club_with_its_information() throws Exception {
         Club club = clubs.find(createClub("""
                 {"name": "U.S. Orléans.Echecs", "committeeCode": "45", "ffeClubId": "G45001", "commune": "Orléans"}"""))
                 .orElseThrow();
 
+        assertEquals("U.S. Orléans.Echecs", club.name());
+        assertTrue(club.managedByApplication());
+        assertEquals(Optional.of(new CommitteeCode("45")), club.committee());
         assertEquals(Optional.of(new FfeClubId("G45001")), club.ffeClubId());
         assertEquals(Optional.of("Orléans"), club.commune());
     }
