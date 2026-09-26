@@ -201,6 +201,32 @@ told that the club "Montargis" has been created", not "When I send POST /clubs /
 Do not force an acceptance test for a purely internal refactoring or a tiny isolated domain rule
 when a focused unit test communicates the behavior more clearly.
 
+### 6.1 Vertical slices
+
+Work is planned and delivered as vertical slices. The ordered backlog of slices lives in
+`docs/slices.md`; read it before proposing or starting any new behavior.
+
+- A slice is one observable business capability, delivered end to end: acceptance scenario, use
+  case, domain behavior, persistence, REST, and screen, each technical layer driven by its own test.
+- Choose the next slice from `docs/slices.md`. Do not start a behavior that is absent from it:
+  propose adding it first, with its intention, dependencies, and open questions.
+- Order slices so that each one relies only on behaviors already built. A business precondition
+  fabricated by a test fixture reveals a missing earlier slice; data external to the system, such
+  as FFE data, remains a legitimate fixture.
+- Before starting a slice, use the `vsa-slicer` agent (`.claude/agents/vsa-slicer.md`) to check its
+  scope, its prerequisites, and its first RED, when the user asks for it.
+- The code is organized by slice inside its bounded context: one package per use case, named
+  after it (for example `clubmanagement.createclub`), holding the use case, its refusals, and
+  its inbound adapter in a `rest` subpackage. The unit tests live in the same package.
+- The domain model and the ports stay shared (`clubmanagement.domain`, `clubmanagement.ports`);
+  a slice never owns a parallel model. An outbound adapter that persists an aggregate or reads
+  a reference is shared too (`clubmanagement.persistence`, `clubmanagement.insee`).
+- A slice depends only on the shared domain and ports, never on another slice. ArchUnit
+  (`architecture.ArchitectureTests`) enforces this and the hexagonal dependency rules.
+- Update `docs/slices.md` in the same branch as the slice: status, layers covered, and the open
+  questions answered or discovered.
+- Roadmap themes stay undivided until a use case is requested (YAGNI).
+
 ## 7. Transformation Priority Premise (TPP)
 
 Use TPP as a guide for choosing the next test and the smallest implementation transformation,
