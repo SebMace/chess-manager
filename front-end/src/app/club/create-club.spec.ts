@@ -47,6 +47,7 @@ describe('CreateClub', () => {
   async function createValidClub(name: string): Promise<void> {
     fillFields(page, { 'Nom du club': name, 'Code du comité': '45', 'Identifiant FFE': 'G45001', ...REGISTERED_OFFICE });
     await chooseCommune('Orl', 'Orléans');
+    playsAtRegisteredOffice(page);
     buttonNamed(page, 'Créer le club').click();
   }
 
@@ -79,7 +80,7 @@ describe('CreateClub', () => {
   it('lets the administrator say that the club plays at its registered office', async () => {
     fillFields(page, { 'Nom du club': 'U.S. Orléans.Echecs', 'Code du comité': '45', 'Identifiant FFE': 'G45001', ...REGISTERED_OFFICE });
     await chooseCommune('Orl', 'Orléans');
-    checkboxLabelled(page, 'La salle de jeu est au siège social').click();
+    playsAtRegisteredOffice(page);
     await fixture.whenStable();
 
     expect(() => fieldInGroup(page, 'Salle de jeu', 'Numéro et voie')).toThrow();
@@ -114,6 +115,7 @@ describe('CreateClub', () => {
 
     press(commune, 'Enter');
     await fixture.whenStable();
+    playsAtRegisteredOffice(page);
     buttonNamed(page, 'Créer le club').click();
 
     expect(server.expectOne({ method: 'POST', url: '/clubs' }).request.body.communeCode).toBe('45234');
@@ -243,6 +245,7 @@ describe('CreateClub', () => {
     fillFields(page, { 'Nom du club': 'U.S. Orléans.Echecs', 'Code du comité': '45', 'Identifiant FFE': 'G45001' });
     await chooseCommune('Orl', 'Orléans');
     fillFields(page, { ...REGISTERED_OFFICE, 'Code postal': '45 000' });
+    playsAtRegisteredOffice(page);
     buttonNamed(page, 'Créer le club').click();
 
     server.expectOne({ method: 'POST', url: '/clubs' });
@@ -305,8 +308,8 @@ function fill(field: HTMLInputElement, value: string): void {
   field.dispatchEvent(new Event('input'));
 }
 
-function checkboxLabelled(page: HTMLElement, text: string): HTMLInputElement {
-  return fieldLabelled(page, text);
+function playsAtRegisteredOffice(page: HTMLElement): void {
+  fieldLabelled(page, 'La salle de jeu est au siège social').click();
 }
 
 function fieldInGroup(page: HTMLElement, group: string, text: string): HTMLInputElement {
