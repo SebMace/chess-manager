@@ -1,6 +1,7 @@
 package acceptance.steps;
 
 import clubmanagement.createclub.CommuneNotInCommitteeDepartment;
+import clubmanagement.clubsofcommittee.ClubOfCommittee;
 import clubmanagement.clubsofcommittee.ClubsOfCommittee;
 import clubmanagement.communesofcommittee.CommunesOfCommittee;
 import clubmanagement.createclub.CreateClub;
@@ -44,7 +45,7 @@ public class CreateClubSteps {
     private final Map<String, CommitteeCode> committees = new HashMap<>();
     private final Map<String, RuntimeException> refusals = new HashMap<>();
     private List<Commune> offeredCommunes = List.of();
-    private List<Club> consultedClubs = List.of();
+    private List<ClubOfCommittee> consultedClubs = List.of();
 
     @Given("{string} is a departmental committee of the FFE")
     public void departmentalCommittee(String name) { committees.put(name, COMMITTEES.get(name)); }
@@ -79,7 +80,7 @@ public class CreateClubSteps {
 
     @When("an administrator consults the clubs of the departmental committee {string}")
     public void consultClubs(String committee) {
-        consultedClubs = new ClubsOfCommittee(clubs).execute(committees.get(committee));
+        consultedClubs = new ClubsOfCommittee(clubs, communes).execute(committees.get(committee));
     }
 
     @Then("the administrator is shown the club {string}")
