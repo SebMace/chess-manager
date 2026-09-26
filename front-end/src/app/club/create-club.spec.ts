@@ -31,6 +31,19 @@ describe('CreateClub', () => {
     expect(page.textContent).toContain('Le club U.S. Orléans.Echecs a été créé.');
   });
 
+  it('creates the club with its FFE identity', async () => {
+    createClub(page, {
+      'Nom du club': 'U.S. Orléans.Echecs',
+      'Code du comité': '45',
+      'Identifiant FFE': 'G45001',
+      'Commune': 'Orléans',
+    });
+
+    const request = server.expectOne({ method: 'POST', url: '/clubs' });
+    expect(request.request.body).toEqual(
+      { name: 'U.S. Orléans.Echecs', committeeCode: '45', ffeClubId: 'G45001', commune: 'Orléans' });
+  });
+
   it('tells the administrator that the club could not be created', async () => {
     createClubInCommittee(page, 'Montargis', '45');
 
@@ -95,16 +108,16 @@ describe('CreateClub', () => {
 });
 
 function createClubWithoutCommittee(page: HTMLElement, name: string): void {
-  const field = fieldLabelled(page, 'Nom du club');
-  field.value = name;
-  field.dispatchEvent(new Event('input'));
+  createClub(page, { 'Nom du club': name });
+}
+
+function createClub(page: HTMLElement, fields: Record<string, string>): void {
+  for (const [label, value] of Object.entries(fields)) fill(fieldLabelled(page, label), value);
   buttonNamed(page, 'Créer le club').click();
 }
 
 function createClubInCommittee(page: HTMLElement, name: string, committee: string): void {
-  fill(fieldLabelled(page, 'Nom du club'), name);
-  fill(fieldLabelled(page, 'Code du comité'), committee);
-  buttonNamed(page, 'Créer le club').click();
+  createClub(page, { 'Nom du club': name, 'Code du comité': committee });
 }
 
 function fill(field: HTMLInputElement, value: string): void {

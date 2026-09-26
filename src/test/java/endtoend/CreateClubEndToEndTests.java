@@ -4,6 +4,7 @@ import application.club.ClubRepository;
 import domain.club.Club;
 import domain.club.vo.ClubId;
 import domain.club.vo.CommitteeCode;
+import domain.club.vo.FfeClubId;
 import infrastructure.ChessManagerApplication;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +48,16 @@ class CreateClubEndToEndTests {
         assertEquals("U.S. Orléans.Echecs", club.name());
         assertTrue(club.managedByApplication());
         assertEquals(Optional.of(new CommitteeCode("45")), club.committee());
+    }
+
+    @Test
+    void an_administrator_creates_a_club_with_its_ffe_identity() throws Exception {
+        Club club = clubs.find(createClub("""
+                {"name": "U.S. Orléans.Echecs", "committeeCode": "45", "ffeClubId": "G45001", "commune": "Orléans"}"""))
+                .orElseThrow();
+
+        assertEquals(Optional.of(new FfeClubId("G45001")), club.ffeClubId());
+        assertEquals(Optional.of("Orléans"), club.commune());
     }
 
     @Test
