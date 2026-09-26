@@ -22,7 +22,7 @@ public class ClubController {
 
     @PostMapping("/clubs")
     public ResponseEntity<Void> create(@RequestBody CreateClubRequest request) {
-        if (request.committeeCode() == null || request.ffeClubId() == null) return ResponseEntity.badRequest().build();
+        if (request.committeeCode() == null) return ResponseEntity.badRequest().build();
         ClubId id = createClub.execute(request.name(), new CommitteeCode(request.committeeCode()),
                 new FfeClubId(request.ffeClubId()), request.commune());
         return ResponseEntity.created(URI.create("/clubs/" + id.clubId())).build();
