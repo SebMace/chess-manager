@@ -4,10 +4,12 @@ import { Commune } from './communes';
 export function communesMatching(communes: readonly Commune[], typed: string): Commune[] {
   const typedWords = words(typed);
   if (typedWords.length === 0) return [];
-  return communes.filter(commune => {
-    const nameWords = words(commune.name);
-    return typedWords.every(typedWord => nameWords.some(word => begins(word, typedWord)));
-  });
+  return communes
+    .filter(commune => {
+      const nameWords = words(commune.name);
+      return typedWords.every(typedWord => nameWords.some(word => begins(word, typedWord)));
+    })
+    .sort((one, other) => one.name.localeCompare(other.name, 'fr'));
 }
 
 // "St" is the usual abbreviation of "Saint", yet it may also begin a word such as "Strasbourg".
