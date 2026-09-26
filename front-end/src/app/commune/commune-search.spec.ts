@@ -14,4 +14,8 @@ describe('communesMatching', () => {
   it('finds a commune by the beginning of any word of its name', () => {
     expect(communesMatching(LOIRET, 'pryv')).toEqual([SAINT_PRYVE]);
   });
+
+  it('finds a commune by the beginnings of several words typed', () => {
+    expect(communesMatching(LOIRET, 'saint-mes')).toEqual([SAINT_PRYVE]);
+  });
 });
