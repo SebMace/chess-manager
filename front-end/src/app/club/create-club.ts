@@ -62,7 +62,7 @@ type CreationOutcome =
                 <p id="ffe-club-id-error" class="field-error">L'identifiant FFE est obligatoire.</p>
               }
             </div>
-            <div class="field field--wide">
+            <div class="field field--wide commune">
               <label for="commune" class="required">Commune</label>
               <input
                 id="commune"
@@ -80,7 +80,13 @@ type CreationOutcome =
                 (input)="typeCommune(commune.value, committeeCode.value)"
                 (keydown)="browseCommunes($event, commune)"
               />
-              <ul id="commune-options" role="listbox" aria-label="Communes proposées">
+              <ul
+                id="commune-options"
+                role="listbox"
+                aria-label="Communes proposées"
+                class="commune-options"
+                [hidden]="offeredCommunes().length === 0"
+              >
                 @for (offered of offeredCommunes(); track offered.code) {
                   <li
                     role="option"
