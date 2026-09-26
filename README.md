@@ -122,18 +122,22 @@ curl -i -X POST localhost:8080/clubs -H 'Content-Type: application/json' -d '{
 ## Front-end (Angular)
 
 The Angular 22 application in `front-end/` is a separate npm project, not built by Maven.
-It shows a French screen where the administrator creates a club and is told whether the
-club has been created. It needs Node.js 22.22, 24.15 or 26 and npm.
+It opens on the clubs managed by the application in a departmental committee: the
+administrator types the number of their department and is shown each club with its commune
+and its FFE identifier, sorted by name. A link leads to the French screen where the
+administrator creates a club and is told whether the club has been created. It needs Node.js 22.22, 24.15 or 26 and npm.
 
 | File | Role |
 |---|---|
+| `src/app/club-management/clubs-of-committee/clubs-of-committee.ts` | `ClubsOfCommittee` component: the clubs of the committee the administrator asks for. |
 | `src/app/club-management/create-club/create-club.ts` | `CreateClub` component: the form and the creation outcome. |
 | `src/app/club-management/create-club/commune-search.ts` | The communes matching what the administrator types. |
 | `src/app/club-management/ports/clubs.ts` | `Clubs` port: what the club screens need, with no HTTP detail. |
 | `src/app/club-management/ports/communes.ts` | `Communes` port: the communes of a departmental committee. |
 | `src/app/club-management/http/http-clubs.ts` | `HttpClubs` adapter: implements `Clubs` over the REST API. |
 | `src/app/club-management/http/http-communes.ts` | `HttpCommunes` adapter: implements `Communes` over the REST API. |
-| `src/app/app.config.ts` | Wires `Clubs` to `HttpClubs` and `Communes` to `HttpCommunes`. |
+| `src/app/app.routes.ts` | The clubs of a committee at `/`, the creation of a club at `/clubs/new`. |
+| `src/app/app.config.ts` | Provides the router and wires `Clubs` to `HttpClubs` and `Communes` to `HttpCommunes`. |
 
 As in the back-end, each slice has its own folder named after its use case (`create-club`);
 the ports and their HTTP adapters are shared by the slices of Club Management.
@@ -187,6 +191,7 @@ clubmanagement/
   ports/                   shared ports: ClubRepository, ClubRelationshipRepository, Communes, PersonRepository
   createclub/              CreateClub, its refusals, rest/CreateClubController
   communesofcommittee/     CommunesOfCommittee, rest/CommunesOfCommitteeController
+  clubsofcommittee/        ClubsOfCommittee, ClubOfCommittee, rest/ClubsOfCommitteeController
   isexternalplayer/        IsExternalPlayer
   recordperson/            RecordPerson
   registerlicense/         RegisterLicense
