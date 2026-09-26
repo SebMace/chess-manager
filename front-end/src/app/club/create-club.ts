@@ -1,6 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { Clubs, FfeClubIdAlreadyUsed, NewClub } from './clubs';
-import { Commune, Communes } from '../commune/communes';
+import { Clubs, FfeClubIdAlreadyUsed, NewClub } from '../club-management/ports/clubs';
+import { Commune, Communes } from '../club-management/ports/communes';
 import { communesMatching } from '../commune/commune-search';
 
 const REQUIRED_INFORMATION = [
