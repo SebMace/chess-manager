@@ -191,6 +191,18 @@ describe('CreateClub', () => {
     expect(page.textContent).toContain('La commune est obligatoire.');
   });
 
+  it('tells the administrator to choose the commune among those offered', async () => {
+    fillFields(page, { 'Nom du club': 'U.S. Orléans.Echecs', 'Code du comité': '45', 'Identifiant FFE': 'G45001' });
+    fill(fieldLabelled(page, 'Commune'), 'Orl');
+    server.expectOne(request => request.url === '/communes').flush(LOIRET);
+    buttonNamed(page, 'Créer le club').click();
+    await fixture.whenStable();
+
+    server.expectNone({ method: 'POST', url: '/clubs' });
+    expect(page.textContent).toContain('Choisissez la commune parmi celles proposées.');
+    expect(page.textContent).not.toContain('La commune est obligatoire.');
+  });
+
   it('tells the administrator that the FFE identifier is already used by another club', async () => {
     await createValidClub('Échiquier Orléanais');
 
