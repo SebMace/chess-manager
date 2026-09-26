@@ -12,7 +12,11 @@ describe('ClubsOfCommittee', () => {
 
   beforeEach(async () => {
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting(), { provide: Clubs, useClass: HttpClubs }],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: Clubs, useClass: HttpClubs },
+      ],
     });
     fixture = TestBed.createComponent(ClubsOfCommittee);
     server = TestBed.inject(HttpTestingController);
@@ -23,12 +27,18 @@ describe('ClubsOfCommittee', () => {
   async function consultClubsOfCommittee(committeeCode: string, clubs: unknown[]): Promise<void> {
     fill(fieldLabelled(page, 'Numéro de votre département'), committeeCode);
     buttonNamed(page, 'Afficher les clubs').click();
-    server.expectOne(request => request.url === '/clubs' && request.params.get('committee') === committeeCode).flush(clubs);
+    server
+      .expectOne(
+        (request) => request.url === '/clubs' && request.params.get('committee') === committeeCode,
+      )
+      .flush(clubs);
     await fixture.whenStable();
   }
 
   it('shows the administrator the clubs of the committee they ask for', async () => {
-    await consultClubsOfCommittee('45', [{ name: 'U.S. Orléans.Echecs', commune: 'Orléans', ffeClubId: 'G45001' }]);
+    await consultClubsOfCommittee('45', [
+      { name: 'U.S. Orléans.Echecs', commune: 'Orléans', ffeClubId: 'G45001' },
+    ]);
 
     expect(shownClubs(page)).toEqual([['U.S. Orléans.Echecs', 'Orléans', 'G45001']]);
   });
@@ -41,8 +51,9 @@ describe('ClubsOfCommittee', () => {
 });
 
 function shownClubs(page: HTMLElement): string[][] {
-  return Array.from(page.querySelectorAll('tbody tr')).map(row =>
-    Array.from(row.querySelectorAll('th, td')).map(cell => cell.textContent?.trim() ?? ''));
+  return Array.from(page.querySelectorAll('tbody tr')).map((row) =>
+    Array.from(row.querySelectorAll('th, td')).map((cell) => cell.textContent?.trim() ?? ''),
+  );
 }
 
 function fill(field: HTMLInputElement, value: string): void {
@@ -51,13 +62,17 @@ function fill(field: HTMLInputElement, value: string): void {
 }
 
 function fieldLabelled(page: HTMLElement, text: string): HTMLInputElement {
-  const label = Array.from(page.querySelectorAll('label')).find(l => l.textContent?.trim() === text);
+  const label = Array.from(page.querySelectorAll('label')).find(
+    (l) => l.textContent?.trim() === text,
+  );
   if (!label?.control) throw new Error(`No field labelled "${text}"`);
   return label.control as HTMLInputElement;
 }
 
 function buttonNamed(page: HTMLElement, text: string): HTMLButtonElement {
-  const button = Array.from(page.querySelectorAll('button')).find(b => b.textContent?.trim() === text);
+  const button = Array.from(page.querySelectorAll('button')).find(
+    (b) => b.textContent?.trim() === text,
+  );
   if (!button) throw new Error(`No button named "${text}"`);
   return button;
 }
