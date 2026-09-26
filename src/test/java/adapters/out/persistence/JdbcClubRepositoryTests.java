@@ -91,6 +91,15 @@ class JdbcClubRepositoryTests {
     }
 
     @Test
+    void should_refuse_to_store_a_club_without_its_commune() {
+        JdbcClubRepository clubs = new JdbcClubRepository(JdbcClient.create(dataSource));
+
+        assertThrows(DataIntegrityViolationException.class, () -> clubs.save(new Club(
+                new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000012")),
+                "Cercle d'Échecs de Pithiviers", true, new CommitteeCode("45"), new FfeClubId("G45007"), null)));
+    }
+
+    @Test
     void should_find_nothing_for_an_unknown_club() {
         JdbcClubRepository clubs = new JdbcClubRepository(JdbcClient.create(dataSource));
         ClubId unknown = new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000099"));
