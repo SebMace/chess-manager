@@ -35,6 +35,7 @@ public class CreateClubSteps {
     private static final Map<String, CommuneCode> COMMUNES = Map.of(
             "Orléans", InMemoryCommunes.ORLEANS.code(),
             "Olivet", InMemoryCommunes.OLIVET.code(),
+            "Montargis", InMemoryCommunes.MONTARGIS.code(),
             "Saint-Pryvé-Saint-Mesmin", InMemoryCommunes.SAINT_PRYVE_SAINT_MESMIN.code(),
             "Olivet (Mayenne)", InMemoryCommunes.OLIVET_IN_MAYENNE.code());
     private final InMemoryClubRepository clubs = new InMemoryClubRepository();
