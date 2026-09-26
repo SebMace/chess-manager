@@ -1,1 +1,46 @@
-/* You can add global styles to this file, and also import other style files */
+/* Chess Manager: a light, board-inspired palette (ivory and walnut squares). */
+:root {
+  --square-light: #f0d9b5;
+  --square-dark: #b58863;
+  --walnut: #5c4033;
+  --walnut-deep: #3b2a20;
+  --ivory: #fbf8f1;
+  --ink: #2b211b;
+  --ink-soft: #6f6157;
+  --line: #e2d6c3;
+  --backdrop-light: #f6efe2;
+  --backdrop-dark: #ede1cb;
+  --focus: #b58863;
+  --success: #2f6b3a;
+  --success-bg: #e8f3e9;
+  --danger: #a2322b;
+  --danger-bg: #fbeae8;
+
+  --radius: 10px;
+  --space: 1rem;
+
+  color-scheme: light;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--ink);
+  line-height: 1.5;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    repeating-conic-gradient(var(--backdrop-dark) 0 25%, var(--backdrop-light) 0 50%) 0 0 / 64px 64px;
+  background-attachment: fixed;
+}
+
+h1,
+h2,
+legend {
+  font-family: Georgia, "Times New Roman", serif;
+}
