@@ -107,6 +107,14 @@ describe('CreateClub', () => {
     expect(page.textContent).toContain("L'identifiant FFE est obligatoire.");
   });
 
+  it('tells the administrator that the commune is required', async () => {
+    createClub(page, { 'Nom du club': 'U.S. Orléans.Echecs', 'Code du comité': '45', 'Identifiant FFE': 'G45001' });
+    await fixture.whenStable();
+
+    server.expectNone({ method: 'POST', url: '/clubs' });
+    expect(page.textContent).toContain('La commune est obligatoire.');
+  });
+
   it('tells the administrator that the FFE identifier is already used by another club', async () => {
     createValidClub(page, 'Échiquier Orléanais');
 
