@@ -79,6 +79,19 @@ describe('CreateClub', () => {
     server.expectNone({ method: 'POST', url: '/clubs' });
     expect(page.textContent).toContain('Le code du comité est obligatoire.');
   });
+
+  it('no longer tells the administrator that the committee is required once it is given', async () => {
+    createClubWithoutCommittee(page, 'Montargis');
+    await fixture.whenStable();
+
+    createClubInCommittee(page, 'Montargis', '45');
+    server.expectOne({ method: 'POST', url: '/clubs' })
+      .flush(null, { status: 201, statusText: 'Created', headers: { Location: '/clubs/6' } });
+    await fixture.whenStable();
+
+    expect(page.textContent).toContain('Le club Montargis a été créé.');
+    expect(page.textContent).not.toContain('Le code du comité est obligatoire.');
+  });
 });
 
 function createClubWithoutCommittee(page: HTMLElement, name: string): void {
