@@ -114,6 +114,15 @@ class CreateClubEndToEndTests {
     }
 
     @Test
+    void a_club_cannot_be_created_with_a_registered_office_postcode_that_is_not_five_digits() throws Exception {
+        HttpResponse<Void> response = post("""
+                {"name": "Loury Échecs", "committeeCode": "45", "ffeClubId": "G45010", "communeCode": "45188",
+                 "registeredOffice": {"street": "3 place de l'Église", "postcode": "4547", "town": "Loury"}}""");
+
+        assertEquals(400, response.statusCode());
+    }
+
+    @Test
     void a_second_club_cannot_use_the_same_ffe_identifier() throws Exception {
         createClub("""
                 {"name": "Echiquier du Gâtinais", "committeeCode": "45", "ffeClubId": "G45100", "communeCode": "45208", "registeredOffice": {"street": "12 rue des Échecs", "postcode": "45000", "town": "Orléans"}}""");
