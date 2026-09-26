@@ -104,3 +104,14 @@ Feature: Create a club
       | FFE identifier         | G45001  |
       | commune                | Orléans |
     Then the club "U.S. Orléans.Echecs" is not created
+
+  @acceptance
+  Scenario: A club cannot be created with an incomplete registered office
+    Given "Loiret" is a departmental committee of the FFE
+    When an administrator creates the club "U.S. Orléans.Echecs" with:
+      | departmental committee     | Loiret            |
+      | FFE identifier             | G45001            |
+      | commune                    | Orléans           |
+      | registered office street   | 12 rue des Échecs |
+      | registered office postcode | 45000             |
+    Then the club "U.S. Orléans.Echecs" is not created
