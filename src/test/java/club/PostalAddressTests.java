@@ -20,4 +20,9 @@ class PostalAddressTests {
     void should_reject_an_address_without_its_street() {
         assertThrows(IllegalArgumentException.class, () -> new PostalAddress("", "45000", "Orléans"));
     }
+
+    @Test
+    void should_reject_a_postcode_with_fewer_than_five_digits() {
+        assertThrows(IllegalArgumentException.class, () -> new PostalAddress("12 rue des Échecs", "4500", "Orléans"));
+    }
 }
