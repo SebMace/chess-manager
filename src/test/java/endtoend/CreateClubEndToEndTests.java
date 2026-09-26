@@ -42,20 +42,14 @@ class CreateClubEndToEndTests {
     }
 
     @Test
-    void an_administrator_creates_a_club_in_its_departmental_committee() throws Exception {
-        Club club = clubs.find(createClub("{\"name\": \"U.S. Orléans.Echecs\", \"committeeCode\": \"45\"}")).orElseThrow();
-
-        assertEquals("U.S. Orléans.Echecs", club.name());
-        assertTrue(club.managedByApplication());
-        assertEquals(Optional.of(new CommitteeCode("45")), club.committee());
-    }
-
-    @Test
-    void an_administrator_creates_a_club_with_its_ffe_identity() throws Exception {
+    void an_administrator_creates_a_club_with_its_information() throws Exception {
         Club club = clubs.find(createClub("""
                 {"name": "U.S. Orléans.Echecs", "committeeCode": "45", "ffeClubId": "G45001", "commune": "Orléans"}"""))
                 .orElseThrow();
 
+        assertEquals("U.S. Orléans.Echecs", club.name());
+        assertTrue(club.managedByApplication());
+        assertEquals(Optional.of(new CommitteeCode("45")), club.committee());
         assertEquals(Optional.of(new FfeClubId("G45001")), club.ffeClubId());
         assertEquals(Optional.of("Orléans"), club.commune());
     }
@@ -65,6 +59,33 @@ class CreateClubEndToEndTests {
         HttpResponse<Void> response = post("{\"name\": \"Montargis\"}");
 
         assertEquals(400, response.statusCode());
+    }
+
+    @Test
+    void a_club_cannot_be_created_without_its_ffe_identifier() throws Exception {
+        HttpResponse<Void> response = post("""
+                {"name": "U.S. Orléans.Echecs", "committeeCode": "45", "commune": "Orléans"}""");
+
+        assertEquals(400, response.statusCode());
+    }
+
+    @Test
+    void a_club_cannot_be_created_with_a_blank_ffe_identifier() throws Exception {
+        HttpResponse<Void> response = post("""
+                {"name": "U.S. Orléans.Echecs", "committeeCode": "45", "ffeClubId": "   "}""");
+
+        assertEquals(400, response.statusCode());
+    }
+
+    @Test
+    void a_second_club_cannot_use_the_same_ffe_identifier() throws Exception {
+        createClub("""
+                {"name": "Echiquier du Gâtinais", "committeeCode": "45", "ffeClubId": "G45100"}""");
+
+        HttpResponse<Void> response = post("""
+                {"name": "Gâtinais Échecs", "committeeCode": "45", "ffeClubId": "g45100"}""");
+
+        assertEquals(409, response.statusCode());
     }
 
     private ClubId createClub(String json) throws Exception {

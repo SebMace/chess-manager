@@ -1,10 +1,11 @@
 import { Component, inject, signal } from '@angular/core';
-import { Clubs, NewClub } from './clubs';
+import { Clubs, FfeClubIdAlreadyUsed, NewClub } from './clubs';
 
 type CreationOutcome =
   | { kind: 'none' }
   | { kind: 'created'; club: string }
-  | { kind: 'failed' };
+  | { kind: 'failed' }
+  | { kind: 'ffeClubIdAlreadyUsed'; ffeClubId: string };
 
 @Component({
   selector: 'app-create-club',
@@ -43,8 +44,18 @@ type CreationOutcome =
               }
             </div>
             <div class="field">
-              <label for="ffe-club-id">Identifiant FFE</label>
-              <input id="ffe-club-id" #ffeClubId placeholder="ex. G45001" />
+              <label for="ffe-club-id" class="required">Identifiant FFE</label>
+              <input
+                id="ffe-club-id"
+                #ffeClubId
+                aria-required="true"
+                placeholder="ex. G45001"
+                [attr.aria-invalid]="ffeClubIdRequired() || null"
+                [attr.aria-describedby]="ffeClubIdRequired() ? 'ffe-club-id-error' : null"
+              />
+              @if (ffeClubIdRequired()) {
+                <p id="ffe-club-id-error" class="field-error">L'identifiant FFE est obligatoire.</p>
+              }
             </div>
             <div class="field field--wide">
               <label for="commune">Commune</label>
@@ -61,6 +72,10 @@ type CreationOutcome =
         <p role="status" class="notice notice--success">Le club {{ result.club }} a été créé.</p>
       } @else if (result.kind === 'failed') {
         <p role="status" class="notice notice--failure">Le club n'a pas pu être créé. Réessayez.</p>
+      } @else if (result.kind === 'ffeClubIdAlreadyUsed') {
+        <p role="status" class="notice notice--failure">
+          Un club avec l'identifiant FFE {{ result.ffeClubId }} existe déjà.
+        </p>
       }
     </section>
   `,
@@ -69,17 +84,21 @@ export class CreateClub {
   private readonly clubs = inject(Clubs);
   protected readonly outcome = signal<CreationOutcome>({ kind: 'none' });
   protected readonly committeeRequired = signal(false);
+  protected readonly ffeClubIdRequired = signal(false);
 
   protected create(event: Event, club: NewClub): void {
     event.preventDefault();
-    if (!club.committeeCode) {
-      this.committeeRequired.set(true);
-      return;
-    }
-    this.committeeRequired.set(false);
+    this.committeeRequired.set(!club.committeeCode);
+    this.ffeClubIdRequired.set(!club.ffeClubId);
+    if (this.committeeRequired() || this.ffeClubIdRequired()) return;
     this.clubs.create(club).subscribe({
       next: () => this.outcome.set({ kind: 'created', club: club.name }),
-      error: () => this.outcome.set({ kind: 'failed' }),
+      error: (refusal: unknown) =>
+        this.outcome.set(
+          refusal instanceof FfeClubIdAlreadyUsed
+            ? { kind: 'ffeClubIdAlreadyUsed', ffeClubId: refusal.ffeClubId }
+            : { kind: 'failed' },
+        ),
     });
   }
 }

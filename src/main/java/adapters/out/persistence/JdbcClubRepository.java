@@ -45,6 +45,14 @@ public class JdbcClubRepository implements ClubRepository {
                 .update();
     }
 
+    @Override
+    public boolean existsWithFfeClubId(FfeClubId ffeClubId) {
+        return jdbc.sql("SELECT EXISTS (SELECT 1 FROM club WHERE ffe_club_id = :ffeClubId)")
+                .param("ffeClubId", ffeClubId.value())
+                .query(Boolean.class)
+                .single();
+    }
+
     private static CommitteeCode committee(String code) {
         return code == null ? null : new CommitteeCode(code);
     }
