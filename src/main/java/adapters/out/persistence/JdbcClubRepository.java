@@ -28,7 +28,8 @@ public class JdbcClubRepository implements ClubRepository {
                         row.getBoolean("managed_by_application"),
                         committee(row.getString("committee_code")),
                         ffeClubId(row.getString("ffe_club_id")),
-                        new CommuneCode(row.getString("commune_code"))))
+                        new CommuneCode(row.getString("commune_code")),
+                        null))
                 .optional();
     }
 
