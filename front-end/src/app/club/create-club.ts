@@ -1,10 +1,11 @@
 import { Component, inject, signal } from '@angular/core';
-import { Clubs, NewClub } from './clubs';
+import { Clubs, FfeClubIdAlreadyUsed, NewClub } from './clubs';
 
 type CreationOutcome =
   | { kind: 'none' }
   | { kind: 'created'; club: string }
-  | { kind: 'failed' };
+  | { kind: 'failed' }
+  | { kind: 'ffeClubIdAlreadyUsed'; ffeClubId: string };
 
 @Component({
   selector: 'app-create-club',
@@ -71,6 +72,10 @@ type CreationOutcome =
         <p role="status" class="notice notice--success">Le club {{ result.club }} a été créé.</p>
       } @else if (result.kind === 'failed') {
         <p role="status" class="notice notice--failure">Le club n'a pas pu être créé. Réessayez.</p>
+      } @else if (result.kind === 'ffeClubIdAlreadyUsed') {
+        <p role="status" class="notice notice--failure">
+          Un club avec l'identifiant FFE {{ result.ffeClubId }} existe déjà.
+        </p>
       }
     </section>
   `,
@@ -88,7 +93,12 @@ export class CreateClub {
     if (this.committeeRequired() || this.ffeClubIdRequired()) return;
     this.clubs.create(club).subscribe({
       next: () => this.outcome.set({ kind: 'created', club: club.name }),
-      error: () => this.outcome.set({ kind: 'failed' }),
+      error: (refusal: unknown) =>
+        this.outcome.set(
+          refusal instanceof FfeClubIdAlreadyUsed
+            ? { kind: 'ffeClubIdAlreadyUsed', ffeClubId: refusal.ffeClubId }
+            : { kind: 'failed' },
+        ),
     });
   }
 }
