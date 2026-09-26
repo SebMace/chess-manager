@@ -28,11 +28,6 @@ public class CreateClubSteps {
     @Given("{string} is a departmental committee of the FFE")
     public void departmentalCommittee(String name) { committees.put(name, new CommitteeCode("45")); }
 
-    @When("an administrator creates the club {string} in the departmental committee {string}")
-    public void createClubInCommittee(String name, String committee) {
-        createdClubs.put(name, createClub.execute(name, committees.get(committee), null, null));
-    }
-
     @When("an administrator creates the club {string} with:")
     public void createClubWith(String name, DataTable information) {
         Map<String, String> club = information.asMap();
