@@ -2,6 +2,7 @@ package domain.club;
 
 import domain.club.vo.ClubId;
 import domain.club.vo.CommitteeCode;
+import domain.club.vo.FfeClubId;
 
 import java.util.Optional;
 
@@ -31,6 +32,8 @@ public final class Club {
     public String name() { return name; }
     public boolean managedByApplication() { return managedByApplication; }
     public Optional<CommitteeCode> committee() { return Optional.ofNullable(committee); }
+    public Optional<FfeClubId> ffeClubId() { return Optional.empty(); }
+    public Optional<String> commune() { return Optional.empty(); }
 
     @Override
     public boolean equals(Object other) {
