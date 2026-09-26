@@ -1,6 +1,6 @@
 package commune;
 
-import domain.commune.CommuneCode;
+import clubmanagement.domain.commune.CommuneCode;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

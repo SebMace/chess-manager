@@ -1,14 +1,14 @@
 package application;
 
-import static domain.club.RelationshipStatus.*;
+import static clubmanagement.domain.club.RelationshipStatus.*;
 import application.club.RegisterLicense;
-import domain.club.ClubRelationship;
-import domain.club.vo.ClubId;
-import domain.club.vo.Season;
-import domain.member.vo.FfeId;
-import domain.member.vo.FfeLicense;
-import domain.member.vo.FfeLicenseType;
-import domain.person.vo.PersonId;
+import clubmanagement.domain.club.ClubRelationship;
+import clubmanagement.domain.club.vo.ClubId;
+import clubmanagement.domain.club.vo.Season;
+import clubmanagement.domain.member.vo.FfeId;
+import clubmanagement.domain.member.vo.FfeLicense;
+import clubmanagement.domain.member.vo.FfeLicenseType;
+import clubmanagement.domain.person.vo.PersonId;
 import org.junit.jupiter.api.Test;
 import relationship.InMemoryClubRelationshipRepository;
 

@@ -1,10 +1,10 @@
-package domain.club;
+package clubmanagement.domain.club;
 
-import domain.club.vo.ClubId;
-import domain.club.vo.CommitteeCode;
-import domain.club.vo.FfeClubId;
-import domain.club.vo.PostalAddress;
-import domain.commune.CommuneCode;
+import clubmanagement.domain.club.vo.ClubId;
+import clubmanagement.domain.club.vo.CommitteeCode;
+import clubmanagement.domain.club.vo.FfeClubId;
+import clubmanagement.domain.club.vo.PostalAddress;
+import clubmanagement.domain.commune.CommuneCode;
 
 import java.util.Optional;
 

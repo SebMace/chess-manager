@@ -1,4 +1,4 @@
-package domain.member.vo;
+package clubmanagement.domain.member.vo;
 
 public record EloRating(int rating) {
      public EloRating  {

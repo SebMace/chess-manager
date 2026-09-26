@@ -157,7 +157,7 @@
                 <version>${pitest.version}</version>
                 <configuration>
                     <targetClasses>
-                        <param>domain.*</param>
+                        <param>clubmanagement.domain.*</param>
                         <param>application.*</param>
                     </targetClasses>
                     <targetTests>

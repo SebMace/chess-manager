@@ -1,7 +1,7 @@
 package club;
 
-import domain.club.vo.CommitteeCode;
-import domain.commune.DepartmentCode;
+import clubmanagement.domain.club.vo.CommitteeCode;
+import clubmanagement.domain.commune.DepartmentCode;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

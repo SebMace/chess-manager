@@ -1,9 +1,9 @@
 package relationship;
 
 import application.club.ClubRelationshipRepository;
-import domain.person.vo.PersonId;
-import domain.club.vo.ClubId;
-import domain.club.ClubRelationship;
+import clubmanagement.domain.person.vo.PersonId;
+import clubmanagement.domain.club.vo.ClubId;
+import clubmanagement.domain.club.ClubRelationship;
 
 import java.util.HashMap;
 import java.util.Map;

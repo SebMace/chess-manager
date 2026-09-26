@@ -1,8 +1,8 @@
 package application.club;
 
-import domain.club.Club;
-import domain.club.vo.ClubId;
-import domain.club.vo.FfeClubId;
+import clubmanagement.domain.club.Club;
+import clubmanagement.domain.club.vo.ClubId;
+import clubmanagement.domain.club.vo.FfeClubId;
 import java.util.Optional;
 
 public interface

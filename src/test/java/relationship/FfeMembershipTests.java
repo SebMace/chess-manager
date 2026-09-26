@@ -1,12 +1,12 @@
 package relationship;
 
-import domain.club.ClubRelationship;
-import domain.club.vo.ClubId;
-import domain.club.vo.Season;
-import domain.person.vo.PersonId;
-import domain.member.vo.FfeId;
-import domain.member.vo.FfeLicense;
-import domain.member.vo.FfeLicenseType;
+import clubmanagement.domain.club.ClubRelationship;
+import clubmanagement.domain.club.vo.ClubId;
+import clubmanagement.domain.club.vo.Season;
+import clubmanagement.domain.person.vo.PersonId;
+import clubmanagement.domain.member.vo.FfeId;
+import clubmanagement.domain.member.vo.FfeLicense;
+import clubmanagement.domain.member.vo.FfeLicenseType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

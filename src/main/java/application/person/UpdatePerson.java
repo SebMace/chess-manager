@@ -1,10 +1,10 @@
 package application.person;
 
-import domain.member.vo.EloRating;
-import domain.member.vo.FideId;
-import domain.exceptions.FideIdAlreadyAssignedException;
-import domain.person.Person;
-import domain.person.vo.PersonId;
+import clubmanagement.domain.member.vo.EloRating;
+import clubmanagement.domain.member.vo.FideId;
+import clubmanagement.domain.exceptions.FideIdAlreadyAssignedException;
+import clubmanagement.domain.person.Person;
+import clubmanagement.domain.person.vo.PersonId;
 
 public class UpdatePerson {
     private final PersonRepository people;

@@ -1,5 +1,5 @@
 package affiliation;
-import domain.club.vo.Season;
+import clubmanagement.domain.club.vo.Season;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotEquals;

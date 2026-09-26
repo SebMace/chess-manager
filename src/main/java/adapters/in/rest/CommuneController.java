@@ -1,7 +1,7 @@
 package adapters.in.rest;
 
 import application.club.CommunesOfCommittee;
-import domain.club.vo.CommitteeCode;
+import clubmanagement.domain.club.vo.CommitteeCode;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;

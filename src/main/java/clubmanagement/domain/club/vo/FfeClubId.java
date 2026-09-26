@@ -1,4 +1,4 @@
-package domain.club.vo;
+package clubmanagement.domain.club.vo;
 
 import java.util.Locale;
 

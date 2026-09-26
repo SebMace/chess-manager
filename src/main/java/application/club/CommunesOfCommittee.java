@@ -1,8 +1,8 @@
 package application.club;
 
 import application.commune.Communes;
-import domain.club.vo.CommitteeCode;
-import domain.commune.Commune;
+import clubmanagement.domain.club.vo.CommitteeCode;
+import clubmanagement.domain.commune.Commune;
 
 import java.util.List;
 

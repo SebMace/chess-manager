@@ -1,8 +1,8 @@
 package person;
 
-import domain.person.Person;
-import domain.person.vo.PersonId;
-import domain.member.vo.EloRating;
+import clubmanagement.domain.person.Person;
+import clubmanagement.domain.person.vo.PersonId;
+import clubmanagement.domain.member.vo.EloRating;
 import org.junit.jupiter.api.Test;
 import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;

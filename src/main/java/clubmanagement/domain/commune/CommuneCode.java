@@ -1,4 +1,4 @@
-package domain.commune;
+package clubmanagement.domain.commune;
 
 /** The INSEE code of a commune (code officiel géographique), e.g. 45234 for Orléans. */
 public record CommuneCode(String value) {

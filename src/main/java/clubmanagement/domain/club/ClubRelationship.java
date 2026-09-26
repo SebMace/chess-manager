@@ -1,9 +1,9 @@
-package domain.club;
+package clubmanagement.domain.club;
 
-import domain.person.vo.PersonId;
-import domain.club.vo.ClubId;
-import domain.club.vo.Season;
-import domain.member.vo.FfeLicense;
+import clubmanagement.domain.person.vo.PersonId;
+import clubmanagement.domain.club.vo.ClubId;
+import clubmanagement.domain.club.vo.Season;
+import clubmanagement.domain.member.vo.FfeLicense;
 
 import java.util.Objects;
 import java.util.Optional;

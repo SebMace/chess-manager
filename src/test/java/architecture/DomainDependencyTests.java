@@ -13,9 +13,9 @@ class DomainDependencyTests {
     void domain_should_not_depend_on_application_or_infrastructure() {
         JavaClasses domainClasses = new ClassFileImporter()
                 .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)
-                .importPackages("domain");
+                .importPackages("clubmanagement.domain");
 
-        noClasses().that().resideInAPackage("domain..")
+        noClasses().that().resideInAPackage("clubmanagement.domain..")
                 .should().dependOnClassesThat()
                 .resideInAnyPackage("application..", "infrastructure..", "infra..", "adapters..")
                 .because("the domain must remain independent of application orchestration and infrastructure")
@@ -26,9 +26,9 @@ class DomainDependencyTests {
     void core_should_not_depend_on_frameworks_or_adapters() {
         JavaClasses coreClasses = new ClassFileImporter()
                 .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)
-                .importPackages("domain", "application");
+                .importPackages("clubmanagement.domain", "application");
 
-        noClasses().that().resideInAnyPackage("domain..", "application..")
+        noClasses().that().resideInAnyPackage("clubmanagement.domain..", "application..")
                 .should().dependOnClassesThat()
                 .resideInAnyPackage("org.springframework..", "adapters..", "infrastructure..")
                 .because("the hexagon's core must not know about Spring or about the adapters around it")

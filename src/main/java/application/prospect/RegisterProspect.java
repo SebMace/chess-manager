@@ -2,12 +2,12 @@ package application.prospect;
 
 import application.club.ClubRelationshipRepository;
 import application.person.PersonRepository;
-import domain.club.ClubRelationship;
-import domain.club.ClubAffiliations;
-import domain.club.vo.ClubId;
-import domain.club.vo.Season;
-import domain.person.Person;
-import domain.person.vo.PersonId;
+import clubmanagement.domain.club.ClubRelationship;
+import clubmanagement.domain.club.ClubAffiliations;
+import clubmanagement.domain.club.vo.ClubId;
+import clubmanagement.domain.club.vo.Season;
+import clubmanagement.domain.person.Person;
+import clubmanagement.domain.person.vo.PersonId;
 
 import java.util.function.Supplier;
 

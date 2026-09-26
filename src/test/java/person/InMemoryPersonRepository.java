@@ -1,9 +1,9 @@
 package person;
 
 import application.person.PersonRepository;
-import domain.person.Person;
-import domain.person.vo.PersonId;
-import domain.exceptions.FideIdAlreadyAssignedException;
+import clubmanagement.domain.person.Person;
+import clubmanagement.domain.person.vo.PersonId;
+import clubmanagement.domain.exceptions.FideIdAlreadyAssignedException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;

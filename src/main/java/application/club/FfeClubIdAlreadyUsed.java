@@ -1,6 +1,6 @@
 package application.club;
 
-import domain.club.vo.FfeClubId;
+import clubmanagement.domain.club.vo.FfeClubId;
 
 public class FfeClubIdAlreadyUsed extends RuntimeException {
     private final FfeClubId ffeClubId;

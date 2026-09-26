@@ -1,7 +1,7 @@
 package application.club;
 
-import domain.club.vo.CommitteeCode;
-import domain.commune.CommuneCode;
+import clubmanagement.domain.club.vo.CommitteeCode;
+import clubmanagement.domain.commune.CommuneCode;
 
 public class CommuneNotInCommitteeDepartment extends RuntimeException {
     private final CommuneCode commune;

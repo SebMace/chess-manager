@@ -1,8 +1,8 @@
 package application.club;
 
-import domain.club.ClubRelationship;
-import domain.club.vo.ClubId;
-import domain.person.vo.PersonId;
+import clubmanagement.domain.club.ClubRelationship;
+import clubmanagement.domain.club.vo.ClubId;
+import clubmanagement.domain.person.vo.PersonId;
 
 public class RegisterPartnership {
     private final ClubRelationshipRepository relationships;

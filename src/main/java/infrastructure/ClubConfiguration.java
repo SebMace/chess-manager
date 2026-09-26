@@ -8,7 +8,7 @@ import application.club.ClubRepository;
 import application.club.CommunesOfCommittee;
 import application.club.CreateClub;
 import application.commune.Communes;
-import domain.club.vo.ClubId;
+import clubmanagement.domain.club.vo.ClubId;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.simple.JdbcClient;

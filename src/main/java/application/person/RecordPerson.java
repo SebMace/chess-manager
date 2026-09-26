@@ -1,7 +1,7 @@
 package application.person;
 
-import domain.person.Person;
-import domain.person.vo.PersonId;
+import clubmanagement.domain.person.Person;
+import clubmanagement.domain.person.vo.PersonId;
 
 import java.util.UUID;
 

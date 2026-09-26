@@ -1,4 +1,4 @@
-package domain.member.vo;
+package clubmanagement.domain.member.vo;
 
 public record FideId(Long fideId) {
     public FideId(Long fideId) {

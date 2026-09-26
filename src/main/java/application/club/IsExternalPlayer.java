@@ -1,8 +1,8 @@
 package application.club;
 
-import domain.club.ClubAffiliations;
-import domain.club.vo.Season;
-import domain.person.vo.PersonId;
+import clubmanagement.domain.club.ClubAffiliations;
+import clubmanagement.domain.club.vo.Season;
+import clubmanagement.domain.person.vo.PersonId;
 
 /**
  * An external player is licensed, for the season, in a club not managed by the application.

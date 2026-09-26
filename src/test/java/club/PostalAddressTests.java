@@ -1,6 +1,6 @@
 package club;
 
-import domain.club.vo.PostalAddress;
+import clubmanagement.domain.club.vo.PostalAddress;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

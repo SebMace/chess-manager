@@ -1,4 +1,4 @@
-package domain.person.vo;
+package clubmanagement.domain.person.vo;
 
 import java.io.Serializable;
 import java.util.UUID;

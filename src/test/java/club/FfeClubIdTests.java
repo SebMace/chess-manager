@@ -1,6 +1,6 @@
 package club;
 
-import domain.club.vo.FfeClubId;
+import clubmanagement.domain.club.vo.FfeClubId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;

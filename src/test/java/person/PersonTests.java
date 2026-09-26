@@ -1,10 +1,10 @@
 package person;
 
-import domain.exceptions.FideIdAlreadyAssignedException;
-import domain.person.Person;
-import domain.member.vo.EloRating;
-import domain.member.vo.FideId;
-import domain.person.vo.PersonId;
+import clubmanagement.domain.exceptions.FideIdAlreadyAssignedException;
+import clubmanagement.domain.person.Person;
+import clubmanagement.domain.member.vo.EloRating;
+import clubmanagement.domain.member.vo.FideId;
+import clubmanagement.domain.person.vo.PersonId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
