@@ -17,6 +17,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
 import javax.sql.DataSource;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -136,5 +137,17 @@ class JdbcClubRepositoryTests {
         ClubId unknown = new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000099"));
 
         assertTrue(clubs.find(unknown).isEmpty());
+    }
+
+    @Test
+    void should_find_the_clubs_of_a_committee() {
+        JdbcClubRepository clubs = new JdbcClubRepository(JdbcClient.create(dataSource));
+        PostalAddress bourges = new PostalAddress("1 rue Moyenne", "18000", "Bourges");
+
+        clubs.save(new Club(new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000020")), "Cercle fictif du Cher",
+                true, new CommitteeCode("18"), new FfeClubId("G18999"), new CommuneCode("18033"), bourges, bourges));
+
+        assertEquals(List.of("Cercle fictif du Cher"),
+                clubs.inCommittee(new CommitteeCode("18")).stream().map(Club::name).toList());
     }
 }
