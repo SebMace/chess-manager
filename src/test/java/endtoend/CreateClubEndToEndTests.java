@@ -78,6 +78,14 @@ class CreateClubEndToEndTests {
     }
 
     @Test
+    void a_club_cannot_be_created_without_its_commune() throws Exception {
+        HttpResponse<Void> response = post("""
+                {"name": "Échiquier Orléanais", "committeeCode": "45", "ffeClubId": "G45006"}""");
+
+        assertEquals(400, response.statusCode());
+    }
+
+    @Test
     void a_second_club_cannot_use_the_same_ffe_identifier() throws Exception {
         createClub("""
                 {"name": "Echiquier du Gâtinais", "committeeCode": "45", "ffeClubId": "G45100", "commune": "Montargis"}""");
