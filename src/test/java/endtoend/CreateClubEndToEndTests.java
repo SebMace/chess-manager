@@ -77,6 +77,17 @@ class CreateClubEndToEndTests {
         assertEquals(400, response.statusCode());
     }
 
+    @Test
+    void a_second_club_cannot_use_the_same_ffe_identifier() throws Exception {
+        createClub("""
+                {"name": "Echiquier du Gâtinais", "committeeCode": "45", "ffeClubId": "G45100"}""");
+
+        HttpResponse<Void> response = post("""
+                {"name": "Gâtinais Échecs", "committeeCode": "45", "ffeClubId": "g45100"}""");
+
+        assertEquals(409, response.statusCode());
+    }
+
     private ClubId createClub(String json) throws Exception {
         HttpResponse<Void> response = post(json);
 
