@@ -15,6 +15,6 @@ public class CommunesOfCommittee {
     }
 
     public List<Commune> execute(CommitteeCode committee) {
-        return List.of();
+        return communes.inDepartment(committee.department());
     }
 }
