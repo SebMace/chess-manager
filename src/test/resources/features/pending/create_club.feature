@@ -8,3 +8,10 @@ Feature: Create a club
   Scenario: A created club is managed by the application
     When an administrator creates the club "Montargis"
     Then "Montargis" is a club managed by the application
+
+  @acceptance
+  Scenario: A created club belongs to its departmental committee
+    Given "Loiret" is a departmental committee of the FFE
+    When an administrator creates the club "U.S. Orléans.Echecs" in the departmental committee "Loiret"
+    Then "U.S. Orléans.Echecs" is a club managed by the application
+    And "U.S. Orléans.Echecs" belongs to the departmental committee "Loiret"
