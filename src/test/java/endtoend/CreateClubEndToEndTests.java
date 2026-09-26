@@ -69,6 +69,14 @@ class CreateClubEndToEndTests {
         assertEquals(400, response.statusCode());
     }
 
+    @Test
+    void a_club_cannot_be_created_with_a_blank_ffe_identifier() throws Exception {
+        HttpResponse<Void> response = post("""
+                {"name": "U.S. Orléans.Echecs", "committeeCode": "45", "ffeClubId": "   "}""");
+
+        assertEquals(400, response.statusCode());
+    }
+
     private ClubId createClub(String json) throws Exception {
         HttpResponse<Void> response = post(json);
 
