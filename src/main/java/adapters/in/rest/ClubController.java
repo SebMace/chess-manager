@@ -30,8 +30,12 @@ public class ClubController {
         if (request.committeeCode() == null) return ResponseEntity.badRequest().build();
         ClubId id = createClub.execute(request.name(), new CommitteeCode(request.committeeCode()),
                 new FfeClubId(request.ffeClubId()), new CommuneCode(request.communeCode()),
-                request.registeredOffice() == null ? null : request.registeredOffice().toPostalAddress(), null);
+                postalAddress(request.registeredOffice()), postalAddress(request.playingVenue()));
         return ResponseEntity.created(URI.create("/clubs/" + id.clubId())).build();
+    }
+
+    private static PostalAddress postalAddress(AddressRequest address) {
+        return address == null ? null : address.toPostalAddress();
     }
 
     @ExceptionHandler({IllegalArgumentException.class, CommuneNotInCommitteeDepartment.class})
@@ -45,7 +49,7 @@ public class ClubController {
     }
 
     public record CreateClubRequest(String name, String committeeCode, String ffeClubId, String communeCode,
-                                    AddressRequest registeredOffice) {
+                                    AddressRequest registeredOffice, AddressRequest playingVenue) {
     }
 
     public record AddressRequest(String street, String postcode, String town) {
