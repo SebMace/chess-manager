@@ -133,6 +133,12 @@ export class CreateClub {
     if (event.key === 'ArrowDown') {
       event.preventDefault();
       this.activeCommune.update(active => Math.min(active + 1, offered.length - 1));
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      this.activeCommune.update(active => Math.max(active - 1, 0));
+    } else if (event.key === 'Escape') {
+      this.typedCommune.set('');
+      this.activeCommune.set(-1);
     } else if (event.key === 'Enter' && this.activeCommune() >= 0) {
       event.preventDefault();
       this.chooseCommune(offered[this.activeCommune()], field);
