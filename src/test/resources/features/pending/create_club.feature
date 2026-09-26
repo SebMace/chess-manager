@@ -45,3 +45,12 @@ Feature: Create a club
       | departmental committee | Loiret |
       | FFE identifier         | G45001 |
     Then the club "U.S. Orléans.Echecs" is not created
+
+  @acceptance
+  Scenario: A club cannot be created in a commune outside the department of its committee
+    Given "Loiret" is a departmental committee of the FFE
+    When an administrator creates the club "Olivet – La Tour prend garde" with:
+      | departmental committee | Loiret           |
+      | FFE identifier         | G45002           |
+      | commune                | Olivet (Mayenne) |
+    Then the club "Olivet – La Tour prend garde" is not created

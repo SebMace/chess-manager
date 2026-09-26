@@ -22,7 +22,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class CreateClubSteps {
     private static final UUID CREATED_CLUB_ID = UUID.fromString("00000000-0000-0000-0000-000000000006");
-    private static final Map<String, CommuneCode> COMMUNES = Map.of("Orléans", new CommuneCode("45234"));
+    private static final Map<String, CommuneCode> COMMUNES = Map.of(
+            "Orléans", new CommuneCode("45234"),
+            "Olivet (Mayenne)", new CommuneCode("53169"));
     private final InMemoryClubRepository clubs = new InMemoryClubRepository();
     private final CreateClub createClub = new CreateClub(clubs, () -> new ClubId(CREATED_CLUB_ID));
     private final Map<String, ClubId> createdClubs = new HashMap<>();
