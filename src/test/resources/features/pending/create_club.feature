@@ -54,3 +54,11 @@ Feature: Create a club
       | FFE identifier         | G45002           |
       | commune                | Olivet (Mayenne) |
     Then the club "Olivet – La Tour prend garde" is not created
+
+  @acceptance
+  Scenario: The communes offered for a club are those of the department of its committee
+    Given "Loiret" is a departmental committee of the FFE
+    When an administrator looks for the communes of a club of the departmental committee "Loiret"
+    Then the administrator is offered the commune "Olivet"
+    And the administrator is offered the commune "Saint-Pryvé-Saint-Mesmin"
+    And the administrator is not offered the commune "Olivet (Mayenne)"
