@@ -58,8 +58,18 @@ type CreationOutcome =
               }
             </div>
             <div class="field field--wide">
-              <label for="commune">Commune</label>
-              <input id="commune" #commune placeholder="ex. Orléans" />
+              <label for="commune" class="required">Commune</label>
+              <input
+                id="commune"
+                #commune
+                aria-required="true"
+                placeholder="ex. Orléans"
+                [attr.aria-invalid]="communeRequired() || null"
+                [attr.aria-describedby]="communeRequired() ? 'commune-error' : null"
+              />
+              @if (communeRequired()) {
+                <p id="commune-error" class="field-error">La commune est obligatoire.</p>
+              }
             </div>
           </div>
         </fieldset>
@@ -85,12 +95,14 @@ export class CreateClub {
   protected readonly outcome = signal<CreationOutcome>({ kind: 'none' });
   protected readonly committeeRequired = signal(false);
   protected readonly ffeClubIdRequired = signal(false);
+  protected readonly communeRequired = signal(false);
 
   protected create(event: Event, club: NewClub): void {
     event.preventDefault();
     this.committeeRequired.set(!club.committeeCode);
     this.ffeClubIdRequired.set(!club.ffeClubId);
-    if (this.committeeRequired() || this.ffeClubIdRequired()) return;
+    this.communeRequired.set(!club.commune);
+    if (this.committeeRequired() || this.ffeClubIdRequired() || this.communeRequired()) return;
     this.clubs.create(club).subscribe({
       next: () => this.outcome.set({ kind: 'created', club: club.name }),
       error: (refusal: unknown) =>
