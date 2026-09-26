@@ -45,7 +45,7 @@ public final class Club {
     public Optional<CommitteeCode> committee() { return Optional.ofNullable(committee); }
     public Optional<FfeClubId> ffeClubId() { return Optional.ofNullable(ffeClubId); }
     public CommuneCode commune() { return commune; }
-    public Optional<PostalAddress> registeredOffice() { return Optional.ofNullable(registeredOffice); }
+    public PostalAddress registeredOffice() { return registeredOffice; }
 
     @Override
     public boolean equals(Object other) {

@@ -106,7 +106,7 @@ public class CreateClubSteps {
     @Then("the registered office of {string} is:")
     public void clubRegisteredOffice(String name, DataTable address) {
         Map<String, String> office = address.asMap();
-        assertEquals(Optional.of(new PostalAddress(office.get("street"), office.get("postcode"), office.get("town"))),
+        assertEquals(new PostalAddress(office.get("street"), office.get("postcode"), office.get("town")),
                 createdClub(name).registeredOffice());
     }
 

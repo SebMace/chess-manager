@@ -79,7 +79,7 @@ class JdbcClubRepositoryTests {
 
         clubs.save(new Club(loury, "Loury Échecs", true, new CommitteeCode("45"), new FfeClubId("G45008"), new CommuneCode("45188"), office));
 
-        assertEquals(Optional.of(office), clubs.find(loury).orElseThrow().registeredOffice());
+        assertEquals(office, clubs.find(loury).orElseThrow().registeredOffice());
     }
 
     @Test
