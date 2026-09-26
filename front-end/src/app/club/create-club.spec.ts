@@ -129,7 +129,7 @@ function createClub(page: HTMLElement, fields: Record<string, string>): void {
 }
 
 function createValidClub(page: HTMLElement, name: string): void {
-  createClub(page, { 'Nom du club': name, 'Code du comité': '45', 'Identifiant FFE': 'G45001' });
+  createClub(page, { 'Nom du club': name, 'Code du comité': '45', 'Identifiant FFE': 'G45001', 'Commune': 'Orléans' });
 }
 
 function fill(field: HTMLInputElement, value: string): void {
