@@ -72,6 +72,17 @@ class JdbcClubRepositoryTests {
     }
 
     @Test
+    void should_find_a_saved_club_with_its_registered_office() {
+        JdbcClubRepository clubs = new JdbcClubRepository(JdbcClient.create(dataSource));
+        ClubId loury = new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000013"));
+        PostalAddress office = new PostalAddress("3 place de l'Église", "45470", "Loury");
+
+        clubs.save(new Club(loury, "Loury Échecs", true, new CommitteeCode("45"), new FfeClubId("G45008"), new CommuneCode("45188"), office));
+
+        assertEquals(Optional.of(office), clubs.find(loury).orElseThrow().registeredOffice());
+    }
+
+    @Test
     void should_tell_whether_a_club_already_uses_an_ffe_identifier() {
         JdbcClubRepository clubs = new JdbcClubRepository(JdbcClient.create(dataSource));
         ClubId gien = new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000009"));
