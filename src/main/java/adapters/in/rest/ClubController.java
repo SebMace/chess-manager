@@ -28,7 +28,7 @@ public class ClubController {
     public ResponseEntity<Void> create(@RequestBody CreateClubRequest request) {
         if (request.committeeCode() == null) return ResponseEntity.badRequest().build();
         ClubId id = createClub.execute(request.name(), new CommitteeCode(request.committeeCode()),
-                new FfeClubId(request.ffeClubId()), new CommuneCode(request.commune()));
+                new FfeClubId(request.ffeClubId()), new CommuneCode(request.communeCode()));
         return ResponseEntity.created(URI.create("/clubs/" + id.clubId())).build();
     }
 
@@ -42,6 +42,6 @@ public class ClubController {
         return ResponseEntity.status(HttpStatus.CONFLICT).build();
     }
 
-    public record CreateClubRequest(String name, String committeeCode, String ffeClubId, String commune) {
+    public record CreateClubRequest(String name, String committeeCode, String ffeClubId, String communeCode) {
     }
 }
