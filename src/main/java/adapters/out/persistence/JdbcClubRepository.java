@@ -45,6 +45,11 @@ public class JdbcClubRepository implements ClubRepository {
                 .update();
     }
 
+    @Override
+    public boolean existsWithFfeClubId(FfeClubId ffeClubId) {
+        throw new UnsupportedOperationException("not yet implemented");
+    }
+
     private static CommitteeCode committee(String code) {
         return code == null ? null : new CommitteeCode(code);
     }
