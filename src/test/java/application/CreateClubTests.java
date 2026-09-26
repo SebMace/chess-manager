@@ -51,6 +51,15 @@ class CreateClubTests {
     }
 
     @Test
+    void should_save_the_playing_venue_of_the_club() {
+        CreateClub createClub = new CreateClub(clubs, communes, () -> clubId);
+
+        createClub.execute("U.S. Orléans.Echecs", new CommitteeCode("45"), new FfeClubId("G45001"), ORLEANS, OFFICE, VENUE);
+
+        assertEquals(Optional.of(VENUE), clubs.find(clubId).orElseThrow().playingVenue());
+    }
+
+    @Test
     void should_refuse_a_club_without_its_ffe_identifier() {
         CreateClub createClub = new CreateClub(clubs, communes, () -> clubId);
 
