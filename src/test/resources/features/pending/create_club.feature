@@ -10,3 +10,13 @@ Feature: Create a club
     When an administrator creates the club "U.S. Orléans.Echecs" in the departmental committee "Loiret"
     Then "U.S. Orléans.Echecs" is a club managed by the application
     And "U.S. Orléans.Echecs" belongs to the departmental committee "Loiret"
+
+  @acceptance
+  Scenario: A created club keeps its FFE identity
+    Given "Loiret" is a departmental committee of the FFE
+    When an administrator creates the club "U.S. Orléans.Echecs" with:
+      | departmental committee | Loiret  |
+      | FFE identifier         | G45001  |
+      | commune                | Orléans |
+    Then the FFE identifier of "U.S. Orléans.Echecs" is "G45001"
+    And the commune of "U.S. Orléans.Echecs" is "Orléans"
