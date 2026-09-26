@@ -56,7 +56,7 @@ class CreateClubTests {
 
         createClub.execute("U.S. Orléans.Echecs", new CommitteeCode("45"), new FfeClubId("G45001"), ORLEANS, OFFICE, VENUE);
 
-        assertEquals(Optional.of(VENUE), clubs.find(clubId).orElseThrow().playingVenue());
+        assertEquals(VENUE, clubs.find(clubId).orElseThrow().playingVenue());
     }
 
     @Test

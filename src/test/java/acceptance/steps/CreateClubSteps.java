@@ -114,7 +114,7 @@ public class CreateClubSteps {
     @Then("the playing venue of {string} is:")
     public void clubPlayingVenue(String name, DataTable address) {
         Map<String, String> venue = address.asMap();
-        assertEquals(Optional.of(new PostalAddress(venue.get("street"), venue.get("postcode"), venue.get("town"))),
+        assertEquals(new PostalAddress(venue.get("street"), venue.get("postcode"), venue.get("town")),
                 createdClub(name).playingVenue());
     }
 

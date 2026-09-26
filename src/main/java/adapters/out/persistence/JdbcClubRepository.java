@@ -61,9 +61,9 @@ public class JdbcClubRepository implements ClubRepository {
                 .param("officeStreet", club.registeredOffice().street())
                 .param("officePostcode", club.registeredOffice().postcode())
                 .param("officeTown", club.registeredOffice().town())
-                .param("venueStreet", club.playingVenue().map(PostalAddress::street).orElse(null))
-                .param("venuePostcode", club.playingVenue().map(PostalAddress::postcode).orElse(null))
-                .param("venueTown", club.playingVenue().map(PostalAddress::town).orElse(null))
+                .param("venueStreet", club.playingVenue().street())
+                .param("venuePostcode", club.playingVenue().postcode())
+                .param("venueTown", club.playingVenue().town())
                 .update();
     }
 

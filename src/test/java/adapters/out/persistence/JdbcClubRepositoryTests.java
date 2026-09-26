@@ -92,7 +92,7 @@ class JdbcClubRepositoryTests {
         clubs.save(new Club(olivet, "Olivet – La Tour prend garde", true, new CommitteeCode("45"), new FfeClubId("G45011"),
                 new CommuneCode("45298"), OFFICE, venue));
 
-        assertEquals(Optional.of(venue), clubs.find(olivet).orElseThrow().playingVenue());
+        assertEquals(venue, clubs.find(olivet).orElseThrow().playingVenue());
     }
 
     @Test
