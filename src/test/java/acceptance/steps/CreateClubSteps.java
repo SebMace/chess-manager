@@ -88,6 +88,11 @@ public class CreateClubSteps {
         assertTrue(consultedClubs.stream().anyMatch(club -> club.name().equals(name)));
     }
 
+    @Then("the administrator is shown the club {string} located in {string} with the FFE identifier {string}")
+    public void clubShownWithItsCommuneAndFfeIdentifier(String name, String commune, String ffeIdentifier) {
+        assertTrue(consultedClubs.contains(new ClubOfCommittee(name, commune, new FfeClubId(ffeIdentifier))));
+    }
+
     @Then("the administrator is not shown the club {string}")
     public void clubNotShown(String name) {
         assertTrue(consultedClubs.stream().noneMatch(club -> club.name().equals(name)));
