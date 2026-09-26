@@ -30,7 +30,7 @@ public class ClubController {
         if (request.committeeCode() == null) return ResponseEntity.badRequest().build();
         ClubId id = createClub.execute(request.name(), new CommitteeCode(request.committeeCode()),
                 new FfeClubId(request.ffeClubId()), new CommuneCode(request.communeCode()),
-                request.registeredOffice() == null ? null : request.registeredOffice().toPostalAddress());
+                request.registeredOffice() == null ? null : request.registeredOffice().toPostalAddress(), null);
         return ResponseEntity.created(URI.create("/clubs/" + id.clubId())).build();
     }
 
