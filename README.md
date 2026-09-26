@@ -101,13 +101,21 @@ mvn spring-boot:run
 ```
 
 Spring Boot starts the PostgreSQL 18 service described in `compose.yaml`, connects to it,
-and Flyway migrates the schema; the application listens on port 8080. Data is kept in the
-`postgres-data` Docker volume between runs. The credentials in `compose.yaml` only protect
-this local container. Docker Compose support is a development-only dependency and is
-skipped during tests, which use Testcontainers.
+and Flyway migrates the schema; the application listens on port 8080. The credentials in
+`compose.yaml` only protect this local container. Docker Compose support is a
+development-only dependency and is skipped during tests, which use Testcontainers.
+
+`mvn spring-boot:run` activates the `dev` profile: at each start, `DevelopmentData` empties
+the tables and creates a minimal set of **fictitious** clubs of the Loiret committee (45)
+through the use cases — `DEMO01`, `DEMO02` and `DEMO03`. Anything created during a session
+is therefore lost at the next start. Real club names and FFE identifiers are FFE data and
+must not be committed. No other profile creates or deletes data.
 
 ```sh
-curl -i -X POST localhost:8080/clubs -H 'Content-Type: application/json' -d '{"name":"Montargis"}'
+curl -i -X POST localhost:8080/clubs -H 'Content-Type: application/json' -d '{
+  "name": "Échiquier de Montargis", "committeeCode": "45", "ffeClubId": "DEMO04", "communeCode": "45208",
+  "registeredOffice": {"street": "1 rue du Marché", "postcode": "45200", "town": "Montargis"},
+  "playingVenue": {"street": "1 rue du Marché", "postcode": "45200", "town": "Montargis"}}'
 ```
 
 ## Front-end (Angular)
