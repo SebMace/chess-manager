@@ -23,7 +23,8 @@ public class JdbcClubRepository implements ClubRepository {
     public Optional<Club> find(ClubId clubId) {
         return jdbc.sql("""
                         SELECT id, name, managed_by_application, committee_code, ffe_club_id, commune_code,
-                               registered_office_street, registered_office_postcode, registered_office_town
+                               registered_office_street, registered_office_postcode, registered_office_town,
+                               playing_venue_street, playing_venue_postcode, playing_venue_town
                         FROM club WHERE id = :id""")
                 .param("id", clubId.clubId())
                 .query((row, rowNumber) -> new Club(
@@ -35,7 +36,10 @@ public class JdbcClubRepository implements ClubRepository {
                         new CommuneCode(row.getString("commune_code")),
                         new PostalAddress(row.getString("registered_office_street"),
                                 row.getString("registered_office_postcode"),
-                                row.getString("registered_office_town"))))
+                                row.getString("registered_office_town")),
+                        new PostalAddress(row.getString("playing_venue_street"),
+                                row.getString("playing_venue_postcode"),
+                                row.getString("playing_venue_town"))))
                 .optional();
     }
 
@@ -43,9 +47,11 @@ public class JdbcClubRepository implements ClubRepository {
     public void save(Club club) {
         jdbc.sql("""
                         INSERT INTO club (id, name, managed_by_application, committee_code, ffe_club_id, commune_code,
-                                          registered_office_street, registered_office_postcode, registered_office_town)
+                                          registered_office_street, registered_office_postcode, registered_office_town,
+                                          playing_venue_street, playing_venue_postcode, playing_venue_town)
                         VALUES (:id, :name, :managed, :committee, :ffeClubId, :commune,
-                                :officeStreet, :officePostcode, :officeTown)""")
+                                :officeStreet, :officePostcode, :officeTown,
+                                :venueStreet, :venuePostcode, :venueTown)""")
                 .param("id", club.id().clubId())
                 .param("name", club.name())
                 .param("managed", club.managedByApplication())
@@ -55,6 +61,9 @@ public class JdbcClubRepository implements ClubRepository {
                 .param("officeStreet", club.registeredOffice().street())
                 .param("officePostcode", club.registeredOffice().postcode())
                 .param("officeTown", club.registeredOffice().town())
+                .param("venueStreet", club.playingVenue().street())
+                .param("venuePostcode", club.playingVenue().postcode())
+                .param("venueTown", club.playingVenue().town())
                 .update();
     }
 

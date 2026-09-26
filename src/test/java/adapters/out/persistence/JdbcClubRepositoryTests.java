@@ -28,6 +28,7 @@ class JdbcClubRepositoryTests {
     static final PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:18");
 
     private static final PostalAddress OFFICE = new PostalAddress("12 rue des Échecs", "45000", "Orléans");
+    private static final PostalAddress VENUE = new PostalAddress("5 rue du Roi", "45100", "Orléans");
     private static DataSource dataSource;
     private final ClubId montargis = new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000006"));
 
@@ -41,7 +42,7 @@ class JdbcClubRepositoryTests {
     void should_find_a_saved_club_managed_by_the_application() {
         JdbcClubRepository clubs = new JdbcClubRepository(JdbcClient.create(dataSource));
 
-        clubs.save(new Club(montargis, "Montargis", true, new CommitteeCode("45"), new FfeClubId("G45004"), new CommuneCode("45208"), OFFICE));
+        clubs.save(new Club(montargis, "Montargis", true, new CommitteeCode("45"), new FfeClubId("G45004"), new CommuneCode("45208"), OFFICE, VENUE));
 
         Club club = clubs.find(montargis).orElseThrow();
         assertEquals(montargis, club.id());
@@ -54,7 +55,7 @@ class JdbcClubRepositoryTests {
         JdbcClubRepository clubs = new JdbcClubRepository(JdbcClient.create(dataSource));
         ClubId orleans = new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000007"));
 
-        clubs.save(new Club(orleans, "U.S. Orléans.Echecs", true, new CommitteeCode("45"), new FfeClubId("G45005"), new CommuneCode("45234"), OFFICE));
+        clubs.save(new Club(orleans, "U.S. Orléans.Echecs", true, new CommitteeCode("45"), new FfeClubId("G45005"), new CommuneCode("45234"), OFFICE, VENUE));
 
         assertEquals(Optional.of(new CommitteeCode("45")), clubs.find(orleans).orElseThrow().committee());
     }
@@ -64,7 +65,7 @@ class JdbcClubRepositoryTests {
         JdbcClubRepository clubs = new JdbcClubRepository(JdbcClient.create(dataSource));
         ClubId orleans = new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000008"));
 
-        clubs.save(new Club(orleans, "U.S. Orléans.Echecs", true, new CommitteeCode("45"), new FfeClubId("G45001"), new CommuneCode("45234"), OFFICE));
+        clubs.save(new Club(orleans, "U.S. Orléans.Echecs", true, new CommitteeCode("45"), new FfeClubId("G45001"), new CommuneCode("45234"), OFFICE, VENUE));
 
         Club club = clubs.find(orleans).orElseThrow();
         assertEquals(Optional.of(new FfeClubId("G45001")), club.ffeClubId());
@@ -77,9 +78,21 @@ class JdbcClubRepositoryTests {
         ClubId loury = new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000013"));
         PostalAddress office = new PostalAddress("3 place de l'Église", "45470", "Loury");
 
-        clubs.save(new Club(loury, "Loury Échecs", true, new CommitteeCode("45"), new FfeClubId("G45008"), new CommuneCode("45188"), office));
+        clubs.save(new Club(loury, "Loury Échecs", true, new CommitteeCode("45"), new FfeClubId("G45008"), new CommuneCode("45188"), office, VENUE));
 
         assertEquals(office, clubs.find(loury).orElseThrow().registeredOffice());
+    }
+
+    @Test
+    void should_find_a_saved_club_with_its_playing_venue() {
+        JdbcClubRepository clubs = new JdbcClubRepository(JdbcClient.create(dataSource));
+        ClubId olivet = new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000014"));
+        PostalAddress venue = new PostalAddress("8 rue des Tours", "45160", "Olivet");
+
+        clubs.save(new Club(olivet, "Olivet – La Tour prend garde", true, new CommitteeCode("45"), new FfeClubId("G45011"),
+                new CommuneCode("45298"), OFFICE, venue));
+
+        assertEquals(venue, clubs.find(olivet).orElseThrow().playingVenue());
     }
 
     @Test
@@ -87,7 +100,7 @@ class JdbcClubRepositoryTests {
         JdbcClubRepository clubs = new JdbcClubRepository(JdbcClient.create(dataSource));
         ClubId gien = new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000009"));
 
-        clubs.save(new Club(gien, "Echiquiers Berry-Sologne", true, new CommitteeCode("45"), new FfeClubId("G45002"), new CommuneCode("45155"), OFFICE));
+        clubs.save(new Club(gien, "Echiquiers Berry-Sologne", true, new CommitteeCode("45"), new FfeClubId("G45002"), new CommuneCode("45155"), OFFICE, VENUE));
 
         assertTrue(clubs.existsWithFfeClubId(new FfeClubId("G45002")));
         assertFalse(clubs.existsWithFfeClubId(new FfeClubId("G45999")));
@@ -97,11 +110,11 @@ class JdbcClubRepositoryTests {
     void should_refuse_to_store_two_clubs_with_the_same_ffe_identifier() {
         JdbcClubRepository clubs = new JdbcClubRepository(JdbcClient.create(dataSource));
         clubs.save(new Club(new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000010")),
-                "MJC Chécy", true, new CommitteeCode("45"), new FfeClubId("G45003"), new CommuneCode("45089"), OFFICE));
+                "MJC Chécy", true, new CommitteeCode("45"), new FfeClubId("G45003"), new CommuneCode("45089"), OFFICE, VENUE));
 
         assertThrows(DataIntegrityViolationException.class, () -> clubs.save(new Club(
                 new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000011")),
-                "Chécy Échecs", true, new CommitteeCode("45"), new FfeClubId("G45003"), new CommuneCode("45089"), OFFICE)));
+                "Chécy Échecs", true, new CommitteeCode("45"), new FfeClubId("G45003"), new CommuneCode("45089"), OFFICE, VENUE)));
     }
 
     @Test
@@ -110,9 +123,10 @@ class JdbcClubRepositoryTests {
 
         assertThrows(DataIntegrityViolationException.class, () -> jdbc.sql("""
                         INSERT INTO club (id, name, managed_by_application, committee_code, ffe_club_id,
-                                          registered_office_street, registered_office_postcode, registered_office_town)
+                                          registered_office_street, registered_office_postcode, registered_office_town,
+                                          playing_venue_street, playing_venue_postcode, playing_venue_town)
                         VALUES ('00000000-0000-0000-0000-000000000012', 'Cercle d''Échecs de Pithiviers', TRUE, '45', 'G45007',
-                                '1 rue de la Gare', '45300', 'Pithiviers')""")
+                                '1 rue de la Gare', '45300', 'Pithiviers', '1 rue de la Gare', '45300', 'Pithiviers')""")
                 .update());
     }
 

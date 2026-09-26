@@ -53,7 +53,8 @@ public class CreateClubSteps {
                     committees.get(club.get("departmental committee")),
                     ffeIdentifier == null ? null : new FfeClubId(ffeIdentifier),
                     commune(club.get("commune")),
-                    registeredOffice(club)));
+                    registeredOffice(club),
+                    playingVenue(club)));
         } catch (IllegalArgumentException | FfeClubIdAlreadyUsed | CommuneNotInCommitteeDepartment refusal) {
             refusals.put(name, refusal);
         }
@@ -63,7 +64,7 @@ public class CreateClubSteps {
     public void clubCreated(String name, DataTable information) {
         Map<String, String> club = information.asMap();
         createdClubs.put(name, createClub.execute(name, committees.get(club.get("departmental committee")),
-                new FfeClubId(club.get("FFE identifier")), commune(club.get("commune")), registeredOffice(club)));
+                new FfeClubId(club.get("FFE identifier")), commune(club.get("commune")), registeredOffice(club), playingVenue(club)));
     }
 
     @When("an administrator looks for the communes of a club of the departmental committee {string}")
@@ -108,6 +109,20 @@ public class CreateClubSteps {
         Map<String, String> office = address.asMap();
         assertEquals(new PostalAddress(office.get("street"), office.get("postcode"), office.get("town")),
                 createdClub(name).registeredOffice());
+    }
+
+    @Then("the playing venue of {string} is:")
+    public void clubPlayingVenue(String name, DataTable address) {
+        Map<String, String> venue = address.asMap();
+        assertEquals(new PostalAddress(venue.get("street"), venue.get("postcode"), venue.get("town")),
+                createdClub(name).playingVenue());
+    }
+
+    private static PostalAddress playingVenue(Map<String, String> club) {
+        if ("at the registered office".equals(club.get("playing venue"))) return registeredOffice(club);
+        String street = club.get("playing venue street");
+        return street == null ? null : new PostalAddress(street,
+                club.get("playing venue postcode"), club.get("playing venue town"));
     }
 
     private static PostalAddress registeredOffice(Map<String, String> club) {

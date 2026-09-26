@@ -15,25 +15,31 @@ class ClubTests {
     @Test
     void should_identify_a_club_independently_of_its_name() {
         ClubId id = new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000002"));
-        Club club = new Club(id, "Orléans", ORLEANS, OFFICE);
+        Club club = new Club(id, "Orléans", ORLEANS, OFFICE, OFFICE);
         assertEquals(id, club.id());
         assertEquals("Orléans", club.name());
-        assertEquals(club, new Club(id, "Orléans Échecs", ORLEANS, OFFICE));
-        assertNotEquals(club, new Club(new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000003")), "Orléans", ORLEANS, OFFICE));
+        assertEquals(club, new Club(id, "Orléans Échecs", ORLEANS, OFFICE, OFFICE));
+        assertNotEquals(club, new Club(new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000003")), "Orléans", ORLEANS, OFFICE, OFFICE));
     }
     @Test
     void should_reject_a_club_without_an_identity() {
-        assertThrows(IllegalArgumentException.class, () -> new Club(null, "Orléans", ORLEANS, OFFICE));
+        assertThrows(IllegalArgumentException.class, () -> new Club(null, "Orléans", ORLEANS, OFFICE, OFFICE));
     }
     @Test
     void should_reject_a_club_without_its_commune() {
         ClubId id = new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000002"));
-        assertThrows(IllegalArgumentException.class, () -> new Club(id, "Orléans", null, OFFICE));
+        assertThrows(IllegalArgumentException.class, () -> new Club(id, "Orléans", null, OFFICE, OFFICE));
     }
 
     @Test
     void should_reject_a_club_without_its_registered_office() {
         ClubId id = new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000002"));
-        assertThrows(IllegalArgumentException.class, () -> new Club(id, "Orléans", ORLEANS, null));
+        assertThrows(IllegalArgumentException.class, () -> new Club(id, "Orléans", ORLEANS, null, OFFICE));
+    }
+
+    @Test
+    void should_reject_a_club_without_its_playing_venue() {
+        ClubId id = new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000002"));
+        assertThrows(IllegalArgumentException.class, () -> new Club(id, "Orléans", ORLEANS, OFFICE, null));
     }
 }
