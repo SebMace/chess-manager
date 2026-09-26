@@ -2,8 +2,8 @@ package infrastructure;
 
 import clubmanagement.createclub.rest.CreateClubController;
 import clubmanagement.communesofcommittee.rest.CommunesOfCommitteeController;
-import adapters.out.insee.InseeCommunes;
-import adapters.out.persistence.JdbcClubRepository;
+import clubmanagement.insee.InseeCommunes;
+import clubmanagement.persistence.JdbcClubRepository;
 import clubmanagement.ports.ClubRepository;
 import clubmanagement.communesofcommittee.CommunesOfCommittee;
 import clubmanagement.createclub.CreateClub;

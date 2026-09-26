@@ -1,4 +1,4 @@
-package adapters.out.persistence;
+package clubmanagement.persistence;
 
 import clubmanagement.ports.ClubRepository;
 import clubmanagement.domain.club.Club;

@@ -1,4 +1,4 @@
-package adapters.out.persistence;
+package clubmanagement.persistence;
 
 import clubmanagement.domain.club.Club;
 import clubmanagement.domain.club.vo.ClubId;

@@ -1,4 +1,4 @@
-package adapters.out.insee;
+package clubmanagement.insee;
 
 import clubmanagement.domain.commune.Commune;
 import clubmanagement.domain.commune.CommuneCode;
