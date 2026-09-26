@@ -211,6 +211,26 @@ describe('CreateClub', () => {
     expect(page.textContent).toContain('La localité est obligatoire.');
   });
 
+  it('tells the administrator that a postcode is made of five digits', async () => {
+    fillFields(page, { 'Nom du club': 'U.S. Orléans.Echecs', 'Code du comité': '45', 'Identifiant FFE': 'G45001' });
+    await chooseCommune('Orl', 'Orléans');
+    fillFields(page, { ...REGISTERED_OFFICE, 'Code postal': '4500' });
+    buttonNamed(page, 'Créer le club').click();
+    await fixture.whenStable();
+
+    server.expectNone({ method: 'POST', url: '/clubs' });
+    expect(page.textContent).toContain('Le code postal doit comporter 5 chiffres.');
+  });
+
+  it('accepts a postcode typed with a space', async () => {
+    fillFields(page, { 'Nom du club': 'U.S. Orléans.Echecs', 'Code du comité': '45', 'Identifiant FFE': 'G45001' });
+    await chooseCommune('Orl', 'Orléans');
+    fillFields(page, { ...REGISTERED_OFFICE, 'Code postal': '45 000' });
+    buttonNamed(page, 'Créer le club').click();
+
+    server.expectOne({ method: 'POST', url: '/clubs' });
+  });
+
   it('tells the administrator to choose the commune among those offered', async () => {
     fillFields(page, { 'Nom du club': 'U.S. Orléans.Echecs', 'Code du comité': '45', 'Identifiant FFE': 'G45001' });
     fill(fieldLabelled(page, 'Commune'), 'Orl');

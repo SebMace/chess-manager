@@ -13,6 +13,11 @@ const REQUIRED_INFORMATION = [
 ] as const satisfies readonly (keyof NewClub)[];
 type RequiredInformation = (typeof REQUIRED_INFORMATION)[number];
 
+/** A French postcode is made of five digits; spaces typed by the administrator are ignored. */
+function isPostcode(typed: string): boolean {
+  return /^\d{5}$/.test(typed.replaceAll(' ', ''));
+}
+
 type CreationOutcome =
   | { kind: 'none' }
   | { kind: 'created'; club: string }
@@ -143,11 +148,13 @@ type CreationOutcome =
                 autocomplete="postal-code"
                 inputmode="numeric"
                 placeholder="ex. 45000"
-                [attr.aria-invalid]="missing().has('registeredOfficePostcode') || null"
-                [attr.aria-describedby]="missing().has('registeredOfficePostcode') ? 'office-postcode-error' : null"
+                [attr.aria-invalid]="missing().has('registeredOfficePostcode') || postcodeMalformed() || null"
+                [attr.aria-describedby]="missing().has('registeredOfficePostcode') || postcodeMalformed() ? 'office-postcode-error' : null"
               />
               @if (missing().has('registeredOfficePostcode')) {
                 <p id="office-postcode-error" class="field-error">Le code postal est obligatoire.</p>
+              } @else if (postcodeMalformed()) {
+                <p id="office-postcode-error" class="field-error">Le code postal doit comporter 5 chiffres.</p>
               }
             </div>
             <div class="field">
@@ -188,6 +195,7 @@ export class CreateClub {
   private readonly clubs = inject(Clubs);
   protected readonly outcome = signal<CreationOutcome>({ kind: 'none' });
   protected readonly missing = signal<ReadonlySet<RequiredInformation>>(new Set());
+  protected readonly postcodeMalformed = signal(false);
   private readonly communes = inject(Communes);
   private readonly communesOfCommittee = signal<readonly Commune[]>([]);
   private committeeOfCommunes = '';
@@ -235,7 +243,8 @@ export class CreateClub {
   protected create(event: Event, club: NewClub): void {
     event.preventDefault();
     this.missing.set(new Set(REQUIRED_INFORMATION.filter((information) => !club[information])));
-    if (this.missing().size > 0) return;
+    this.postcodeMalformed.set(!!club.registeredOfficePostcode && !isPostcode(club.registeredOfficePostcode));
+    if (this.missing().size > 0 || this.postcodeMalformed()) return;
     this.clubs.create(club).subscribe({
       next: () => this.outcome.set({ kind: 'created', club: club.name }),
       error: (refusal: unknown) =>

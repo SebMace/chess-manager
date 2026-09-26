@@ -6,6 +6,8 @@ public record PostalAddress(String street, String postcode, String town) {
         required(street, "street");
         required(postcode, "postcode");
         required(town, "town");
+        postcode = postcode.replace(" ", "");
+        if (!postcode.matches("\\d{5}")) throw new IllegalArgumentException("A postcode is made of five digits");
     }
 
     private static void required(String part, String name) {
