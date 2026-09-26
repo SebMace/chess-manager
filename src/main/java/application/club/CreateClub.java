@@ -23,6 +23,8 @@ public class CreateClub {
     }
 
     public ClubId execute(String name, CommitteeCode committee, FfeClubId ffeClubId, String commune) {
-        return execute(name, committee);
+        ClubId id = newClubId.get();
+        clubs.save(new Club(id, name, true, committee, ffeClubId, commune));
+        return id;
     }
 }
