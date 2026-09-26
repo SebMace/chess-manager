@@ -1,5 +1,6 @@
 package adapters.in.rest;
 
+import application.club.CommuneNotInCommitteeDepartment;
 import application.club.CreateClub;
 import application.club.FfeClubIdAlreadyUsed;
 import domain.club.vo.ClubId;
@@ -31,7 +32,7 @@ public class ClubController {
         return ResponseEntity.created(URI.create("/clubs/" + id.clubId())).build();
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
+    @ExceptionHandler({IllegalArgumentException.class, CommuneNotInCommitteeDepartment.class})
     public ResponseEntity<Void> refuseInvalidClub() {
         return ResponseEntity.badRequest().build();
     }
