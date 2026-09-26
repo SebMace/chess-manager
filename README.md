@@ -127,10 +127,16 @@ club has been created. It needs Node.js 22.22, 24.15 or 26 and npm.
 
 | File | Role |
 |---|---|
-| `src/app/club/create-club.ts` | `CreateClub` component: the form and the creation outcome. |
-| `src/app/club/clubs.ts` | `Clubs` port: what the club screens need, with no HTTP detail. |
-| `src/app/club/http-clubs.ts` | `HttpClubs` adapter: implements `Clubs` over the REST API. |
-| `src/app/app.config.ts` | Wires `Clubs` to `HttpClubs`. |
+| `src/app/club-management/create-club/create-club.ts` | `CreateClub` component: the form and the creation outcome. |
+| `src/app/club-management/create-club/commune-search.ts` | The communes matching what the administrator types. |
+| `src/app/club-management/ports/clubs.ts` | `Clubs` port: what the club screens need, with no HTTP detail. |
+| `src/app/club-management/ports/communes.ts` | `Communes` port: the communes of a departmental committee. |
+| `src/app/club-management/http/http-clubs.ts` | `HttpClubs` adapter: implements `Clubs` over the REST API. |
+| `src/app/club-management/http/http-communes.ts` | `HttpCommunes` adapter: implements `Communes` over the REST API. |
+| `src/app/app.config.ts` | Wires `Clubs` to `HttpClubs` and `Communes` to `HttpCommunes`. |
+
+As in the back-end, each slice has its own folder named after its use case (`create-club`);
+the ports and their HTTP adapters are shared by the slices of Club Management.
 
 The front-end holds no business rule; they stay in the back-end.
 
