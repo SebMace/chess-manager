@@ -37,3 +37,11 @@ Feature: Create a club
       | commune                | Orléans |
     Then the club "Échiquier Orléanais" is not created
     And the administrator is told that the FFE identifier "G45001" is already used
+
+  @acceptance
+  Scenario: A club cannot be created without its commune
+    Given "Loiret" is a departmental committee of the FFE
+    When an administrator creates the club "U.S. Orléans.Echecs" with:
+      | departmental committee | Loiret |
+      | FFE identifier         | G45001 |
+    Then the club "U.S. Orléans.Echecs" is not created
