@@ -10,6 +10,9 @@ const REQUIRED_INFORMATION = [
   'registeredOfficeStreet',
   'registeredOfficePostcode',
   'registeredOfficeTown',
+  'playingVenueStreet',
+  'playingVenuePostcode',
+  'playingVenueTown',
 ] as const satisfies readonly (keyof NewClub)[];
 type RequiredInformation = (typeof REQUIRED_INFORMATION)[number];
 
@@ -192,35 +195,53 @@ type CreationOutcome =
             </div>
             @if (!venueAtOffice()) {
               <div class="field field--wide">
-                <label for="venue-street">Numéro et voie</label>
+                <label for="venue-street" class="required">Numéro et voie</label>
                 <input
                   id="venue-street"
                   #venueStreet
+                  aria-required="true"
                   placeholder="ex. 5 rue du Roi"
                   [value]="venue().street"
+                  [attr.aria-invalid]="missing().has('playingVenueStreet') || null"
+                  [attr.aria-describedby]="missing().has('playingVenueStreet') ? 'venue-street-error' : null"
                   (input)="describeVenue({ street: venueStreet.value })"
                 />
+                @if (missing().has('playingVenueStreet')) {
+                  <p id="venue-street-error" class="field-error">Le numéro et la voie sont obligatoires.</p>
+                }
               </div>
               <div class="field">
-                <label for="venue-postcode">Code postal</label>
+                <label for="venue-postcode" class="required">Code postal</label>
                 <input
                   id="venue-postcode"
                   #venuePostcode
+                  aria-required="true"
                   inputmode="numeric"
                   placeholder="ex. 45100"
                   [value]="venue().postcode"
+                  [attr.aria-invalid]="missing().has('playingVenuePostcode') || null"
+                  [attr.aria-describedby]="missing().has('playingVenuePostcode') ? 'venue-postcode-error' : null"
                   (input)="describeVenue({ postcode: venuePostcode.value })"
                 />
+                @if (missing().has('playingVenuePostcode')) {
+                  <p id="venue-postcode-error" class="field-error">Le code postal est obligatoire.</p>
+                }
               </div>
               <div class="field">
-                <label for="venue-town">Localité</label>
+                <label for="venue-town" class="required">Localité</label>
                 <input
                   id="venue-town"
                   #venueTown
+                  aria-required="true"
                   placeholder="ex. Orléans"
                   [value]="venue().town"
+                  [attr.aria-invalid]="missing().has('playingVenueTown') || null"
+                  [attr.aria-describedby]="missing().has('playingVenueTown') ? 'venue-town-error' : null"
                   (input)="describeVenue({ town: venueTown.value })"
                 />
+                @if (missing().has('playingVenueTown')) {
+                  <p id="venue-town-error" class="field-error">La localité est obligatoire.</p>
+                }
               </div>
             }
           </div>

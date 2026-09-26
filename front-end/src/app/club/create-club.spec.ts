@@ -322,7 +322,8 @@ function fill(field: HTMLInputElement, value: string): void {
 }
 
 function playsAtRegisteredOffice(page: HTMLElement): void {
-  fieldLabelled(page, 'La salle de jeu est au siège social').click();
+  const atRegisteredOffice = fieldLabelled(page, 'La salle de jeu est au siège social');
+  if (!atRegisteredOffice.checked) atRegisteredOffice.click();
 }
 
 function fieldInGroup(page: HTMLElement, group: string, text: string): HTMLInputElement {
