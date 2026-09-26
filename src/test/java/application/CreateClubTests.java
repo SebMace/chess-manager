@@ -41,6 +41,15 @@ class CreateClubTests {
     }
 
     @Test
+    void should_save_the_registered_office_of_the_club() {
+        CreateClub createClub = new CreateClub(clubs, communes, () -> clubId);
+
+        createClub.execute("U.S. Orléans.Echecs", new CommitteeCode("45"), new FfeClubId("G45001"), ORLEANS, OFFICE);
+
+        assertEquals(Optional.of(OFFICE), clubs.find(clubId).orElseThrow().registeredOffice());
+    }
+
+    @Test
     void should_refuse_a_club_without_its_ffe_identifier() {
         CreateClub createClub = new CreateClub(clubs, communes, () -> clubId);
 
