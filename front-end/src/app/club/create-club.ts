@@ -1,5 +1,6 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { Clubs, FfeClubIdAlreadyUsed, NewClub } from './clubs';
+import { Commune, Communes } from '../commune/communes';
 
 const REQUIRED_INFORMATION = ['committeeCode', 'ffeClubId', 'commune'] as const satisfies readonly (keyof NewClub)[];
 type RequiredInformation = (typeof REQUIRED_INFORMATION)[number];
@@ -69,7 +70,13 @@ type CreationOutcome =
                 placeholder="ex. Orléans"
                 [attr.aria-invalid]="missing().has('commune') || null"
                 [attr.aria-describedby]="missing().has('commune') ? 'commune-error' : null"
+                (input)="typeCommune(commune.value, committeeCode.value)"
               />
+              <ul id="commune-options" role="listbox" aria-label="Communes proposées">
+                @for (offered of offeredCommunes(); track offered.code) {
+                  <li role="option">{{ offered.name }}</li>
+                }
+              </ul>
               @if (missing().has('commune')) {
                 <p id="commune-error" class="field-error">La commune est obligatoire.</p>
               }
@@ -97,6 +104,21 @@ export class CreateClub {
   private readonly clubs = inject(Clubs);
   protected readonly outcome = signal<CreationOutcome>({ kind: 'none' });
   protected readonly missing = signal<ReadonlySet<RequiredInformation>>(new Set());
+  private readonly communes = inject(Communes);
+  private readonly communesOfCommittee = signal<readonly Commune[]>([]);
+  private committeeOfCommunes = '';
+  private readonly typedCommune = signal('');
+  protected readonly offeredCommunes = computed(() => {
+    const typed = this.typedCommune().toLowerCase();
+    return typed ? this.communesOfCommittee().filter(commune => commune.name.toLowerCase().startsWith(typed)) : [];
+  });
+
+  protected typeCommune(typed: string, committeeCode: string): void {
+    this.typedCommune.set(typed);
+    if (!committeeCode || committeeCode === this.committeeOfCommunes) return;
+    this.committeeOfCommunes = committeeCode;
+    this.communes.ofCommittee(committeeCode).subscribe(communes => this.communesOfCommittee.set(communes));
+  }
 
   protected create(event: Event, club: NewClub): void {
     event.preventDefault();
