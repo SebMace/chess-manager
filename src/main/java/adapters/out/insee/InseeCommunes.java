@@ -1,6 +1,6 @@
 package adapters.out.insee;
 
-import application.commune.Communes;
+import clubmanagement.ports.Communes;
 import clubmanagement.domain.commune.Commune;
 import clubmanagement.domain.commune.CommuneCode;
 import clubmanagement.domain.commune.DepartmentCode;

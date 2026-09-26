@@ -1,6 +1,6 @@
 package infrastructure;
 
-import application.club.ClubRepository;
+import clubmanagement.ports.ClubRepository;
 import application.club.CreateClub;
 import clubmanagement.domain.club.vo.CommitteeCode;
 import clubmanagement.domain.club.vo.FfeClubId;

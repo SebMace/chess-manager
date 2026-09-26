@@ -1,6 +1,6 @@
 package person;
 
-import application.person.PersonRepository;
+import clubmanagement.ports.PersonRepository;
 import clubmanagement.domain.person.Person;
 import clubmanagement.domain.person.vo.PersonId;
 import clubmanagement.domain.exceptions.FideIdAlreadyAssignedException;

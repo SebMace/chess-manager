@@ -1,5 +1,6 @@
 package application.person;
 
+import clubmanagement.ports.PersonRepository;
 import clubmanagement.domain.person.Person;
 import clubmanagement.domain.person.vo.PersonId;
 

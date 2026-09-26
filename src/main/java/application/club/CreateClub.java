@@ -1,6 +1,7 @@
 package application.club;
 
-import application.commune.Communes;
+import clubmanagement.ports.ClubRepository;
+import clubmanagement.ports.Communes;
 import clubmanagement.domain.club.Club;
 import clubmanagement.domain.club.vo.ClubId;
 import clubmanagement.domain.club.vo.CommitteeCode;

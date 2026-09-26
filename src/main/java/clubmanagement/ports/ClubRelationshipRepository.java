@@ -1,4 +1,4 @@
-package application.club;
+package clubmanagement.ports;
 
 import clubmanagement.domain.club.ClubRelationship;
 import clubmanagement.domain.club.vo.ClubId;

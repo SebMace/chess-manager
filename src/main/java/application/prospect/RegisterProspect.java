@@ -1,7 +1,7 @@
 package application.prospect;
 
-import application.club.ClubRelationshipRepository;
-import application.person.PersonRepository;
+import clubmanagement.ports.ClubRelationshipRepository;
+import clubmanagement.ports.PersonRepository;
 import clubmanagement.domain.club.ClubRelationship;
 import clubmanagement.domain.club.ClubAffiliations;
 import clubmanagement.domain.club.vo.ClubId;

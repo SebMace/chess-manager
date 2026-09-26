@@ -1,4 +1,4 @@
-package application.person;
+package clubmanagement.ports;
 
 import clubmanagement.domain.person.Person;
 import clubmanagement.domain.person.vo.PersonId;

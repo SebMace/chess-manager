@@ -1,5 +1,7 @@
 package application.club;
 
+import clubmanagement.ports.ClubRelationshipRepository;
+import clubmanagement.ports.ClubRepository;
 import clubmanagement.domain.club.ClubAffiliations;
 import clubmanagement.domain.club.vo.Season;
 import clubmanagement.domain.person.vo.PersonId;

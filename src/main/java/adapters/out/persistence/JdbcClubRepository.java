@@ -1,6 +1,6 @@
 package adapters.out.persistence;
 
-import application.club.ClubRepository;
+import clubmanagement.ports.ClubRepository;
 import clubmanagement.domain.club.Club;
 import clubmanagement.domain.club.vo.ClubId;
 import clubmanagement.domain.club.vo.CommitteeCode;

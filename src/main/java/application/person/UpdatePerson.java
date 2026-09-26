@@ -1,5 +1,6 @@
 package application.person;
 
+import clubmanagement.ports.PersonRepository;
 import clubmanagement.domain.member.vo.EloRating;
 import clubmanagement.domain.member.vo.FideId;
 import clubmanagement.domain.exceptions.FideIdAlreadyAssignedException;
