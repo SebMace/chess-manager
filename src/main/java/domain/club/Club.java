@@ -17,12 +17,12 @@ public final class Club {
     private final CommuneCode commune;
     private final PostalAddress registeredOffice;
 
-    public Club(ClubId id, String name, CommuneCode commune) {
-        this(id, name, false, commune);
+    public Club(ClubId id, String name, CommuneCode commune, PostalAddress registeredOffice) {
+        this(id, name, false, commune, registeredOffice);
     }
 
-    public Club(ClubId id, String name, boolean managedByApplication, CommuneCode commune) {
-        this(id, name, managedByApplication, null, null, commune, null);
+    public Club(ClubId id, String name, boolean managedByApplication, CommuneCode commune, PostalAddress registeredOffice) {
+        this(id, name, managedByApplication, null, null, commune, registeredOffice);
     }
 
     public Club(ClubId id, String name, boolean managedByApplication, CommitteeCode committee,

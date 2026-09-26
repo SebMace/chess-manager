@@ -10,6 +10,7 @@ import domain.club.Club;
 import domain.club.ClubAffiliations;
 import domain.club.RelationshipStatus;
 import domain.club.vo.ClubId;
+import domain.club.vo.PostalAddress;
 import domain.commune.CommuneCode;
 import domain.club.vo.Season;
 import domain.member.vo.FfeId;
@@ -29,13 +30,14 @@ import java.util.stream.Collectors;
 /** One application fixture per scenario; commands use the same repositories as observations. */
 public class ClubManagementDriver {
     private static final UUID PERSON_UUID = UUID.fromString("00000000-0000-0000-0000-000000000001");
+    private static final PostalAddress OFFICE = new PostalAddress("12 rue des Échecs", "45000", "Orléans");
     private final InMemoryClubRepository clubRepository = new InMemoryClubRepository();
     private final InMemoryPersonRepository people = new InMemoryPersonRepository();
     private final InMemoryClubRelationshipRepository relationships = new InMemoryClubRelationshipRepository();
     private final Map<String, Club> clubs = Map.of(
-            "Orléans", new Club(new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000002")), "Orléans", new CommuneCode("45234")),
-            "Olivet", new Club(new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000003")), "Olivet", new CommuneCode("45232")),
-            "Gien", new Club(new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000004")), "Gien", new CommuneCode("45155")));
+            "Orléans", new Club(new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000002")), "Orléans", new CommuneCode("45234"), OFFICE),
+            "Olivet", new Club(new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000003")), "Olivet", new CommuneCode("45232"), OFFICE),
+            "Gien", new Club(new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000004")), "Gien", new CommuneCode("45155"), OFFICE));
     private Season season = new Season(2026, 2027);
     private PersonId personId;
 
@@ -46,7 +48,7 @@ public class ClubManagementDriver {
     }
 
     public void defineClub(String name, boolean managed) {
-        clubRepository.save(new Club(clubId(name), name, managed, clubs.get(name).commune()));
+        clubRepository.save(new Club(clubId(name), name, managed, clubs.get(name).commune(), OFFICE));
     }
 
     public boolean isClubManaged(String name) { return clubRepository.find(clubId(name)).orElseThrow().managedByApplication(); }
