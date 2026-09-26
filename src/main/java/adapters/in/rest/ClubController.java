@@ -20,9 +20,8 @@ public class ClubController {
 
     @PostMapping("/clubs")
     public ResponseEntity<Void> create(@RequestBody CreateClubRequest request) {
-        ClubId id = request.committeeCode() == null
-                ? createClub.execute(request.name())
-                : createClub.execute(request.name(), new CommitteeCode(request.committeeCode()));
+        if (request.committeeCode() == null) return ResponseEntity.badRequest().build();
+        ClubId id = createClub.execute(request.name(), new CommitteeCode(request.committeeCode()));
         return ResponseEntity.created(URI.create("/clubs/" + id.clubId())).build();
     }
 
