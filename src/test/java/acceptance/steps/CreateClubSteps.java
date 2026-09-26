@@ -29,6 +29,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class CreateClubSteps {
     private static final UUID CREATED_CLUB_ID = UUID.fromString("00000000-0000-0000-0000-000000000006");
+    private static final Map<String, CommitteeCode> COMMITTEES = Map.of(
+            "Loiret", new CommitteeCode("45"),
+            "Mayenne", new CommitteeCode("53"));
     private static final Map<String, CommuneCode> COMMUNES = Map.of(
             "Orléans", InMemoryCommunes.ORLEANS.code(),
             "Olivet", InMemoryCommunes.OLIVET.code(),
@@ -44,7 +47,7 @@ public class CreateClubSteps {
     private List<Club> consultedClubs = List.of();
 
     @Given("{string} is a departmental committee of the FFE")
-    public void departmentalCommittee(String name) { committees.put(name, new CommitteeCode("45")); }
+    public void departmentalCommittee(String name) { committees.put(name, COMMITTEES.get(name)); }
 
     @When("an administrator creates the club {string} with:")
     public void createClubWith(String name, DataTable information) {
@@ -82,6 +85,11 @@ public class CreateClubSteps {
     @Then("the administrator is shown the club {string}")
     public void clubShown(String name) {
         assertTrue(consultedClubs.stream().anyMatch(club -> club.name().equals(name)));
+    }
+
+    @Then("the administrator is not shown the club {string}")
+    public void clubNotShown(String name) {
+        assertTrue(consultedClubs.stream().noneMatch(club -> club.name().equals(name)));
     }
 
     @Then("the administrator is offered the commune {string}")
