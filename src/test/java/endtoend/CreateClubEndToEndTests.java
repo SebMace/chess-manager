@@ -56,16 +56,26 @@ class CreateClubEndToEndTests {
         assertEquals(Optional.of(new CommitteeCode("45")), club.committee());
     }
 
-    private ClubId createClub(String json) throws Exception {
-        HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/clubs"))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(json))
-                .build();
+    @Test
+    void a_club_cannot_be_created_without_its_departmental_committee() throws Exception {
+        HttpResponse<Void> response = post("{\"name\": \"Montargis\"}");
 
-        HttpResponse<Void> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.discarding());
+        assertEquals(400, response.statusCode());
+    }
+
+    private ClubId createClub(String json) throws Exception {
+        HttpResponse<Void> response = post(json);
 
         assertEquals(201, response.statusCode());
         String location = response.headers().firstValue("Location").orElseThrow();
         return new ClubId(UUID.fromString(location.substring(location.lastIndexOf('/') + 1)));
+    }
+
+    private HttpResponse<Void> post(String json) throws Exception {
+        HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/clubs"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(json))
+                .build();
+        return HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.discarding());
     }
 }
