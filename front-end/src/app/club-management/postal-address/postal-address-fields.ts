@@ -35,6 +35,7 @@ import { Towns } from '../ports/towns';
         aria-required="true"
         [attr.autocomplete]="'section-' + id + ' postal-code'"
         inputmode="numeric"
+        [attr.list]="id + '-postcodes'"
         placeholder="ex. 45000"
         [value]="address().postcode"
         [attr.aria-invalid]="problems().has('missingPostcode') || problems().has('malformedPostcode') || null"
@@ -47,6 +48,11 @@ import { Towns } from '../ports/towns';
       } @else if (problems().has('malformedPostcode')) {
         <p [id]="id + '-postcode-error'" class="field-error">Le code postal doit comporter 5 chiffres.</p>
       }
+      <datalist [id]="id + '-postcodes'">
+        @for (serving of servingPostcodes(); track serving) {
+          <option [value]="serving"></option>
+        }
+      </datalist>
     </div>
     <div class="field">
       <label [for]="id + '-town'" class="required">Localité</label>
@@ -59,7 +65,7 @@ import { Towns } from '../ports/towns';
         [value]="address().town"
         [attr.aria-invalid]="problems().has('missingTown') || null"
         [attr.aria-describedby]="problems().has('missingTown') ? id + '-town-error' : null"
-        (input)="describe({ town: town.value })"
+        (input)="typeTown(town.value)"
         #town
       />
       @if (problems().has('missingTown')) {
@@ -81,6 +87,7 @@ export class PostalAddressFields {
 
   private readonly towns = inject(Towns);
   protected readonly servedTowns = signal<readonly string[]>([]);
+  protected readonly servingPostcodes = signal<readonly string[]>([]);
 
   protected typePostcode(postcode: string): void {
     this.describe({ postcode });
@@ -92,6 +99,19 @@ export class PostalAddressFields {
       },
       // The towns are only a help: without them, the administrator still types the town freely.
       error: () => this.servedTowns.set([]),
+    });
+  }
+
+  protected typeTown(town: string): void {
+    this.describe({ town });
+    if (!town.trim()) return;
+    this.towns.postcodesOf(town).subscribe({
+      next: postcodes => {
+        this.servingPostcodes.set(postcodes);
+        if (postcodes.length === 1 && !this.address().postcode) this.describe({ postcode: postcodes[0] });
+      },
+      // The postcodes are only a help: without them, the administrator still types the postcode freely.
+      error: () => this.servingPostcodes.set([]),
     });
   }
 
