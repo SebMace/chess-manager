@@ -13,35 +13,47 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 /** Delivery towns read from La Poste's official postcodes (see resources/laposte/README.md). */
 public class LaPosteDeliveryTowns implements DeliveryTowns {
     private static final String OFFICIAL_POSTCODES = "/laposte/laposte_hexasmal.csv";
+    private static final int COMMUNE = 0;
     private static final int POSTCODE = 2;
     private static final int DELIVERY_TOWN = 3;
 
     private final Map<Postcode, List<String>> towns;
+    private final Map<CommuneCode, List<DeliveryTown>> townsOfCommunes;
 
-    private LaPosteDeliveryTowns(Map<Postcode, List<String>> towns) {
-        this.towns = towns;
+    private LaPosteDeliveryTowns(List<String[]> rows) {
+        // A town is listed once per locality (Ligne_5) it serves with the same postcode.
+        this.towns = rows.stream().collect(Collectors.groupingBy(row -> new Postcode(row[POSTCODE]),
+                Collectors.collectingAndThen(
+                        Collectors.mapping(row -> row[DELIVERY_TOWN], Collectors.toCollection(LinkedHashSet::new)),
+                        List::copyOf)));
+        this.townsOfCommunes = rows.stream().collect(Collectors.groupingBy(row -> new CommuneCode(row[COMMUNE]),
+                Collectors.collectingAndThen(
+                        Collectors.groupingBy(row -> row[DELIVERY_TOWN], LinkedHashMap::new,
+                                Collectors.mapping(row -> new Postcode(row[POSTCODE]), Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(Postcode::value))))),
+                        LaPosteDeliveryTowns::deliveryTowns)));
+    }
+
+    private static List<DeliveryTown> deliveryTowns(Map<String, TreeSet<Postcode>> postcodesOfTowns) {
+        return postcodesOfTowns.entrySet().stream()
+                .map(town -> new DeliveryTown(town.getKey(), List.copyOf(town.getValue())))
+                .toList();
     }
 
     public static LaPosteDeliveryTowns fromOfficialPostcodes() {
         try (InputStream file = LaPosteDeliveryTowns.class.getResourceAsStream(OFFICIAL_POSTCODES);
              BufferedReader lines = new BufferedReader(new InputStreamReader(file, StandardCharsets.ISO_8859_1))) {
-            return new LaPosteDeliveryTowns(lines.lines()
-                    .skip(1)
-                    .map(line -> line.split(";", -1))
-                    // A town is listed once per locality (Ligne_5) it serves with the same postcode.
-                    .collect(Collectors.groupingBy(row -> new Postcode(row[POSTCODE]),
-                            Collectors.collectingAndThen(
-                                    Collectors.mapping(row -> row[DELIVERY_TOWN], Collectors.toCollection(LinkedHashSet::new)),
-                                    List::copyOf))));
+            return new LaPosteDeliveryTowns(lines.lines().skip(1).map(line -> line.split(";", -1)).toList());
         } catch (IOException e) {
             throw new UncheckedIOException("Cannot read " + OFFICIAL_POSTCODES, e);
         }
@@ -64,7 +76,7 @@ public class LaPosteDeliveryTowns implements DeliveryTowns {
 
     @Override
     public List<DeliveryTown> ofCommune(CommuneCode commune) {
-        return List.of();
+        return townsOfCommunes.getOrDefault(commune, List.of());
     }
 
     // La Poste writes a town in capitals, without accents nor punctuation, and abbreviates the words
