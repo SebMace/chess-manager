@@ -2,7 +2,9 @@ package clubmanagement.persistence;
 
 import clubmanagement.domain.club.vo.Activity;
 import clubmanagement.domain.club.vo.ClubId;
+import clubmanagement.domain.club.vo.PostalAddress;
 import clubmanagement.domain.club.vo.Session;
+import clubmanagement.domain.club.vo.Venue;
 import clubmanagement.ports.ClubCalendar;
 import org.springframework.jdbc.core.simple.JdbcClient;
 
@@ -24,19 +26,25 @@ public class JdbcClubCalendar implements ClubCalendar {
     @Override
     public void defineOpeningHours(ClubId club, Set<Session> sessions) {
         sessions.forEach(session -> jdbc.sql("""
-                        INSERT INTO club_session (club_id, day_of_week, starts_at, ends_at, activity)
-                        VALUES (:club, :day, :from, :to, :activity)""")
+                        INSERT INTO club_session (club_id, day_of_week, starts_at, ends_at, activity,
+                                                  venue_street, venue_postcode, venue_town)
+                        VALUES (:club, :day, :from, :to, :activity, :street, :postcode, :town)""")
                 .param("club", club.clubId())
                 .param("day", session.day().name())
                 .param("from", session.from())
                 .param("to", session.to())
                 .param("activity", session.activity().map(Activity::name).orElse(null))
+                .param("street", address(session.venue()).map(PostalAddress::street).orElse(null))
+                .param("postcode", address(session.venue()).map(PostalAddress::postcode).orElse(null))
+                .param("town", address(session.venue()).map(PostalAddress::town).orElse(null))
                 .update());
     }
 
     @Override
     public Set<Session> openingHoursOf(ClubId club) {
-        return jdbc.sql("SELECT day_of_week, starts_at, ends_at, activity FROM club_session WHERE club_id = :club")
+        return jdbc.sql("""
+                        SELECT day_of_week, starts_at, ends_at, activity, venue_street, venue_postcode, venue_town
+                        FROM club_session WHERE club_id = :club""")
                 .param("club", club.clubId())
                 .query(JdbcClubCalendar::session)
                 .stream()
@@ -47,6 +55,21 @@ public class JdbcClubCalendar implements ClubCalendar {
         return new Session(DayOfWeek.valueOf(row.getString("day_of_week")),
                 row.getObject("starts_at", LocalTime.class),
                 row.getObject("ends_at", LocalTime.class),
-                Optional.ofNullable(row.getString("activity")).map(Activity::new));
+                Optional.ofNullable(row.getString("activity")).map(Activity::new),
+                venue(row));
+    }
+
+    /** The playing venue of the club is kept as a reference: no address is stored for it. */
+    private static Optional<PostalAddress> address(Venue venue) {
+        return switch (venue) {
+            case Venue.Address(PostalAddress address) -> Optional.of(address);
+            case Venue.PlayingVenue() -> Optional.empty();
+        };
+    }
+
+    private static Venue venue(ResultSet row) throws SQLException {
+        String street = row.getString("venue_street");
+        return street == null ? Venue.PLAYING_VENUE
+                : new Venue.Address(new PostalAddress(street, row.getString("venue_postcode"), row.getString("venue_town")));
     }
 }
