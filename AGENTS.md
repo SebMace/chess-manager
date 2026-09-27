@@ -112,6 +112,20 @@ SOLID principles are diagnostic tools, not a checklist that justifies more class
 - keep ports focused on what their clients need;
 - orient dependencies toward stable domain and application policies.
 
+### 4.1 YAGNI checkpoint
+
+Before starting a slice, an evolution of a slice, or a fix, the agent must explicitly ask
+whether the need is real today and propose the simplest option, including doing nothing.
+The following signals make this question mandatory:
+
+- a rare user action, where the help brings little value;
+- symmetry or completeness as the only reason ("the reverse lookup too");
+- a justification by a future feature ("later, the place of a session");
+- a fix for a failure never observed in real use;
+- edge cases piling up on the same feature.
+
+See the YAGNI lesson on the address entry in `docs/slices.md`.
+
 ## 5. Strict TDD: RED → GREEN → REFACTOR
 
 Behavior-changing production code must normally be driven by a failing automated test.

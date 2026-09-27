@@ -48,6 +48,32 @@ postcodes of a town*, *Find the towns of a commune*), sans nouvelle capacité :
   recherche ;
 - les recherches en cours sont abandonnées quand l'adresse ou le formulaire ne sont plus affichés.
 
+### Leçon YAGNI : l'aide à la saisie des adresses
+
+L'aide à la saisie des adresses et son durcissement sont gardés tels quels. Le principe YAGNI
+aurait pourtant dû être appliqué, et il le sera à l'avenir :
+
+- **un geste rare** : on ne crée un club qu'une fois, et c'est un administrateur qui le fait ;
+  saisir deux adresses à la main ne justifiait pas trois recherches ;
+- **un seul sens suffisait** : la commune est déjà choisie, et le siège d'un club est presque
+  toujours dans sa commune ; *Find the towns of a commune* couvrait le cas courant. *Find the
+  postcodes of a town* est venue par symétrie, et c'est la plus coûteuse (mise à la norme de
+  La Poste, homonymes) ;
+- **des règles pour des cas que personne n'a signalés** : garder ce qui a été proposé par la
+  commune, remettre les adresses à blanc quand elle change, garder la saisie au premier choix ;
+- **un durcissement sans bug constaté** : les réponses tardives étaient une course théorique,
+  alors que le back-end répond en quelques millisecondes depuis la mémoire ; s'en protéger a
+  demandé 21 tests et fait passer l'adresse dans un `WritableSignal` plutôt qu'un `model()` ;
+- **une justification par l'avenir** : « plus tard lieu d'une session » justifiait la
+  généralité par une fonctionnalité qui n'existe pas.
+
+À l'avenir, avant chaque slice, évolution ou correctif, on se demande si le besoin est réel
+aujourd'hui et quelle est l'option la plus simple, jusqu'à « ne rien faire ». Ces signaux
+imposent la question : un geste rare, la symétrie « pour être complet », un « plus tard » dans
+une justification, un correctif sans bug observé, des cas limites qui s'enchaînent sur une même
+fonctionnalité. Tant qu'aucun besoin réel n'est constaté, l'aide à la saisie des adresses ne reçoit
+plus de durcissement ni de cas limite, et ses questions ouvertes attendent.
+
 ## Slices à venir
 
 On finalise d'abord la création d'un club ; les slices sur les joueurs viendront plus tard.
