@@ -300,7 +300,9 @@ The front-end and the back-end are checked against a shared contract with
   (`vitest-base.config.mts`): run in parallel, they would overwrite each other's interactions.
 - **Provider states**: an interaction can start from a business situation (`given(...)`), set up
   by the matching `@State` method of `FrontEndContractTests` through the use cases, never
-  directly in the database.
+  directly in the database. When the back-end generates a value the interaction needs, such as
+  the identifier of a club, the `@State` method returns it and the consumer spec refers to it
+  with `MatchersV3.fromProviderState`.
 - **Provider side**: `contract.FrontEndContractTests` starts the back-end (with PostgreSQL in
   Testcontainers) and replays every recorded interaction against it; it runs with `mvn test`,
   without Node.

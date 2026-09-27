@@ -108,6 +108,147 @@
         "status": 200
       },
       "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "the creation of a club",
+      "pending": false,
+      "request": {
+        "body": {
+          "content": {
+            "committeeCode": "45",
+            "communeCode": "45208",
+            "ffeClubId": "G45201",
+            "name": "Échiquier de Montargis",
+            "playingVenue": {
+              "postcode": "45200",
+              "street": "5 rue du Roi",
+              "town": "Montargis"
+            },
+            "registeredOffice": {
+              "postcode": "45200",
+              "street": "12 rue des Échecs",
+              "town": "Montargis"
+            }
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "method": "POST",
+        "path": "/api/clubs"
+      },
+      "response": {
+        "status": 201
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "the creation of a club with an FFE identifier already used",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "a club already uses the FFE identifier G45200"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "committeeCode": "45",
+            "communeCode": "45208",
+            "ffeClubId": "G45200",
+            "name": "Échiquier de Montargis",
+            "playingVenue": {
+              "postcode": "45200",
+              "street": "5 rue du Roi",
+              "town": "Montargis"
+            },
+            "registeredOffice": {
+              "postcode": "45200",
+              "street": "12 rue des Échecs",
+              "town": "Montargis"
+            }
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "method": "POST",
+        "path": "/api/clubs"
+      },
+      "response": {
+        "status": 409
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "the definition of the opening hours of a club",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "the club G45300 is managed by the application"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": [
+            {
+              "activity": "Jeu libre",
+              "day": "FRIDAY",
+              "from": "20:00",
+              "to": "22:00",
+              "venue": null
+            },
+            {
+              "activity": null,
+              "day": "SATURDAY",
+              "from": "15:00",
+              "to": "17:00",
+              "venue": {
+                "postcode": "45200",
+                "street": "1 place du Marché",
+                "town": "Montargis"
+              }
+            }
+          ],
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "generators": {
+          "path": {
+            "expression": "/api/clubs/${clubId}/opening-hours",
+            "type": "ProviderState"
+          }
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "path": {
+            "combine": "AND",
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          }
+        },
+        "method": "PUT",
+        "path": "/api/clubs/0b6e3d52-7a4f-4c1e-8f2a-9d3c5e7b1a24/opening-hours"
+      },
+      "response": {
+        "status": 204
+      },
+      "type": "Synchronous/HTTP"
     }
   ],
   "metadata": {
