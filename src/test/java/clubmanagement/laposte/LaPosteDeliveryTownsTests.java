@@ -1,6 +1,8 @@
 package clubmanagement.laposte;
 
+import clubmanagement.domain.club.vo.DeliveryTown;
 import clubmanagement.domain.club.vo.Postcode;
+import clubmanagement.domain.commune.CommuneCode;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -65,5 +67,23 @@ class LaPosteDeliveryTownsTests {
     @Test
     void should_not_abbreviate_a_town_that_only_begins_with_saint() {
         assertEquals(List.of(new Postcode("17100")), deliveryTowns.postcodesOf("Saintes"));
+    }
+
+    @Test
+    void should_offer_the_town_of_a_commune_with_each_of_its_postcodes_once() {
+        assertEquals(List.of(new DeliveryTown("ORLEANS", List.of(new Postcode("45000"), new Postcode("45100")))),
+                deliveryTowns.ofCommune(new CommuneCode("45234")));
+    }
+
+    @Test
+    void should_offer_the_town_of_a_commune_without_the_communes_of_the_same_name() {
+        assertEquals(List.of(new DeliveryTown("OLIVET", List.of(new Postcode("45160")))),
+                deliveryTowns.ofCommune(new CommuneCode("45232")));
+    }
+
+    @Test
+    void should_offer_the_town_la_poste_delivers_a_commune_as_even_when_its_name_differs() {
+        assertEquals(List.of(new DeliveryTown("COLMARS LES ALPES", List.of(new Postcode("04370")))),
+                deliveryTowns.ofCommune(new CommuneCode("04061")));
     }
 }
