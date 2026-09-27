@@ -4,6 +4,57 @@
   },
   "interactions": [
     {
+      "description": "a request for the clubs of a committee",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "the committee 45 has the club G45100"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/clubs",
+        "query": {
+          "committee": [
+            "45"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "content": [
+            {
+              "commune": "Montargis",
+              "ffeClubId": "G45100",
+              "name": "Echiquier du Gâtinais"
+            }
+          ],
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
       "description": "a request for the communes of a committee",
       "pending": false,
       "request": {

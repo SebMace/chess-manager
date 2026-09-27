@@ -172,6 +172,12 @@ The front-end and the back-end are checked against a shared contract with
 - **Consumer side**: the specs of the HTTP adapters (`front-end/src/app/club-management/http/*.spec.ts`)
   run the real adapter against the Pact mock server and record each interaction in
   `front-end/pacts/chess-manager-front-chess-manager-back.json`. This file is committed.
+  These specs share `front-end/src/testing/front-end-contract.ts`, so that they all write to
+  the one contract the back-end verifies. Test files run one after the other
+  (`vitest-base.config.mts`): run in parallel, they would overwrite each other's interactions.
+- **Provider states**: an interaction can start from a business situation (`given(...)`), set up
+  by the matching `@State` method of `FrontEndContractTests` through the use cases, never
+  directly in the database.
 - **Provider side**: `contract.FrontEndContractTests` starts the back-end (with PostgreSQL in
   Testcontainers) and replays every recorded interaction against it; it runs with `mvn test`,
   without Node.
