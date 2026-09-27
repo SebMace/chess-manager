@@ -28,3 +28,6 @@ replay_pid*
 
 # Local notes from coding-agent sessions
 /ModeDeFonctionnementCodex.md
+
+# Angular cache when the dev server is started from the repository root
+/.angular/
