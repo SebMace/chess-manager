@@ -15,6 +15,7 @@ class ArchitectureTests {
     private static final String REST_ADAPTERS = "..rest..";
     private static final String PERSISTENCE_ADAPTER = "clubmanagement.persistence..";
     private static final String INSEE_ADAPTER = "clubmanagement.insee..";
+    private static final String LA_POSTE_ADAPTER = "clubmanagement.laposte..";
 
     private static final JavaClasses CLUB_MANAGEMENT = new ClassFileImporter()
             .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)
@@ -33,10 +34,10 @@ class ArchitectureTests {
     @Test
     void core_should_not_depend_on_frameworks_or_adapters() {
         noClasses().that().resideInAPackage("clubmanagement..")
-                .and().resideOutsideOfPackages(REST_ADAPTERS, PERSISTENCE_ADAPTER, INSEE_ADAPTER)
+                .and().resideOutsideOfPackages(REST_ADAPTERS, PERSISTENCE_ADAPTER, INSEE_ADAPTER, LA_POSTE_ADAPTER)
                 .should().dependOnClassesThat()
                 .resideInAnyPackage("org.springframework..", "infrastructure..",
-                        REST_ADAPTERS, PERSISTENCE_ADAPTER, INSEE_ADAPTER)
+                        REST_ADAPTERS, PERSISTENCE_ADAPTER, INSEE_ADAPTER, LA_POSTE_ADAPTER)
                 .because("the hexagon's core must not know about Spring or about the adapters around it")
                 .check(CLUB_MANAGEMENT);
     }
