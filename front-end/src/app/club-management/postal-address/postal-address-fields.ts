@@ -1,4 +1,6 @@
-import { Component, effect, inject, input, model, signal, untracked } from '@angular/core';
+import { Component, DestroyRef, computed, effect, inject, input, model, signal, untracked } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { catchError, filter, of } from 'rxjs';
 import { AddressProblem, PostalAddress, isPostcode } from './postal-address';
 import { DeliveryTown, Towns } from '../ports/towns';
 
@@ -88,8 +90,18 @@ export class PostalAddressFields {
   readonly defaultTown = input<DeliveryTown | null>(null);
 
   private readonly towns = inject(Towns);
-  protected readonly servedTowns = signal<readonly string[]>([]);
-  protected readonly servingPostcodes = signal<readonly string[]>([]);
+  private readonly destroyRef = inject(DestroyRef);
+  // A suggestion only helps with the address as it is: it fades once what it was found for changes.
+  private readonly townsFound = signal<{ postcode: string; towns: readonly string[] }>({ postcode: '', towns: [] });
+  protected readonly servedTowns = computed(() => {
+    const found = this.townsFound();
+    return found.postcode === this.address().postcode ? found.towns : [];
+  });
+  private readonly postcodesFound = signal<{ town: string; postcodes: readonly string[] }>({ town: '', postcodes: [] });
+  protected readonly servingPostcodes = computed(() => {
+    const found = this.postcodesFound();
+    return found.town === this.address().town ? found.postcodes : [];
+  });
   // What the commune last proposed: the administrator has not changed it while the address still holds it.
   private proposed = { town: '', postcode: '' };
 
@@ -106,33 +118,38 @@ export class PostalAddressFields {
     const proposed = { town: town.name, postcode: town.postcodes.length === 1 ? town.postcodes[0] : '' };
     if (!given.town || given.town === this.proposed.town) this.describe({ town: proposed.town });
     if (!given.postcode || given.postcode === this.proposed.postcode) this.describe({ postcode: proposed.postcode });
-    this.servingPostcodes.set(town.postcodes);
+    this.postcodesFound.set({ town: this.address().town, postcodes: town.postcodes });
     this.proposed = proposed;
   }
 
   protected typePostcode(postcode: string): void {
     this.describe({ postcode });
     if (!isPostcode(postcode)) return;
-    this.towns.ofPostcode(postcode).subscribe({
-      next: towns => {
-        this.servedTowns.set(towns);
-        if (towns.length === 1) this.describe({ town: towns[0] });
-      },
+    const town = this.address().town;
+    this.towns.ofPostcode(postcode).pipe(
       // The towns are only a help: without them, the administrator still types the town freely.
-      error: () => this.servedTowns.set([]),
+      catchError(() => of([])),
+      // Only the towns of the postcode still given are of any help.
+      filter(() => this.address().postcode === postcode),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(towns => {
+      this.townsFound.set({ postcode, towns });
+      if (towns.length === 1 && this.address().town === town) this.describe({ town: towns[0] });
     });
   }
 
   protected typeTown(town: string): void {
     this.describe({ town });
     if (!town.trim()) return;
-    this.towns.postcodesOf(town).subscribe({
-      next: postcodes => {
-        this.servingPostcodes.set(postcodes);
-        if (postcodes.length === 1 && !this.address().postcode) this.describe({ postcode: postcodes[0] });
-      },
+    this.towns.postcodesOf(town).pipe(
       // The postcodes are only a help: without them, the administrator still types the postcode freely.
-      error: () => this.servingPostcodes.set([]),
+      catchError(() => of([])),
+      // Only the postcodes of the town still given are of any help.
+      filter(() => this.address().town === town),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(postcodes => {
+      this.postcodesFound.set({ town, postcodes });
+      if (postcodes.length === 1 && !this.address().postcode) this.describe({ postcode: postcodes[0] });
     });
   }
 

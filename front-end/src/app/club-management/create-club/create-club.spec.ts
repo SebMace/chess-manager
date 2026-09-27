@@ -140,6 +140,46 @@ describe('CreateClub', () => {
     }
   });
 
+  it('gives up the towns of the postcode typed for the previous commune once the commune is changed', async () => {
+    fill(fieldLabelled(page, 'Code du comité'), '45');
+    await chooseCommune('Orl', 'Orléans');
+    await flushTownsOfCommune('45234', []);
+    fill(fieldInGroup(page, 'Siège social', 'Code postal'), '45100');
+
+    fill(fieldLabelled(page, 'Commune'), 'Ol');
+    await fixture.whenStable();
+    server.expectOne(request => request.url === '/towns' && request.params.get('postcode') === '45100').flush(['ORLEANS']);
+    await fixture.whenStable();
+
+    expect(fieldInGroup(page, 'Siège social', 'Localité').value).toBe('');
+  });
+
+  it('no longer suggests the postcodes of the town of the commune once the commune is changed', async () => {
+    fill(fieldLabelled(page, 'Code du comité'), '45');
+    await chooseCommune('Orl', 'Orléans');
+    await flushTownsOfCommune('45234', [{ name: 'ORLEANS', postcodes: ['45000', '45100'] }]);
+
+    fill(fieldLabelled(page, 'Commune'), 'Ol');
+    await fixture.whenStable();
+
+    expect(suggestionsFor(page, fieldInGroup(page, 'Siège social', 'Code postal'))).toEqual([]);
+  });
+
+  it('no longer suggests the towns of the postcode typed for the previous commune once the commune is changed', async () => {
+    fill(fieldLabelled(page, 'Code du comité'), '45');
+    await chooseCommune('Orl', 'Orléans');
+    await flushTownsOfCommune('45234', []);
+    fill(fieldInGroup(page, 'Siège social', 'Code postal'), '45240');
+    server.expectOne(request => request.url === '/towns' && request.params.get('postcode') === '45240')
+      .flush(['LA FERTE ST AUBIN', 'LIGNY LE RIBAULT', 'SENNELY']);
+    await fixture.whenStable();
+
+    fill(fieldLabelled(page, 'Commune'), 'Ol');
+    await fixture.whenStable();
+
+    expect(suggestionsFor(page, fieldInGroup(page, 'Siège social', 'Localité'))).toEqual([]);
+  });
+
   it('proposes no town when the towns of the chosen commune cannot be found', async () => {
     fill(fieldLabelled(page, 'Code du comité'), '45');
     await chooseCommune('Orl', 'Orléans');
@@ -398,6 +438,12 @@ function fill(field: HTMLInputElement, value: string): void {
 function playsAtRegisteredOffice(page: HTMLElement): void {
   const atRegisteredOffice = fieldLabelled(page, 'La salle de jeu est au siège social');
   if (!atRegisteredOffice.checked) atRegisteredOffice.click();
+}
+
+function suggestionsFor(page: HTMLElement, field: HTMLInputElement): string[] {
+  const list = field.getAttribute('list');
+  if (!list) return [];
+  return Array.from(page.querySelectorAll<HTMLOptionElement>(`datalist[id="${list}"] option`)).map(option => option.value);
 }
 
 function fieldInGroup(page: HTMLElement, group: string, text: string): HTMLInputElement {
