@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, throwError } from 'rxjs';
+import { PostalAddress } from '../postal-address/postal-address';
 import { ClubOfCommittee, Clubs, FfeClubIdAlreadyUsed, NewClub } from '../ports/clubs';
 
 @Injectable()
@@ -13,16 +14,8 @@ export class HttpClubs implements Clubs {
       committeeCode: club.committeeCode,
       ffeClubId: club.ffeClubId,
       communeCode: club.communeCode,
-      registeredOffice: {
-        street: club.registeredOfficeStreet,
-        postcode: club.registeredOfficePostcode,
-        town: club.registeredOfficeTown,
-      },
-      playingVenue: {
-        street: club.playingVenueStreet,
-        postcode: club.playingVenuePostcode,
-        town: club.playingVenueTown,
-      },
+      registeredOffice: postalAddress(club.registeredOffice),
+      playingVenue: postalAddress(club.playingVenue),
     }).pipe(
       catchError((error: HttpErrorResponse) =>
         throwError(() => (error.status === 409 ? new FfeClubIdAlreadyUsed(club.ffeClubId) : error))),
@@ -32,4 +25,8 @@ export class HttpClubs implements Clubs {
   ofCommittee(committeeCode: string): Observable<ClubOfCommittee[]> {
     return this.http.get<ClubOfCommittee[]>('/api/clubs', { params: { committee: committeeCode } });
   }
+}
+
+function postalAddress(address: PostalAddress): { street: string; postcode: string; town: string } {
+  return { street: address.street, postcode: address.postcode, town: address.town };
 }

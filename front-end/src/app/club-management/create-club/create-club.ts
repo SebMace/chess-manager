@@ -1,28 +1,13 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { Clubs, FfeClubIdAlreadyUsed, NewClub } from '../ports/clubs';
 import { Commune, Communes } from '../ports/communes';
+import { DeliveryTown, Towns } from '../ports/towns';
 import { communesMatching } from './commune-search';
+import { PostalAddressFields } from '../postal-address/postal-address-fields';
+import { AddressProblem, NO_ADDRESS, PostalAddress, problemsOf } from '../postal-address/postal-address';
 
-const REQUIRED_INFORMATION = [
-  'committeeCode',
-  'ffeClubId',
-  'communeCode',
-  'registeredOfficeStreet',
-  'registeredOfficePostcode',
-  'registeredOfficeTown',
-  'playingVenueStreet',
-  'playingVenuePostcode',
-  'playingVenueTown',
-] as const satisfies readonly (keyof NewClub)[];
+const REQUIRED_INFORMATION = ['committeeCode', 'ffeClubId', 'communeCode'] as const satisfies readonly (keyof NewClub)[];
 type RequiredInformation = (typeof REQUIRED_INFORMATION)[number];
-
-const POSTCODES = ['registeredOfficePostcode', 'playingVenuePostcode'] as const satisfies readonly (keyof NewClub)[];
-type Postcode = (typeof POSTCODES)[number];
-
-/** A French postcode is made of five digits; spaces typed by the administrator are ignored. */
-function isPostcode(typed: string): boolean {
-  return /^\d{5}$/.test(typed.replaceAll(' ', ''));
-}
 
 type CreationOutcome =
   | { kind: 'none' }
@@ -33,6 +18,7 @@ type CreationOutcome =
 @Component({
   selector: 'app-create-club',
   styleUrl: './create-club.css',
+  imports: [PostalAddressFields],
   template: `
     <section class="card" aria-labelledby="create-club-title">
       <h2 id="create-club-title">Créer un club</h2>
@@ -43,12 +29,8 @@ type CreationOutcome =
           committeeCode: committeeCode.value,
           ffeClubId: ffeClubId.value,
           communeCode: chosenCommune()?.code ?? '',
-          registeredOfficeStreet: officeStreet.value,
-          registeredOfficePostcode: officePostcode.value,
-          registeredOfficeTown: officeTown.value,
-          playingVenueStreet: venueAtOffice() ? officeStreet.value : venue().street,
-          playingVenuePostcode: venueAtOffice() ? officePostcode.value : venue().postcode,
-          playingVenueTown: venueAtOffice() ? officeTown.value : venue().town,
+          registeredOffice: registeredOffice(),
+          playingVenue: playingVenue(),
         })"
       >
         <fieldset>
@@ -133,54 +115,12 @@ type CreationOutcome =
         <fieldset>
           <legend>Siège social</legend>
           <div class="fields">
-            <div class="field field--wide">
-              <label for="office-street" class="required">Numéro et voie</label>
-              <input
-                id="office-street"
-                #officeStreet
-                aria-required="true"
-                autocomplete="address-line1"
-                placeholder="ex. 12 rue des Échecs"
-                [attr.aria-invalid]="missing().has('registeredOfficeStreet') || null"
-                [attr.aria-describedby]="missing().has('registeredOfficeStreet') ? 'office-street-error' : null"
-              />
-              @if (missing().has('registeredOfficeStreet')) {
-                <p id="office-street-error" class="field-error">Le numéro et la voie sont obligatoires.</p>
-              }
-            </div>
-            <div class="field">
-              <label for="office-postcode" class="required">Code postal</label>
-              <input
-                id="office-postcode"
-                #officePostcode
-                aria-required="true"
-                autocomplete="postal-code"
-                inputmode="numeric"
-                placeholder="ex. 45000"
-                [attr.aria-invalid]="missing().has('registeredOfficePostcode') || malformedPostcodes().has('registeredOfficePostcode') || null"
-                [attr.aria-describedby]="missing().has('registeredOfficePostcode') || malformedPostcodes().has('registeredOfficePostcode') ? 'office-postcode-error' : null"
-              />
-              @if (missing().has('registeredOfficePostcode')) {
-                <p id="office-postcode-error" class="field-error">Le code postal est obligatoire.</p>
-              } @else if (malformedPostcodes().has('registeredOfficePostcode')) {
-                <p id="office-postcode-error" class="field-error">Le code postal doit comporter 5 chiffres.</p>
-              }
-            </div>
-            <div class="field">
-              <label for="office-town" class="required">Localité</label>
-              <input
-                id="office-town"
-                #officeTown
-                aria-required="true"
-                autocomplete="address-level2"
-                placeholder="ex. Orléans"
-                [attr.aria-invalid]="missing().has('registeredOfficeTown') || null"
-                [attr.aria-describedby]="missing().has('registeredOfficeTown') ? 'office-town-error' : null"
-              />
-              @if (missing().has('registeredOfficeTown')) {
-                <p id="office-town-error" class="field-error">La localité est obligatoire.</p>
-              }
-            </div>
+            <app-postal-address-fields
+              idPrefix="office"
+              [(address)]="registeredOffice"
+              [problems]="officeProblems()"
+              [defaultTown]="townOfCommune()"
+            />
           </div>
         </fieldset>
         <fieldset>
@@ -197,57 +137,12 @@ type CreationOutcome =
               <label for="venue-at-office">La salle de jeu est au siège social</label>
             </div>
             @if (!venueAtOffice()) {
-              <div class="field field--wide">
-                <label for="venue-street" class="required">Numéro et voie</label>
-                <input
-                  id="venue-street"
-                  #venueStreet
-                  aria-required="true"
-                  placeholder="ex. 5 rue du Roi"
-                  [value]="venue().street"
-                  [attr.aria-invalid]="missing().has('playingVenueStreet') || null"
-                  [attr.aria-describedby]="missing().has('playingVenueStreet') ? 'venue-street-error' : null"
-                  (input)="describeVenue({ street: venueStreet.value })"
-                />
-                @if (missing().has('playingVenueStreet')) {
-                  <p id="venue-street-error" class="field-error">Le numéro et la voie sont obligatoires.</p>
-                }
-              </div>
-              <div class="field">
-                <label for="venue-postcode" class="required">Code postal</label>
-                <input
-                  id="venue-postcode"
-                  #venuePostcode
-                  aria-required="true"
-                  inputmode="numeric"
-                  placeholder="ex. 45100"
-                  [value]="venue().postcode"
-                  [attr.aria-invalid]="missing().has('playingVenuePostcode') || malformedPostcodes().has('playingVenuePostcode') || null"
-                  [attr.aria-describedby]="missing().has('playingVenuePostcode') || malformedPostcodes().has('playingVenuePostcode') ? 'venue-postcode-error' : null"
-                  (input)="describeVenue({ postcode: venuePostcode.value })"
-                />
-                @if (missing().has('playingVenuePostcode')) {
-                  <p id="venue-postcode-error" class="field-error">Le code postal est obligatoire.</p>
-                } @else if (malformedPostcodes().has('playingVenuePostcode')) {
-                  <p id="venue-postcode-error" class="field-error">Le code postal doit comporter 5 chiffres.</p>
-                }
-              </div>
-              <div class="field">
-                <label for="venue-town" class="required">Localité</label>
-                <input
-                  id="venue-town"
-                  #venueTown
-                  aria-required="true"
-                  placeholder="ex. Orléans"
-                  [value]="venue().town"
-                  [attr.aria-invalid]="missing().has('playingVenueTown') || null"
-                  [attr.aria-describedby]="missing().has('playingVenueTown') ? 'venue-town-error' : null"
-                  (input)="describeVenue({ town: venueTown.value })"
-                />
-                @if (missing().has('playingVenueTown')) {
-                  <p id="venue-town-error" class="field-error">La localité est obligatoire.</p>
-                }
-              </div>
+              <app-postal-address-fields
+                idPrefix="venue"
+                [(address)]="venue"
+                [problems]="venueProblems()"
+                [defaultTown]="townOfCommune()"
+              />
             }
           </div>
         </fieldset>
@@ -272,18 +167,21 @@ export class CreateClub {
   private readonly clubs = inject(Clubs);
   protected readonly outcome = signal<CreationOutcome>({ kind: 'none' });
   protected readonly missing = signal<ReadonlySet<RequiredInformation>>(new Set());
-  protected readonly malformedPostcodes = signal<ReadonlySet<Postcode>>(new Set());
+  protected readonly officeProblems = signal<ReadonlySet<AddressProblem>>(new Set());
+  protected readonly venueProblems = signal<ReadonlySet<AddressProblem>>(new Set());
   protected readonly venueAtOffice = signal(false);
-  protected readonly venue = signal({ street: '', postcode: '', town: '' });
+  protected readonly registeredOffice = signal<PostalAddress>(NO_ADDRESS);
+  protected readonly venue = signal<PostalAddress>(NO_ADDRESS);
+  protected readonly playingVenue = computed(() => (this.venueAtOffice() ? this.registeredOffice() : this.venue()));
 
-  protected describeVenue(part: Partial<{ street: string; postcode: string; town: string }>): void {
-    this.venue.update(venue => ({ ...venue, ...part }));
-  }
   private readonly communes = inject(Communes);
   private readonly communesOfCommittee = signal<readonly Commune[]>([]);
   private committeeOfCommunes = '';
   private readonly typedCommune = signal('');
   protected readonly chosenCommune = signal<Commune | null>(null);
+  private readonly towns = inject(Towns);
+  // A commune served under several towns proposes none of them: the administrator chooses.
+  protected readonly townOfCommune = signal<DeliveryTown | null>(null);
   protected readonly activeCommune = signal(-1);
   protected readonly communeWritten = signal(false);
   protected readonly offeredCommunes = computed(() => communesMatching(this.communesOfCommittee(), this.typedCommune()));
@@ -308,12 +206,18 @@ export class CreateClub {
 
   protected chooseCommune(commune: Commune, field: HTMLInputElement): void {
     this.chosenCommune.set(commune);
+    this.towns.ofCommune(commune.code).subscribe({
+      next: towns => this.townOfCommune.set(towns.length === 1 ? towns[0] : null),
+      // The town is only a help: without it, the administrator still types the addresses freely.
+      error: () => this.townOfCommune.set(null),
+    });
     this.typedCommune.set('');
     this.activeCommune.set(-1);
     field.value = commune.name;
   }
 
   protected typeCommune(typed: string, committeeCode: string): void {
+    if (this.chosenCommune()) this.forgetTownOfCommune();
     this.chosenCommune.set(null);
     this.communeWritten.set(typed.trim().length > 0);
     this.typedCommune.set(typed);
@@ -323,11 +227,20 @@ export class CreateClub {
     this.communes.ofCommittee(committeeCode).subscribe(communes => this.communesOfCommittee.set(communes));
   }
 
+  // The town and the postcode of the addresses follow the commune: changing the one chosen starts them afresh.
+  private forgetTownOfCommune(): void {
+    const withoutTown = (address: PostalAddress) => ({ ...address, town: '', postcode: '' });
+    this.townOfCommune.set(null);
+    this.registeredOffice.update(withoutTown);
+    this.venue.update(withoutTown);
+  }
+
   protected create(event: Event, club: NewClub): void {
     event.preventDefault();
     this.missing.set(new Set(REQUIRED_INFORMATION.filter((information) => !club[information])));
-    this.malformedPostcodes.set(new Set(POSTCODES.filter(postcode => club[postcode] && !isPostcode(club[postcode]))));
-    if (this.missing().size > 0 || this.malformedPostcodes().size > 0) return;
+    this.officeProblems.set(problemsOf(club.registeredOffice));
+    this.venueProblems.set(problemsOf(club.playingVenue));
+    if (this.missing().size > 0 || this.officeProblems().size > 0 || this.venueProblems().size > 0) return;
     this.clubs.create(club).subscribe({
       next: () => this.outcome.set({ kind: 'created', club: club.name }),
       error: (refusal: unknown) =>

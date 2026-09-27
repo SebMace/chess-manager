@@ -1,4 +1,5 @@
 import { Observable } from 'rxjs';
+import { PostalAddress } from '../postal-address/postal-address';
 
 /** What an administrator provides to create a club. */
 export interface NewClub {
@@ -6,12 +7,8 @@ export interface NewClub {
   committeeCode: string;
   ffeClubId: string;
   communeCode: string;
-  registeredOfficeStreet: string;
-  registeredOfficePostcode: string;
-  registeredOfficeTown: string;
-  playingVenueStreet: string;
-  playingVenuePostcode: string;
-  playingVenueTown: string;
+  registeredOffice: PostalAddress;
+  playingVenue: PostalAddress;
 }
 
 /** Refusal: another club already uses this FFE identifier. */
