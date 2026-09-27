@@ -23,6 +23,7 @@ export class FfeClubIdAlreadyUsed extends Error {
 
 /** What an administrator is shown of a club of a departmental committee. */
 export interface ClubOfCommittee {
+  id: string;
   name: string;
   commune: string;
   ffeClubId: string;

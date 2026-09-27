@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ClubsOfCommittee } from './clubs-of-committee';
 import { Clubs } from '../ports/clubs';
@@ -15,6 +16,7 @@ describe('ClubsOfCommittee', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
+        provideRouter([]),
         { provide: Clubs, useClass: HttpClubs },
       ],
     });
@@ -37,10 +39,19 @@ describe('ClubsOfCommittee', () => {
 
   it('shows the administrator the clubs of the committee they ask for', async () => {
     await consultClubsOfCommittee('45', [
-      { name: 'U.S. Orléans.Echecs', commune: 'Orléans', ffeClubId: 'G45001' },
+      { id: 'club-1', name: 'U.S. Orléans.Echecs', commune: 'Orléans', ffeClubId: 'G45001' },
     ]);
 
-    expect(shownClubs(page)).toEqual([['U.S. Orléans.Echecs', 'Orléans', 'G45001']]);
+    expect(shownClubs(page)).toEqual([['U.S. Orléans.Echecs', 'Orléans', 'G45001', 'Horaires']]);
+  });
+
+  it('leads the administrator to the opening hours of each club', async () => {
+    await consultClubsOfCommittee('45', [
+      { id: 'club-1', name: 'U.S. Orléans.Echecs', commune: 'Orléans', ffeClubId: 'G45001' },
+    ]);
+
+    expect(linkNamed(page, "Horaires d'ouverture de U.S. Orléans.Echecs").getAttribute('href'))
+      .toBe('/clubs/club-1/opening-hours');
   });
 
   it('tells the administrator when no club is managed by the application in the committee', async () => {
@@ -75,4 +86,12 @@ function buttonNamed(page: HTMLElement, text: string): HTMLButtonElement {
   );
   if (!button) throw new Error(`No button named "${text}"`);
   return button;
+}
+
+function linkNamed(page: HTMLElement, name: string): HTMLAnchorElement {
+  const link = Array.from(page.querySelectorAll('a')).find(
+    (a) => (a.getAttribute('aria-label') ?? a.textContent?.trim()) === name,
+  );
+  if (!link) throw new Error(`No link named "${name}"`);
+  return link;
 }
