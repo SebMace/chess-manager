@@ -12,5 +12,6 @@ public class DefineOpeningHours {
     }
 
     public void execute(ClubId club, OpeningHours openingHours) {
+        clubCalendar.defineOpeningHours(club, openingHours);
     }
 }
