@@ -23,6 +23,8 @@ Seule la prochaine slice est détaillée ; les autres le seront quand on les dé
 | Create a club | `createclub` | livrée | — |
 | Find the communes of a committee | `communesofcommittee` | livrée | — |
 | Consult the clubs of a committee | `clubsofcommittee` | livrée | Create a club |
+| Define the opening hours of a club | `defineopeninghours` | livrée | Create a club |
+| Consult the opening hours of a club | `openinghoursofclub` | livrée | Define the opening hours of a club |
 | Record a person | `recordperson` | cas d'usage seulement | — |
 | Update a person | `updateperson` | cas d'usage seulement | Record a person |
 | Register a prospect | `registerprospect` | cas d'usage seulement | Create a club |
@@ -35,6 +37,13 @@ Seule la prochaine slice est détaillée ; les autres le seront quand on les dé
 
 Évolutions de *Create a club* : comité départemental, identifiant FFE, commune, siège social,
 salle de jeu, localité et code postal proposés à partir de la commune choisie.
+
+Évolution de *Consult the clubs of a committee* : chaque club porte son identifiant, pour mener
+à ses horaires d'ouverture.
+
+Les règles des horaires d'ouverture (sessions, activités, lieu, remplacement) sont décrites dans
+le README. Club Management enregistre lui-même les sessions derrière son port `ClubCalendar` :
+Craft Calendar sera extrait quand un exemple réclamera un vrai comportement de calendrier.
 
 Durcissement de l'aide à la saisie des adresses (*Find the towns of a postcode*, *Find the
 postcodes of a town*, *Find the towns of a commune*), sans nouvelle capacité :
@@ -80,15 +89,15 @@ On finalise d'abord la création d'un club ; les slices sur les joueurs viendron
 
 | Slice | Package | Statut | Dépend de |
 |---|---|---|---|
-| Define the opening hours of a club | `defineopeninghours` | à venir | Create a club |
 | Move the registered office of a club | `moveregisteredoffice` | à venir | Create a club |
 
-- *Define the opening hours of a club* s'appuiera sur le bounded context Craft Calendar (voir
-  les thèmes). Le terme métier (« horaires d'ouverture », « séances de jeu », « tranches
-  horaires ») reste à confirmer.
-- La prochaine slice reste à choisir entre les deux.
 - Évolutions prévues de *Create a club* : revenir à la liste après la création, pré-remplir le
   comité à partir du département consulté.
+- Évolutions possibles de *Define the opening hours of a club*, à passer au crible YAGNI : refuser
+  un club non géré par l'application ou inconnu ; décider si une session peut franchir minuit ;
+  présenter les sessions du lundi au dimanche ; afficher le nom du club sur l'écran des horaires.
+- Reporté : saisons, vacances scolaires, abonnement depuis un agenda externe.
+- La prochaine slice reste à choisir.
 
 ### Find the towns of a commune
 

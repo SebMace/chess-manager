@@ -1,5 +1,6 @@
 package acceptance.steps;
 
+import acceptance.support.CreatedClubs;
 import clubmanagement.createclub.CommuneNotInCommitteeDepartment;
 import clubmanagement.clubsofcommittee.ClubOfCommittee;
 import clubmanagement.clubsofcommittee.ClubsOfCommittee;
@@ -42,11 +43,15 @@ public class CreateClubSteps {
     private final InMemoryCommunes communes = new InMemoryCommunes();
     private final CreateClub createClub = new CreateClub(clubs, communes, this::nextClubId);
     private long createdClubCount;
-    private final Map<String, ClubId> createdClubs = new HashMap<>();
+    private final CreatedClubs createdClubs;
     private final Map<String, CommitteeCode> committees = new HashMap<>();
     private final Map<String, RuntimeException> refusals = new HashMap<>();
     private List<Commune> offeredCommunes = List.of();
     private List<ClubOfCommittee> consultedClubs = List.of();
+
+    public CreateClubSteps(CreatedClubs createdClubs) {
+        this.createdClubs = createdClubs;
+    }
 
     @Given("{string} is a departmental committee of the FFE")
     public void departmentalCommittee(String name) { committees.put(name, COMMITTEES.get(name)); }
@@ -56,7 +61,7 @@ public class CreateClubSteps {
         Map<String, String> club = information.asMap();
         String ffeIdentifier = club.get("FFE identifier");
         try {
-            createdClubs.put(name, createClub.execute(name,
+            createdClubs.add(name, createClub.execute(name,
                     committees.get(club.get("departmental committee")),
                     ffeIdentifier == null ? null : new FfeClubId(ffeIdentifier),
                     commune(club.get("commune")),
@@ -70,7 +75,7 @@ public class CreateClubSteps {
     @Given("an administrator has created the club {string} with:")
     public void clubCreated(String name, DataTable information) {
         Map<String, String> club = information.asMap();
-        createdClubs.put(name, createClub.execute(name, committees.get(club.get("departmental committee")),
+        createdClubs.add(name, createClub.execute(name, committees.get(club.get("departmental committee")),
                 new FfeClubId(club.get("FFE identifier")), commune(club.get("commune")), registeredOffice(club), playingVenue(club)));
     }
 
@@ -91,7 +96,7 @@ public class CreateClubSteps {
 
     @Then("the administrator is shown the club {string} located in {string} with the FFE identifier {string}")
     public void clubShownWithItsCommuneAndFfeIdentifier(String name, String commune, String ffeIdentifier) {
-        assertTrue(consultedClubs.contains(new ClubOfCommittee(name, commune, new FfeClubId(ffeIdentifier))));
+        assertTrue(consultedClubs.contains(new ClubOfCommittee(createdClubs.idOf(name).orElseThrow(), name, commune, new FfeClubId(ffeIdentifier))));
     }
 
     @Then("the administrator is shown the clubs in this order:")
@@ -128,7 +133,7 @@ public class CreateClubSteps {
     @Then("the club {string} is not created")
     public void clubIsNotCreated(String name) {
         assertNotNull(refusals.get(name), "the creation should have been refused");
-        assertNull(createdClubs.get(name));
+        assertTrue(createdClubs.idOf(name).isEmpty());
     }
 
     @Then("the FFE identifier of {string} is {string}")
@@ -174,17 +179,17 @@ public class CreateClubSteps {
 
     private ClubId nextClubId() { return new ClubId(new UUID(0, ++createdClubCount)); }
 
-    private Club createdClub(String name) { return clubs.find(createdClubs.get(name)).orElseThrow(); }
+    private Club createdClub(String name) { return clubs.find(createdClubs.idOf(name).orElseThrow()).orElseThrow(); }
 
     @Then("{string} belongs to the departmental committee {string}")
     public void clubBelongsToCommittee(String name, String committee) {
-        Club club = clubs.find(createdClubs.get(name)).orElseThrow();
+        Club club = clubs.find(createdClubs.idOf(name).orElseThrow()).orElseThrow();
         assertEquals(Optional.of(committees.get(committee)), club.committee());
     }
 
     @Then("{string} is a club managed by the application")
     public void clubIsManaged(String name) {
-        Club club = clubs.find(createdClubs.get(name)).orElseThrow();
+        Club club = clubs.find(createdClubs.idOf(name).orElseThrow()).orElseThrow();
         assertEquals(name, club.name());
         assertTrue(club.managedByApplication());
     }

@@ -17,6 +17,96 @@ The model separates three aggregate roots:
 and `PARTNER` describe relationships, not types of people. There are no separate
 bounded contexts or microservices for these aggregates.
 
+## Planned bounded context: Craft Calendar
+
+Craft Calendar is a generic calendar and scheduling bounded context. Chess Manager is its first
+consumer, through the opening hours of a club, but it is meant to serve other applications
+too: a wealth-management advice application, a personal agenda, and so on. It therefore never
+depends on chess: it knows neither clubs, players, the FFE, tournaments nor memberships. Its
+language will grow from calendars, events, recurrences, time slots and exclusion periods, and
+only as far as a requested use case demands it.
+
+**Status.** This is a validated architectural direction, not existing code yet. The slice
+*Define the opening hours of a club* depends on the `ClubCalendar` port. No example asks yet for
+calendar behavior (dates of occurrence, exclusions, export), so Club Management stores the
+sessions itself (`JdbcClubCalendar`): Craft Calendar would only have stored the same data under
+other names. It will be extracted behind the same port when an example needs real calendar
+behavior; the use case and the domain will not change.
+
+### Context map
+
+The two contexts do not share their models. Club Management says "the club opens every Friday
+from 20:00 to 22:00 for free play, at its playing venue"; Craft Calendar will say something like
+"weekly recurrence, Friday, 20:00–22:00, at this address". The translation is explicit and lives
+in one adapter.
+
+```mermaid
+flowchart LR
+    subgraph upstream["Upstream"]
+        CC["<b>Craft Calendar</b><br/>generic calendar<br/><i>Open Host Service<br/>+ Published Language</i>"]
+    end
+    subgraph downstream["Downstream consumers"]
+        CM["<b>Club Management</b><br/>Chess Manager<br/><i>Anticorruption Layer</i>"]
+        WA["Wealth-management advice<br/><i>possible consumer</i>"]
+        PA["Personal agenda<br/><i>possible consumer</i>"]
+    end
+    CC -- "U → D" --> CM
+    CC -. "U → D" .-> WA
+    CC -. "U → D" .-> PA
+```
+
+- **Craft Calendar is upstream, as an Open Host Service with a Published Language.** It serves
+  several consumers and bends to none of them: it publishes one protocol, in its own language.
+- **Club Management is downstream, behind an Anticorruption Layer**: its `ClubCalendar` port and
+  an adapter translate club concepts (sessions, activities, the playing venue of the club) into
+  the published language, and back. The `Club` aggregate never depends on a Craft Calendar class
+  and computes no recurrence.
+- **Rejected relationships.** *Conformist*: the club model would end up speaking in recurrences.
+  *Shared Kernel*: it would tie the life cycles of both contexts and forbid extracting Craft
+  Calendar. *Partnership*: it assumes two teams releasing in step, which makes no sense for a
+  generic context. *Separate Ways*: the need is real.
+- *Customer–Supplier* describes how the work is organized (the chess needs drive the backlog of
+  Craft Calendar), not how the models relate.
+
+### Dependency direction inside the modular monolith
+
+A bounded-context boundary is not a deployment boundary. Both contexts will live in the same
+Spring Boot application and the same JVM, with no shared transaction: Club Management calls
+Craft Calendar as if the call were already remote.
+
+```mermaid
+flowchart LR
+    subgraph clubmanagement["clubmanagement"]
+        UC["DefineOpeningHours<br/><i>use case</i>"] --> PORT["ClubCalendar<br/><i>port</i>"]
+        ADAPTER["Craft Calendar adapter<br/><i>anticorruption layer, planned</i>"] -. implements .-> PORT
+    end
+    subgraph craftcalendar["craftcalendar (planned)"]
+        API["published entry points<br/>and types"]
+    end
+    ADAPTER --> API
+```
+
+Only the adapter may depend on Craft Calendar, and only on what it publishes; Craft Calendar
+never depends on `clubmanagement`. ArchUnit will enforce both rules once the `craftcalendar`
+package exists.
+
+### Path to a separate back-end
+
+The boundaries are drawn so that Craft Calendar can be extracted later without rewriting the
+domain of Club Management:
+
+1. **In-process call**: the adapter calls the public Java entry points of Craft Calendar.
+2. **Separate Maven module**: Club Management depends only on the published artifact, so the
+   compiler guards the boundary.
+3. **HTTP API**: Craft Calendar exposes its published language over HTTP, checked by a contract
+   test; an HTTP adapter implements the same `ClubCalendar` port. Only the wiring changes.
+4. **Separate deployment**: its own application and its own PostgreSQL database; outbound
+   adapters such as Google Calendar or iCalendar belong to Craft Calendar.
+
+Out of scope for now: excluding school holidays (Chess Manager would translate commune →
+academy → zone → holiday periods into generic exclusion periods; Craft Calendar knows none of
+them), and subscribing to the calendar of a club from an external agenda.
+
 ## Relationship and affiliation rules
 
 - A person can be a prospect of several clubs before obtaining a license.
@@ -63,6 +153,14 @@ relationships, save and remove a relationship; the club repository finds and sav
 clubs. These are core-owned application ports. `ClubRepository` has a PostgreSQL
 implementation (see below); the other ports are implemented only by in-memory test fakes.
 
+`ClubCalendar` holds the opening hours of a club, as a set of sessions. Its in-memory fake and
+its PostgreSQL implementation, `JdbcClubCalendar`, run the same tests (`ClubCalendarContract`),
+so the fast tests that rely on the fake can be trusted. Defining the opening hours replaces the
+previous sessions: `JdbcClubCalendar` deletes and inserts them in one transaction, so that a
+failure in between cannot leave a club with no or partial opening hours. No test forces that
+failure; it is a design decision, not a proven behavior. The transaction belongs to the adapter,
+because the use case must not depend on Spring.
+
 `ClubRelationship` is immutable. `registerLicense` returns a new state with the same
 identity; the application must save that state. The fake keys records by the two IDs.
 Application tests use the same repository for setup, action and assertions and reread
@@ -73,7 +171,7 @@ persisted state. Removing `save()` was checked to make the membership test fail.
 Creating a club is the first use case wired end to end, from HTTP to PostgreSQL:
 
 ```
-POST /clubs {"name": "Montargis"}  →  201 Created, Location: /clubs/<id>
+POST /api/clubs {"name": "Montargis"}  →  201 Created, Location: /api/clubs/<id>
 ```
 
 | Package | Role |
@@ -113,10 +211,28 @@ is therefore lost at the next start. Real club names and FFE identifiers are FFE
 must not be committed. No other profile creates or deletes data.
 
 ```sh
-curl -i -X POST localhost:8080/clubs -H 'Content-Type: application/json' -d '{
+curl -i -X POST localhost:8080/api/clubs -H 'Content-Type: application/json' -d '{
   "name": "Échiquier de Montargis", "committeeCode": "45", "ffeClubId": "DEMO04", "communeCode": "45208",
   "registeredOffice": {"street": "1 rue du Marché", "postcode": "45200", "town": "Montargis"},
   "playingVenue": {"street": "1 rue du Marché", "postcode": "45200", "town": "Montargis"}}'
+```
+
+## Opening hours of a club
+
+The opening hours of a club are a set of weekly *sessions*: a day, a start time and an end time.
+
+- A session may be for an activity, or for none. Activities form an open list: the screen
+  proposes "jeu libre", "cours adultes" and "cours enfants", and a club may type others.
+- A session takes place at any address; by default, at the playing venue of the club. That
+  default is a reference, not a copy of the address: if the club moves its playing venue, the
+  session follows it.
+- Sessions may overlap, and their order does not matter.
+- The administrator defines all the sessions at once: the new ones replace the previous ones.
+
+```
+GET /api/clubs/<id>/opening-hours   →  200 [{"day": "FRIDAY", "from": "20:00", "to": "22:00",
+                                             "activity": "jeu libre", "venue": null}, …]
+PUT /api/clubs/<id>/opening-hours   →  204 (a missing venue means the playing venue of the club)
 ```
 
 ## Front-end (Angular)
@@ -125,19 +241,24 @@ The Angular 22 application in `front-end/` is a separate npm project, not built 
 It opens on the clubs managed by the application in a departmental committee: the
 administrator types the number of their department and is shown each club with its commune
 and its FFE identifier, sorted by name. A link leads to the French screen where the
-administrator creates a club and is told whether the club has been created. It needs Node.js 22.22, 24.15 or 26 and npm.
+administrator creates a club and is told whether the club has been created. Each club of the
+list leads to its opening hours: the administrator sees the sessions already defined, adds or
+removes sessions, and saves them all at once. It needs Node.js 22.22, 24.15 or 26 and npm.
 
 | File | Role |
 |---|---|
 | `src/app/club-management/clubs-of-committee/clubs-of-committee.ts` | `ClubsOfCommittee` component: the clubs of the committee the administrator asks for. |
 | `src/app/club-management/create-club/create-club.ts` | `CreateClub` component: the form and the creation outcome. |
 | `src/app/club-management/create-club/commune-search.ts` | The communes matching what the administrator types. |
+| `src/app/club-management/define-opening-hours/define-opening-hours.ts` | `DefineOpeningHours` component: the sessions of a club, with their activity and their venue. |
+| `src/app/club-management/ports/opening-hours.ts` | `OpeningHours` port: read and define the opening hours of a club. |
+| `src/app/club-management/http/http-opening-hours.ts` | `HttpOpeningHours` adapter: implements `OpeningHours` over the REST API. |
 | `src/app/club-management/ports/clubs.ts` | `Clubs` port: what the club screens need, with no HTTP detail. |
 | `src/app/club-management/ports/communes.ts` | `Communes` port: the communes of a departmental committee. |
 | `src/app/club-management/http/http-clubs.ts` | `HttpClubs` adapter: implements `Clubs` over the REST API. |
 | `src/app/club-management/http/http-communes.ts` | `HttpCommunes` adapter: implements `Communes` over the REST API. |
-| `src/app/app.routes.ts` | The clubs of a committee at `/`, the creation of a club at `/clubs/new`. |
-| `src/app/app.config.ts` | Provides the router and wires `Clubs` to `HttpClubs` and `Communes` to `HttpCommunes`. |
+| `src/app/app.routes.ts` | The clubs of a committee at `/`, the creation of a club at `/clubs/new`, the opening hours of a club at `/clubs/<id>/opening-hours`. |
+| `src/app/app.config.ts` | Provides the router and wires `Clubs`, `Communes` and `OpeningHours` to their HTTP adapters. |
 
 As in the back-end, each slice has its own folder named after its use case (`create-club`);
 the ports and their HTTP adapters are shared by the slices of Club Management.
@@ -152,9 +273,11 @@ npm ci
 npm start
 ```
 
-Open <http://localhost:4200>. During development, `proxy.conf.json` forwards `/clubs`
+Open <http://localhost:4200>. During development, `proxy.conf.json` forwards `/api`
 to the back-end on port 8080, so the browser only talks to port 4200 and the back-end
-needs no CORS configuration.
+needs no CORS configuration. Every REST controller is served under `/api`
+(`infrastructure.WebConfiguration`), so the paths of the API never collide with the paths of the
+screens: reloading `/clubs/new` shows the screen instead of calling the API.
 
 Component tests use Vitest with jsdom (no browser); the server is simulated with
 Angular's `HttpTestingController`:
@@ -188,8 +311,10 @@ A slice is one use case, named after it, with its refusals and its inbound adapt
 ```
 clubmanagement/
   domain/                  shared model: Club, ClubRelationship, Person, value objects
-  ports/                   shared ports: ClubRepository, ClubRelationshipRepository, Communes, PersonRepository
+  ports/                   shared ports: ClubRepository, ClubRelationshipRepository, ClubCalendar, Communes, PersonRepository
   createclub/              CreateClub, its refusals, rest/CreateClubController
+  defineopeninghours/      DefineOpeningHours, rest/DefineOpeningHoursController
+  openinghoursofclub/      OpeningHoursOfClub, rest/OpeningHoursOfClubController
   communesofcommittee/     CommunesOfCommittee, rest/CommunesOfCommitteeController
   clubsofcommittee/        ClubsOfCommittee, ClubOfCommittee, rest/ClubsOfCommitteeController
   isexternalplayer/        IsExternalPlayer
@@ -198,7 +323,7 @@ clubmanagement/
   registerpartnership/     RegisterPartnership
   registerprospect/        RegisterProspect
   updateperson/            UpdatePerson
-  persistence/             JdbcClubRepository, shared: it persists the Club aggregate
+  persistence/             JdbcClubRepository and JdbcClubCalendar, shared: the clubs and their opening hours
   insee/                   InseeCommunes, shared: the INSEE communes reference
 infrastructure/            Spring Boot application, explicit wiring, development data
 ```

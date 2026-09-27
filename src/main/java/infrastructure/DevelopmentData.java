@@ -26,6 +26,7 @@ class DevelopmentData implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments arguments) {
+        jdbc.sql("DELETE FROM club_session").update();
         jdbc.sql("DELETE FROM club").update();
         PostalAddress orleans = new PostalAddress("12 rue des Échecs", "45000", "Orléans");
         createClub.execute("Les Cavaliers de la Loire", LOIRET, new FfeClubId("DEMO01"), new CommuneCode("45234"),

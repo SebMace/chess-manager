@@ -9,7 +9,7 @@ export class HttpClubs implements Clubs {
   private readonly http = inject(HttpClient);
 
   create(club: NewClub): Observable<void> {
-    return this.http.post<void>('/clubs', {
+    return this.http.post<void>('/api/clubs', {
       name: club.name,
       committeeCode: club.committeeCode,
       ffeClubId: club.ffeClubId,
@@ -23,7 +23,7 @@ export class HttpClubs implements Clubs {
   }
 
   ofCommittee(committeeCode: string): Observable<ClubOfCommittee[]> {
-    return this.http.get<ClubOfCommittee[]>('/clubs', { params: { committee: committeeCode } });
+    return this.http.get<ClubOfCommittee[]>('/api/clubs', { params: { committee: committeeCode } });
   }
 }
 
