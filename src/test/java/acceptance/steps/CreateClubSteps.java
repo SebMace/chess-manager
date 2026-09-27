@@ -96,7 +96,7 @@ public class CreateClubSteps {
 
     @Then("the administrator is shown the club {string} located in {string} with the FFE identifier {string}")
     public void clubShownWithItsCommuneAndFfeIdentifier(String name, String commune, String ffeIdentifier) {
-        assertTrue(consultedClubs.contains(new ClubOfCommittee(name, commune, new FfeClubId(ffeIdentifier))));
+        assertTrue(consultedClubs.contains(new ClubOfCommittee(createdClubs.idOf(name).orElseThrow(), name, commune, new FfeClubId(ffeIdentifier))));
     }
 
     @Then("the administrator is shown the clubs in this order:")

@@ -36,7 +36,7 @@ public class ClubsOfCommittee {
 
     // A club of a committee was created with its FFE identifier, in a commune of the reference.
     private ClubOfCommittee shown(Club club) {
-        return new ClubOfCommittee(club.name(),
+        return new ClubOfCommittee(club.id(), club.name(),
                 communes.find(club.commune()).map(Commune::name).orElseThrow(),
                 club.ffeClubId().orElseThrow());
     }

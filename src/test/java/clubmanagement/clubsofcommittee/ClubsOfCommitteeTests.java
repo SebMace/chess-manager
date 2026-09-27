@@ -36,7 +36,17 @@ class ClubsOfCommitteeTests {
 
         List<ClubOfCommittee> found = clubsOfCommittee.execute(new CommitteeCode("45"));
 
-        assertEquals(List.of(new ClubOfCommittee("Cercle fictif d'Olivet", "Olivet", new FfeClubId("G45998"))), found);
+        assertEquals(List.of(new ClubOfCommittee(new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000002")), "Cercle fictif d'Olivet", "Olivet", new FfeClubId("G45998"))), found);
+    }
+
+    @Test
+    void should_identify_each_club_so_that_the_administrator_can_work_on_it() {
+        save("00000000-0000-0000-0000-000000000006", "U.S. Orléans.Echecs", "G45001");
+
+        List<ClubOfCommittee> found = clubsOfCommittee.execute(new CommitteeCode("45"));
+
+        assertEquals(List.of(new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000006"))),
+                found.stream().map(ClubOfCommittee::id).toList());
     }
 
     @Test
