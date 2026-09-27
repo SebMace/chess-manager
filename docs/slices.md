@@ -41,6 +41,8 @@ On finalise d'abord la création d'un club ; les slices sur les joueurs viendron
 |---|---|---|---|
 | Define the opening hours of a club | `defineopeninghours` | à venir | Create a club |
 | Move the registered office of a club | `moveregisteredoffice` | à venir | Create a club |
+| Find the towns of a postcode | `townsofpostcode` | prochaine | — |
+| Find the postcodes of a town | `postcodesoftown` | à venir | — |
 
 - *Define the opening hours of a club* s'appuiera sur le bounded context Craft Calendar (voir
   les thèmes). Le terme métier (« horaires d'ouverture », « séances de jeu », « tranches
@@ -48,6 +50,25 @@ On finalise d'abord la création d'un club ; les slices sur les joueurs viendron
 - La prochaine slice reste à choisir entre les deux.
 - Évolutions prévues de *Create a club* : revenir à la liste après la création, pré-remplir le
   comité à partir du département consulté.
+
+### Find the towns of a postcode
+
+- **Intention** : quand l'administrateur saisit le code postal d'une adresse, l'application lui
+  propose les localités desservies par ce code, par exemple 45240 → LA FERTE ST AUBIN,
+  LIGNY LE RIBAULT, MARCILLY EN VILLETTE, MENESTREAU EN VILLETTE, SENNELY. Sert à toutes les
+  adresses postales : siège social, salle de jeu, et plus tard lieu d'une session.
+- **Décisions** :
+  - la source est la base officielle des codes postaux de La Poste (Licence Ouverte 2.0), pas le
+    code officiel géographique de l'INSEE, qui ne contient aucun code postal ;
+  - la localité d'une adresse est le libellé d'acheminement de La Poste, qui diffère parfois du
+    nom de la commune (Colmars → COLMARS LES ALPES) ;
+  - la localité est proposée telle que La Poste l'écrit, en majuscules sans accents, forme
+    attendue sur la dernière ligne d'une adresse (NF Z10-011) ;
+  - un code postal peut desservir plusieurs localités : l'application propose, elle ne déduit pas.
+- **Questions ouvertes** : refuser une localité absente de la base, ou la laisser libre ?
+
+*Find the postcodes of a town* est le sens inverse (ORLEANS → 45000, 45100) ; on la détaillera
+quand on la démarrera.
 
 ## Thèmes, à découper le moment venu
 
