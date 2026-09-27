@@ -14,6 +14,6 @@ public class PostcodesOfTown {
     }
 
     public List<Postcode> execute(String town) {
-        return List.of();
+        return deliveryTowns.postcodesOf(town);
     }
 }
