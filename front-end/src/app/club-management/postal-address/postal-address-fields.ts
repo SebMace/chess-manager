@@ -1,5 +1,6 @@
-import { Component, input, model } from '@angular/core';
-import { AddressProblem, PostalAddress } from './postal-address';
+import { Component, inject, input, model, signal } from '@angular/core';
+import { AddressProblem, PostalAddress, isPostcode } from './postal-address';
+import { Towns } from '../ports/towns';
 
 /**
  * The fields of a postal address, always laid out the same way. The problems are shown as given:
@@ -38,7 +39,7 @@ import { AddressProblem, PostalAddress } from './postal-address';
         [value]="address().postcode"
         [attr.aria-invalid]="problems().has('missingPostcode') || problems().has('malformedPostcode') || null"
         [attr.aria-describedby]="problems().has('missingPostcode') || problems().has('malformedPostcode') ? id + '-postcode-error' : null"
-        (input)="describe({ postcode: postcode.value })"
+        (input)="typePostcode(postcode.value)"
         #postcode
       />
       @if (problems().has('missingPostcode')) {
@@ -53,6 +54,7 @@ import { AddressProblem, PostalAddress } from './postal-address';
         [id]="id + '-town'"
         aria-required="true"
         [attr.autocomplete]="'section-' + id + ' address-level2'"
+        [attr.list]="id + '-towns'"
         placeholder="ex. Orléans"
         [value]="address().town"
         [attr.aria-invalid]="problems().has('missingTown') || null"
@@ -63,6 +65,11 @@ import { AddressProblem, PostalAddress } from './postal-address';
       @if (problems().has('missingTown')) {
         <p [id]="id + '-town-error'" class="field-error">La localité est obligatoire.</p>
       }
+      <datalist [id]="id + '-towns'">
+        @for (served of servedTowns(); track served) {
+          <option [value]="served"></option>
+        }
+      </datalist>
     </div>
   `,
 })
@@ -71,6 +78,18 @@ export class PostalAddressFields {
   readonly idPrefix = input.required<string>();
   readonly address = model.required<PostalAddress>();
   readonly problems = input<ReadonlySet<AddressProblem>>(new Set());
+
+  private readonly towns = inject(Towns);
+  protected readonly servedTowns = signal<readonly string[]>([]);
+
+  protected typePostcode(postcode: string): void {
+    this.describe({ postcode });
+    if (!isPostcode(postcode)) return;
+    this.towns.ofPostcode(postcode).subscribe(towns => {
+      this.servedTowns.set(towns);
+      if (towns.length === 1) this.describe({ town: towns[0] });
+    });
+  }
 
   protected describe(part: Partial<PostalAddress>): void {
     this.address.update(address => ({ ...address, ...part }));

@@ -20,6 +20,6 @@ export function problemsOf(address: PostalAddress): ReadonlySet<AddressProblem> 
 }
 
 /** A French postcode is made of five digits; spaces typed by the administrator are ignored. */
-function isPostcode(typed: string): boolean {
+export function isPostcode(typed: string): boolean {
   return /^\d{5}$/.test(typed.replaceAll(' ', ''));
 }
