@@ -29,6 +29,7 @@ Seule la prochaine slice est détaillée ; les autres le seront quand on les dé
 | Register a license | `registerlicense` | cas d'usage seulement | Create a club |
 | Register a partnership | `registerpartnership` | cas d'usage seulement | Create a club |
 | Recognize an external player | `isexternalplayer` | cas d'usage seulement | Register a license |
+| Find the towns of a postcode | `townsofpostcode` | livrée | — |
 
 Évolutions de *Create a club* : comité départemental, identifiant FFE, commune, siège social,
 salle de jeu.
@@ -41,7 +42,6 @@ On finalise d'abord la création d'un club ; les slices sur les joueurs viendron
 |---|---|---|---|
 | Define the opening hours of a club | `defineopeninghours` | à venir | Create a club |
 | Move the registered office of a club | `moveregisteredoffice` | à venir | Create a club |
-| Find the towns of a postcode | `townsofpostcode` | prochaine | — |
 | Find the postcodes of a town | `postcodesoftown` | à venir | — |
 
 - *Define the opening hours of a club* s'appuiera sur le bounded context Craft Calendar (voir
@@ -65,6 +65,9 @@ On finalise d'abord la création d'un club ; les slices sur les joueurs viendron
   - la localité est proposée telle que La Poste l'écrit, en majuscules sans accents, forme
     attendue sur la dernière ligne d'une adresse (NF Z10-011) ;
   - un code postal peut desservir plusieurs localités : l'application propose, elle ne déduit pas.
+  - à l'écran, une seule localité remplit le champ ; plusieurs sont suggérées sans être
+    choisies ; rien n'est cherché avant les 5 chiffres ; si la recherche échoue, rien n'est
+    suggéré et la saisie reste libre, sans message.
 - **Questions ouvertes** : refuser une localité absente de la base, ou la laisser libre ?
 
 *Find the postcodes of a town* est le sens inverse (ORLEANS → 45000, 45100) ; on la détaillera
