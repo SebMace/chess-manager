@@ -11,7 +11,9 @@ import clubmanagement.ports.ClubCalendarContract;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.BeforeAll;
 import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
@@ -36,7 +38,8 @@ class JdbcClubCalendarTests extends ClubCalendarContract {
     }
 
     @Override
-    protected ClubCalendar clubCalendar() { return new JdbcClubCalendar(JdbcClient.create(dataSource)); }
+    protected ClubCalendar clubCalendar() { return new JdbcClubCalendar(JdbcClient.create(dataSource),
+                new TransactionTemplate(new DataSourceTransactionManager(dataSource))); }
 
     /** The sessions of a club refer to it, so the club is saved first, with its own FFE identifier. */
     @Override

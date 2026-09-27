@@ -7,6 +7,7 @@ import clubmanagement.domain.club.vo.Session;
 import clubmanagement.domain.club.vo.Venue;
 import clubmanagement.ports.ClubCalendar;
 import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.transaction.support.TransactionOperations;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -18,15 +19,23 @@ import java.util.stream.Collectors;
 
 public class JdbcClubCalendar implements ClubCalendar {
     private final JdbcClient jdbc;
+    private final TransactionOperations transactions;
 
-    public JdbcClubCalendar(JdbcClient jdbc) {
+    public JdbcClubCalendar(JdbcClient jdbc, TransactionOperations transactions) {
         this.jdbc = jdbc;
+        this.transactions = transactions;
     }
 
+    /**
+     * Replaces the sessions in one transaction: a failure between the deletion and the insertions must
+     * not leave the club without opening hours, or with only part of them. No test forces this failure.
+     */
     @Override
     public void defineOpeningHours(ClubId club, Set<Session> sessions) {
-        jdbc.sql("DELETE FROM club_session WHERE club_id = :club").param("club", club.clubId()).update();
-        sessions.forEach(session -> insert(club, session));
+        transactions.executeWithoutResult(transaction -> {
+            jdbc.sql("DELETE FROM club_session WHERE club_id = :club").param("club", club.clubId()).update();
+            sessions.forEach(session -> insert(club, session));
+        });
     }
 
     private void insert(ClubId club, Session session) {
