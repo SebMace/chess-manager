@@ -1,4 +1,4 @@
-import { Component, inject, input, model, signal } from '@angular/core';
+import { Component, effect, inject, input, model, signal, untracked } from '@angular/core';
 import { AddressProblem, PostalAddress, isPostcode } from './postal-address';
 import { DeliveryTown, Towns } from '../ports/towns';
 
@@ -90,6 +90,25 @@ export class PostalAddressFields {
   private readonly towns = inject(Towns);
   protected readonly servedTowns = signal<readonly string[]>([]);
   protected readonly servingPostcodes = signal<readonly string[]>([]);
+  // What the commune last proposed: the administrator has not changed it while the address still holds it.
+  private proposed = { town: '', postcode: '' };
+
+  constructor() {
+    // Only a change of commune proposes its town: the administrator's own changes do not.
+    effect(() => {
+      const town = this.defaultTown();
+      if (town) untracked(() => this.propose(town));
+    });
+  }
+
+  private propose(town: DeliveryTown): void {
+    const given = this.address();
+    const proposed = { town: town.name, postcode: town.postcodes.length === 1 ? town.postcodes[0] : '' };
+    if (!given.town || given.town === this.proposed.town) this.describe({ town: proposed.town });
+    if (!given.postcode || given.postcode === this.proposed.postcode) this.describe({ postcode: proposed.postcode });
+    this.servingPostcodes.set(town.postcodes);
+    this.proposed = proposed;
+  }
 
   protected typePostcode(postcode: string): void {
     this.describe({ postcode });

@@ -1,6 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { Clubs, FfeClubIdAlreadyUsed, NewClub } from '../ports/clubs';
 import { Commune, Communes } from '../ports/communes';
+import { DeliveryTown, Towns } from '../ports/towns';
 import { communesMatching } from './commune-search';
 import { PostalAddressFields } from '../postal-address/postal-address-fields';
 import { AddressProblem, NO_ADDRESS, PostalAddress, problemsOf } from '../postal-address/postal-address';
@@ -114,7 +115,12 @@ type CreationOutcome =
         <fieldset>
           <legend>Siège social</legend>
           <div class="fields">
-            <app-postal-address-fields idPrefix="office" [(address)]="registeredOffice" [problems]="officeProblems()" />
+            <app-postal-address-fields
+              idPrefix="office"
+              [(address)]="registeredOffice"
+              [problems]="officeProblems()"
+              [defaultTown]="townOfCommune()"
+            />
           </div>
         </fieldset>
         <fieldset>
@@ -131,7 +137,12 @@ type CreationOutcome =
               <label for="venue-at-office">La salle de jeu est au siège social</label>
             </div>
             @if (!venueAtOffice()) {
-              <app-postal-address-fields idPrefix="venue" [(address)]="venue" [problems]="venueProblems()" />
+              <app-postal-address-fields
+                idPrefix="venue"
+                [(address)]="venue"
+                [problems]="venueProblems()"
+                [defaultTown]="townOfCommune()"
+              />
             }
           </div>
         </fieldset>
@@ -168,6 +179,9 @@ export class CreateClub {
   private committeeOfCommunes = '';
   private readonly typedCommune = signal('');
   protected readonly chosenCommune = signal<Commune | null>(null);
+  private readonly towns = inject(Towns);
+  // A commune served under several towns proposes none of them: the administrator chooses.
+  protected readonly townOfCommune = signal<DeliveryTown | null>(null);
   protected readonly activeCommune = signal(-1);
   protected readonly communeWritten = signal(false);
   protected readonly offeredCommunes = computed(() => communesMatching(this.communesOfCommittee(), this.typedCommune()));
@@ -192,6 +206,11 @@ export class CreateClub {
 
   protected chooseCommune(commune: Commune, field: HTMLInputElement): void {
     this.chosenCommune.set(commune);
+    this.towns.ofCommune(commune.code).subscribe({
+      next: towns => this.townOfCommune.set(towns.length === 1 ? towns[0] : null),
+      // The town is only a help: without it, the administrator still types the addresses freely.
+      error: () => this.townOfCommune.set(null),
+    });
     this.typedCommune.set('');
     this.activeCommune.set(-1);
     field.value = commune.name;
