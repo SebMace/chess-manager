@@ -4,6 +4,7 @@ import acceptance.support.CreatedClubs;
 import clubmanagement.defineopeninghours.DefineOpeningHours;
 import clubmanagement.domain.club.vo.Activity;
 import clubmanagement.domain.club.vo.ClubId;
+import clubmanagement.domain.club.vo.PostalAddress;
 import clubmanagement.domain.club.vo.Session;
 import clubmanagement.domain.club.vo.Venue;
 import clubmanagement.ports.InMemoryClubCalendar;
@@ -72,10 +73,30 @@ public class DefineOpeningHoursSteps {
 
     @Then("the session of {string} every {day} from {time} to {time} takes place at its playing venue")
     public void sessionAtPlayingVenue(String club, DayOfWeek day, LocalTime from, LocalTime to) {
-        Session session = clubCalendar.openingHoursOf(clubId(club)).stream()
+        assertEquals(Venue.PLAYING_VENUE, session(club, day, from, to).venue());
+    }
+
+    @When("an administrator defines that {string} opens every {day} from {time} to {time} for {activity} at:")
+    public void defineOpeningHoursForActivityAt(String club, DayOfWeek day, LocalTime from, LocalTime to,
+                                                Activity activity, DataTable address) {
+        defineOpeningHours.execute(clubId(club),
+                Set.of(new Session(day, from, to, Optional.of(activity), new Venue.Address(address(address)))));
+    }
+
+    @Then("the session of {string} every {day} from {time} to {time} takes place at:")
+    public void sessionAtAddress(String club, DayOfWeek day, LocalTime from, LocalTime to, DataTable address) {
+        assertEquals(new Venue.Address(address(address)), session(club, day, from, to).venue());
+    }
+
+    private Session session(String club, DayOfWeek day, LocalTime from, LocalTime to) {
+        return clubCalendar.openingHoursOf(clubId(club)).stream()
                 .filter(defined -> defined.day() == day && defined.from().equals(from) && defined.to().equals(to))
                 .findFirst().orElseThrow();
-        assertEquals(Venue.PLAYING_VENUE, session.venue());
+    }
+
+    private static PostalAddress address(DataTable address) {
+        Map<String, String> parts = address.asMap();
+        return new PostalAddress(parts.get("street"), parts.get("postcode"), parts.get("town"));
     }
 
     private Set<Session> sessions(DataTable sessions) {
