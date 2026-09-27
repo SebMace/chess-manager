@@ -37,7 +37,7 @@ public class DefineOpeningHoursSteps {
     @ParameterType("\\d{2}:\\d{2}")
     public LocalTime time(String time) { return LocalTime.parse(time); }
 
-    @ParameterType(".+")
+    @ParameterType("[^:]+")
     public Activity activity(String name) { return new Activity(name); }
 
     @When("an administrator defines that {string} opens every {day} from {time} to {time}")
