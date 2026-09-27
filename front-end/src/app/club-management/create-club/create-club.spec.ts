@@ -6,6 +6,8 @@ import { Clubs } from '../ports/clubs';
 import { HttpClubs } from '../http/http-clubs';
 import { Commune, Communes } from '../ports/communes';
 import { HttpCommunes } from '../http/http-communes';
+import { Towns } from '../ports/towns';
+import { HttpTowns } from '../http/http-towns';
 
 const REGISTERED_OFFICE = { 'Numéro et voie': '12 rue des Échecs', 'Code postal': '45000', 'Localité': 'Orléans' };
 
@@ -28,6 +30,7 @@ describe('CreateClub', () => {
         provideHttpClientTesting(),
         { provide: Clubs, useClass: HttpClubs },
         { provide: Communes, useClass: HttpCommunes },
+        { provide: Towns, useClass: HttpTowns },
       ],
     });
     fixture = TestBed.createComponent(CreateClub);
@@ -38,15 +41,16 @@ describe('CreateClub', () => {
 
   async function chooseCommune(typed: string, name: string): Promise<void> {
     fill(fieldLabelled(page, 'Commune'), typed);
-    for (const request of server.match(request => request.url === '/communes')) request.flush(LOIRET);
+    for (const request of server.match(request => request.url === '/api/communes')) request.flush(LOIRET);
     await fixture.whenStable();
     optionNamed(page, name).click();
     await fixture.whenStable();
   }
 
   async function createValidClub(name: string): Promise<void> {
-    fillFields(page, { 'Nom du club': name, 'Code du comité': '45', 'Identifiant FFE': 'G45001', ...REGISTERED_OFFICE });
+    fillFields(page, { 'Nom du club': name, 'Code du comité': '45', 'Identifiant FFE': 'G45001' });
     await chooseCommune('Orl', 'Orléans');
+    fillFields(page, REGISTERED_OFFICE);
     playsAtRegisteredOffice(page);
     buttonNamed(page, 'Créer le club').click();
   }
@@ -62,7 +66,7 @@ describe('CreateClub', () => {
     fill(fieldInGroup(page, 'Salle de jeu', 'Localité'), 'Orléans');
     buttonNamed(page, 'Créer le club').click();
 
-    const request = server.expectOne({ method: 'POST', url: '/clubs' });
+    const request = server.expectOne({ method: 'POST', url: '/api/clubs' });
     expect(request.request.body).toEqual({
       name: 'U.S. Orléans.Echecs',
       committeeCode: '45',
@@ -71,7 +75,7 @@ describe('CreateClub', () => {
       registeredOffice: { street: '12 rue des Échecs', postcode: '45000', town: 'Orléans' },
       playingVenue: { street: '5 rue du Roi', postcode: '45100', town: 'Orléans' },
     });
-    request.flush(null, { status: 201, statusText: 'Created', headers: { Location: '/clubs/7' } });
+    request.flush(null, { status: 201, statusText: 'Created', headers: { Location: '/api/clubs/7' } });
     await fixture.whenStable();
 
     expect(page.textContent).toContain('Le club U.S. Orléans.Echecs a été créé.');
@@ -86,15 +90,175 @@ describe('CreateClub', () => {
     expect(() => fieldInGroup(page, 'Salle de jeu', 'Numéro et voie')).toThrow();
     buttonNamed(page, 'Créer le club').click();
 
-    expect(server.expectOne({ method: 'POST', url: '/clubs' }).request.body.playingVenue)
+    expect(server.expectOne({ method: 'POST', url: '/api/clubs' }).request.body.playingVenue)
       .toEqual({ street: '12 rue des Échecs', postcode: '45000', town: 'Orléans' });
+  });
+
+  it('proposes the town of the chosen commune for the registered office and the playing venue', async () => {
+    fill(fieldLabelled(page, 'Code du comité'), '45');
+    await chooseCommune('Orl', 'Orléans');
+
+    server.expectOne(request => request.method === 'GET' && request.url === '/api/towns'
+      && request.params.get('commune') === '45234').flush([{ name: 'ORLEANS', postcodes: ['45000', '45100'] }]);
+    await fixture.whenStable();
+
+    expect(fieldInGroup(page, 'Siège social', 'Localité').value).toBe('ORLEANS');
+    expect(fieldInGroup(page, 'Salle de jeu', 'Localité').value).toBe('ORLEANS');
+  });
+
+  async function flushTownsOfCommune(communeCode: string, towns: { name: string; postcodes: string[] }[]): Promise<void> {
+    server.expectOne(request => request.url === '/api/towns' && request.params.get('commune') === communeCode).flush(towns);
+    await fixture.whenStable();
+  }
+
+  it('replaces the postcode chosen for the previous commune when another commune is chosen', async () => {
+    fill(fieldLabelled(page, 'Code du comité'), '45');
+    await chooseCommune('Orl', 'Orléans');
+    await flushTownsOfCommune('45234', [{ name: 'ORLEANS', postcodes: ['45000', '45100'] }]);
+    fill(fieldInGroup(page, 'Siège social', 'Code postal'), '45000');
+    for (const request of server.match(request => request.url === '/api/towns')) request.flush(['ORLEANS']);
+    await fixture.whenStable();
+
+    await chooseCommune('Oli', 'Olivet');
+    await flushTownsOfCommune('45232', [{ name: 'OLIVET', postcodes: ['45160'] }]);
+
+    expect(fieldInGroup(page, 'Siège social', 'Code postal').value).toBe('45160');
+    expect(fieldInGroup(page, 'Siège social', 'Localité').value).toBe('OLIVET');
+  });
+
+  it('forgets the town and the postcode of the addresses as soon as the commune is changed', async () => {
+    fill(fieldLabelled(page, 'Code du comité'), '45');
+    await chooseCommune('Oli', 'Olivet');
+    await flushTownsOfCommune('45232', [{ name: 'OLIVET', postcodes: ['45160'] }]);
+
+    fill(fieldLabelled(page, 'Commune'), 'Orl');
+    await fixture.whenStable();
+
+    for (const group of ['Siège social', 'Salle de jeu']) {
+      expect(fieldInGroup(page, group, 'Localité').value).toBe('');
+      expect(fieldInGroup(page, group, 'Code postal').value).toBe('');
+    }
+  });
+
+  it('proposes no town when the commune is no longer chosen by the time its towns are found', async () => {
+    fill(fieldLabelled(page, 'Code du comité'), '45');
+    await chooseCommune('Orl', 'Orléans');
+
+    fill(fieldLabelled(page, 'Commune'), 'Ol');
+    await flushTownsOfCommune('45234', [{ name: 'ORLEANS', postcodes: ['45000', '45100'] }]);
+
+    expect(fieldInGroup(page, 'Siège social', 'Localité').value).toBe('');
+    expect(fieldInGroup(page, 'Salle de jeu', 'Localité').value).toBe('');
+  });
+
+  it('proposes the town of the latest commune chosen when the towns of a previous one arrive late', async () => {
+    fill(fieldLabelled(page, 'Code du comité'), '45');
+    await chooseCommune('Orl', 'Orléans');
+    await chooseCommune('Oli', 'Olivet');
+
+    await flushTownsOfCommune('45232', [{ name: 'OLIVET', postcodes: ['45160'] }]);
+    await flushTownsOfCommune('45234', [{ name: 'ORLEANS', postcodes: ['45000', '45100'] }]);
+
+    expect(fieldInGroup(page, 'Siège social', 'Localité').value).toBe('OLIVET');
+    expect(fieldInGroup(page, 'Siège social', 'Code postal').value).toBe('45160');
+  });
+
+  it('keeps proposing the town of the latest commune chosen when the search for a previous one fails', async () => {
+    fill(fieldLabelled(page, 'Code du comité'), '45');
+    playsAtRegisteredOffice(page);
+    await chooseCommune('Orl', 'Orléans');
+    await chooseCommune('Oli', 'Olivet');
+    await flushTownsOfCommune('45232', [{ name: 'OLIVET', postcodes: ['45160'] }]);
+    server.expectOne(request => request.url === '/api/towns' && request.params.get('commune') === '45234')
+      .flush(null, { status: 500, statusText: 'Internal Server Error' });
+
+    fieldLabelled(page, 'La salle de jeu est au siège social').click();
+    await fixture.whenStable();
+
+    expect(fieldInGroup(page, 'Salle de jeu', 'Localité').value).toBe('OLIVET');
+  });
+
+  it('gives up the towns of the postcode typed for the previous commune once the commune is changed', async () => {
+    fill(fieldLabelled(page, 'Code du comité'), '45');
+    await chooseCommune('Orl', 'Orléans');
+    await flushTownsOfCommune('45234', []);
+    fill(fieldInGroup(page, 'Siège social', 'Code postal'), '45100');
+
+    fill(fieldLabelled(page, 'Commune'), 'Ol');
+    await fixture.whenStable();
+    server.expectOne(request => request.url === '/api/towns' && request.params.get('postcode') === '45100').flush(['ORLEANS']);
+    await fixture.whenStable();
+
+    expect(fieldInGroup(page, 'Siège social', 'Localité').value).toBe('');
+  });
+
+  it('gives up the towns of the postcode typed for the previous commune even when they arrive before the screen is refreshed', async () => {
+    fill(fieldLabelled(page, 'Code du comité'), '45');
+    await chooseCommune('Orl', 'Orléans');
+    await flushTownsOfCommune('45234', []);
+    fill(fieldInGroup(page, 'Siège social', 'Code postal'), '45100');
+    await fixture.whenStable();
+
+    fill(fieldLabelled(page, 'Commune'), 'Ol');
+    server.expectOne(request => request.url === '/api/towns' && request.params.get('postcode') === '45100').flush(['ORLEANS']);
+    await fixture.whenStable();
+
+    expect(fieldInGroup(page, 'Siège social', 'Code postal').value).toBe('');
+    expect(fieldInGroup(page, 'Siège social', 'Localité').value).toBe('');
+  });
+
+  it('no longer suggests the postcodes of the town of the commune once the commune is changed', async () => {
+    fill(fieldLabelled(page, 'Code du comité'), '45');
+    await chooseCommune('Orl', 'Orléans');
+    await flushTownsOfCommune('45234', [{ name: 'ORLEANS', postcodes: ['45000', '45100'] }]);
+
+    fill(fieldLabelled(page, 'Commune'), 'Ol');
+    await fixture.whenStable();
+
+    expect(suggestionsFor(page, fieldInGroup(page, 'Siège social', 'Code postal'))).toEqual([]);
+  });
+
+  it('no longer suggests the towns of the postcode typed for the previous commune once the commune is changed', async () => {
+    fill(fieldLabelled(page, 'Code du comité'), '45');
+    await chooseCommune('Orl', 'Orléans');
+    await flushTownsOfCommune('45234', []);
+    fill(fieldInGroup(page, 'Siège social', 'Code postal'), '45240');
+    server.expectOne(request => request.url === '/api/towns' && request.params.get('postcode') === '45240')
+      .flush(['LA FERTE ST AUBIN', 'LIGNY LE RIBAULT', 'SENNELY']);
+    await fixture.whenStable();
+
+    fill(fieldLabelled(page, 'Commune'), 'Ol');
+    await fixture.whenStable();
+
+    expect(suggestionsFor(page, fieldInGroup(page, 'Siège social', 'Localité'))).toEqual([]);
+  });
+
+  it('stops looking for the towns of the chosen commune once the form is no longer shown', async () => {
+    fill(fieldLabelled(page, 'Code du comité'), '45');
+    await chooseCommune('Orl', 'Orléans');
+
+    fixture.destroy();
+
+    expect(server.expectOne(request => request.url === '/api/towns' && request.params.get('commune') === '45234').cancelled)
+      .toBe(true);
+  });
+
+  it('proposes no town when the towns of the chosen commune cannot be found', async () => {
+    fill(fieldLabelled(page, 'Code du comité'), '45');
+    await chooseCommune('Orl', 'Orléans');
+
+    server.expectOne(request => request.url === '/api/towns' && request.params.has('commune'))
+      .flush(null, { status: 500, statusText: 'Internal Server Error' });
+    await fixture.whenStable();
+
+    expect(fieldInGroup(page, 'Siège social', 'Localité').value).toBe('');
   });
 
   it('offers the communes of the department of the committee that start with the letters typed', async () => {
     fill(fieldLabelled(page, 'Code du comité'), '45');
     fill(fieldLabelled(page, 'Commune'), 'Ol');
 
-    server.expectOne(request => request.method === 'GET' && request.url === '/communes'
+    server.expectOne(request => request.method === 'GET' && request.url === '/api/communes'
       && request.params.get('committee') === '45').flush(LOIRET);
     await fixture.whenStable();
 
@@ -105,7 +269,7 @@ describe('CreateClub', () => {
     fillFields(page, { 'Nom du club': 'U.S. Orléans.Echecs', 'Code du comité': '45', 'Identifiant FFE': 'G45001', ...REGISTERED_OFFICE });
     const commune = fieldLabelled(page, 'Commune');
     fill(commune, 'O');
-    server.expectOne(request => request.url === '/communes').flush(LOIRET);
+    server.expectOne(request => request.url === '/api/communes').flush(LOIRET);
     await fixture.whenStable();
 
     press(commune, 'ArrowDown');
@@ -118,14 +282,14 @@ describe('CreateClub', () => {
     playsAtRegisteredOffice(page);
     buttonNamed(page, 'Créer le club').click();
 
-    expect(server.expectOne({ method: 'POST', url: '/clubs' }).request.body.communeCode).toBe('45234');
+    expect(server.expectOne({ method: 'POST', url: '/api/clubs' }).request.body.communeCode).toBe('45234');
   });
 
   it('lets the administrator go back up the offered communes and close them', async () => {
     fill(fieldLabelled(page, 'Code du comité'), '45');
     const commune = fieldLabelled(page, 'Commune');
     fill(commune, 'O');
-    server.expectOne(request => request.url === '/communes').flush(LOIRET);
+    server.expectOne(request => request.url === '/api/communes').flush(LOIRET);
     await fixture.whenStable();
 
     press(commune, 'ArrowDown');
@@ -143,7 +307,7 @@ describe('CreateClub', () => {
   it('tells the administrator that the club could not be created', async () => {
     await createValidClub('Montargis');
 
-    server.expectOne({ method: 'POST', url: '/clubs' })
+    server.expectOne({ method: 'POST', url: '/api/clubs' })
       .flush(null, { status: 500, statusText: 'Internal Server Error' });
     await fixture.whenStable();
 
@@ -153,13 +317,13 @@ describe('CreateClub', () => {
 
   it('no longer tells the administrator that the club could not be created once it has been created', async () => {
     await createValidClub('Montargis');
-    server.expectOne({ method: 'POST', url: '/clubs' })
+    server.expectOne({ method: 'POST', url: '/api/clubs' })
       .flush(null, { status: 500, statusText: 'Internal Server Error' });
     await fixture.whenStable();
 
     await createValidClub('Montargis');
-    server.expectOne({ method: 'POST', url: '/clubs' })
-      .flush(null, { status: 201, statusText: 'Created', headers: { Location: '/clubs/6' } });
+    server.expectOne({ method: 'POST', url: '/api/clubs' })
+      .flush(null, { status: 201, statusText: 'Created', headers: { Location: '/api/clubs/6' } });
     await fixture.whenStable();
 
     expect(page.textContent).toContain('Le club Montargis a été créé.');
@@ -168,12 +332,12 @@ describe('CreateClub', () => {
 
   it('no longer tells the administrator that a previous club has been created once a creation fails', async () => {
     await createValidClub('Montargis');
-    server.expectOne({ method: 'POST', url: '/clubs' })
-      .flush(null, { status: 201, statusText: 'Created', headers: { Location: '/clubs/6' } });
+    server.expectOne({ method: 'POST', url: '/api/clubs' })
+      .flush(null, { status: 201, statusText: 'Created', headers: { Location: '/api/clubs/6' } });
     await fixture.whenStable();
 
     await createValidClub('Olivet');
-    server.expectOne({ method: 'POST', url: '/clubs' })
+    server.expectOne({ method: 'POST', url: '/api/clubs' })
       .flush(null, { status: 500, statusText: 'Internal Server Error' });
     await fixture.whenStable();
 
@@ -185,7 +349,7 @@ describe('CreateClub', () => {
     createClubWithoutCommittee(page, 'Montargis');
     await fixture.whenStable();
 
-    server.expectNone({ method: 'POST', url: '/clubs' });
+    server.expectNone({ method: 'POST', url: '/api/clubs' });
     expect(page.textContent).toContain('Le code du comité est obligatoire.');
   });
 
@@ -194,8 +358,8 @@ describe('CreateClub', () => {
     await fixture.whenStable();
 
     await createValidClub('Montargis');
-    server.expectOne({ method: 'POST', url: '/clubs' })
-      .flush(null, { status: 201, statusText: 'Created', headers: { Location: '/clubs/6' } });
+    server.expectOne({ method: 'POST', url: '/api/clubs' })
+      .flush(null, { status: 201, statusText: 'Created', headers: { Location: '/api/clubs/6' } });
     await fixture.whenStable();
 
     expect(page.textContent).toContain('Le club Montargis a été créé.');
@@ -206,7 +370,7 @@ describe('CreateClub', () => {
     createClub(page, { 'Nom du club': 'U.S. Orléans.Echecs', 'Code du comité': '45' });
     await fixture.whenStable();
 
-    server.expectNone({ method: 'POST', url: '/clubs' });
+    server.expectNone({ method: 'POST', url: '/api/clubs' });
     expect(page.textContent).toContain("L'identifiant FFE est obligatoire.");
   });
 
@@ -214,7 +378,7 @@ describe('CreateClub', () => {
     createClub(page, { 'Nom du club': 'U.S. Orléans.Echecs', 'Code du comité': '45', 'Identifiant FFE': 'G45001' });
     await fixture.whenStable();
 
-    server.expectNone({ method: 'POST', url: '/clubs' });
+    server.expectNone({ method: 'POST', url: '/api/clubs' });
     expect(page.textContent).toContain('La commune est obligatoire.');
   });
 
@@ -224,7 +388,7 @@ describe('CreateClub', () => {
     buttonNamed(page, 'Créer le club').click();
     await fixture.whenStable();
 
-    server.expectNone({ method: 'POST', url: '/clubs' });
+    server.expectNone({ method: 'POST', url: '/api/clubs' });
     expect(page.textContent).toContain('Le numéro et la voie sont obligatoires.');
     expect(page.textContent).toContain('Le code postal est obligatoire.');
     expect(page.textContent).toContain('La localité est obligatoire.');
@@ -236,7 +400,7 @@ describe('CreateClub', () => {
     buttonNamed(page, 'Créer le club').click();
     await fixture.whenStable();
 
-    server.expectNone({ method: 'POST', url: '/clubs' });
+    server.expectNone({ method: 'POST', url: '/api/clubs' });
     const venue = groupNamed(page, 'Salle de jeu').textContent;
     expect(venue).toContain('Le numéro et la voie sont obligatoires.');
     expect(venue).toContain('Le code postal est obligatoire.');
@@ -250,7 +414,7 @@ describe('CreateClub', () => {
     buttonNamed(page, 'Créer le club').click();
     await fixture.whenStable();
 
-    server.expectNone({ method: 'POST', url: '/clubs' });
+    server.expectNone({ method: 'POST', url: '/api/clubs' });
     expect(page.textContent).toContain('Le code postal doit comporter 5 chiffres.');
   });
 
@@ -263,7 +427,7 @@ describe('CreateClub', () => {
     buttonNamed(page, 'Créer le club').click();
     await fixture.whenStable();
 
-    server.expectNone({ method: 'POST', url: '/clubs' });
+    server.expectNone({ method: 'POST', url: '/api/clubs' });
     expect(groupNamed(page, 'Salle de jeu').textContent).toContain('Le code postal doit comporter 5 chiffres.');
   });
 
@@ -274,17 +438,17 @@ describe('CreateClub', () => {
     playsAtRegisteredOffice(page);
     buttonNamed(page, 'Créer le club').click();
 
-    server.expectOne({ method: 'POST', url: '/clubs' });
+    server.expectOne({ method: 'POST', url: '/api/clubs' });
   });
 
   it('tells the administrator to choose the commune among those offered', async () => {
     fillFields(page, { 'Nom du club': 'U.S. Orléans.Echecs', 'Code du comité': '45', 'Identifiant FFE': 'G45001' });
     fill(fieldLabelled(page, 'Commune'), 'Orl');
-    server.expectOne(request => request.url === '/communes').flush(LOIRET);
+    server.expectOne(request => request.url === '/api/communes').flush(LOIRET);
     buttonNamed(page, 'Créer le club').click();
     await fixture.whenStable();
 
-    server.expectNone({ method: 'POST', url: '/clubs' });
+    server.expectNone({ method: 'POST', url: '/api/clubs' });
     expect(page.textContent).toContain('Choisissez la commune parmi celles proposées.');
     expect(page.textContent).not.toContain('La commune est obligatoire.');
   });
@@ -292,7 +456,7 @@ describe('CreateClub', () => {
   it('tells the administrator that the FFE identifier is already used by another club', async () => {
     await createValidClub('Échiquier Orléanais');
 
-    server.expectOne({ method: 'POST', url: '/clubs' })
+    server.expectOne({ method: 'POST', url: '/api/clubs' })
       .flush(null, { status: 409, statusText: 'Conflict' });
     await fixture.whenStable();
 
@@ -337,6 +501,12 @@ function fill(field: HTMLInputElement, value: string): void {
 function playsAtRegisteredOffice(page: HTMLElement): void {
   const atRegisteredOffice = fieldLabelled(page, 'La salle de jeu est au siège social');
   if (!atRegisteredOffice.checked) atRegisteredOffice.click();
+}
+
+function suggestionsFor(page: HTMLElement, field: HTMLInputElement): string[] {
+  const list = field.getAttribute('list');
+  if (!list) return [];
+  return Array.from(page.querySelectorAll<HTMLOptionElement>(`datalist[id="${list}"] option`)).map(option => option.value);
 }
 
 function fieldInGroup(page: HTMLElement, group: string, text: string): HTMLInputElement {

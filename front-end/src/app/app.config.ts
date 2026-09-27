@@ -5,6 +5,10 @@ import { Clubs } from './club-management/ports/clubs';
 import { HttpClubs } from './club-management/http/http-clubs';
 import { Communes } from './club-management/ports/communes';
 import { HttpCommunes } from './club-management/http/http-communes';
+import { OpeningHours } from './club-management/ports/opening-hours';
+import { HttpOpeningHours } from './club-management/http/http-opening-hours';
+import { Towns } from './club-management/ports/towns';
+import { HttpTowns } from './club-management/http/http-towns';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -12,5 +16,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     { provide: Clubs, useClass: HttpClubs },
     { provide: Communes, useClass: HttpCommunes },
+    { provide: OpeningHours, useClass: HttpOpeningHours },
+    { provide: Towns, useClass: HttpTowns },
   ]
 };

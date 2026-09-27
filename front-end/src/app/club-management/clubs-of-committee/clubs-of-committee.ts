@@ -1,8 +1,10 @@
 import { Component, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { ClubOfCommittee, Clubs } from '../ports/clubs';
 
 @Component({
   selector: 'app-clubs-of-committee',
+  imports: [RouterLink],
   styleUrl: './clubs-of-committee.css',
   template: `
     <section class="card" aria-labelledby="clubs-of-committee-title">
@@ -27,14 +29,22 @@ import { ClubOfCommittee, Clubs } from '../ports/clubs';
                   <th scope="col">Club</th>
                   <th scope="col">Commune</th>
                   <th scope="col">Identifiant FFE</th>
+                  <th scope="col">Horaires d'ouverture</th>
                 </tr>
               </thead>
               <tbody>
-                @for (club of clubs; track club.ffeClubId) {
+                @for (club of clubs; track club.id) {
                   <tr>
                     <th scope="row">{{ club.name }}</th>
                     <td>{{ club.commune }}</td>
                     <td>{{ club.ffeClubId }}</td>
+                    <td>
+                      <a
+                        [routerLink]="['/clubs', club.id, 'opening-hours']"
+                        attr.aria-label="Horaires d'ouverture de {{ club.name }}"
+                        >Horaires</a
+                      >
+                    </td>
                   </tr>
                 }
               </tbody>

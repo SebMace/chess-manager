@@ -151,7 +151,7 @@ class CreateClubEndToEndTests {
 
     @Test
     void the_communes_of_the_department_of_its_committee_are_offered_for_a_club() throws Exception {
-        HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/communes?committee=45")).GET().build();
+        HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/api/communes?committee=45")).GET().build();
 
         HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
 
@@ -161,16 +161,56 @@ class CreateClubEndToEndTests {
     }
 
     @Test
-    void an_administrator_consults_the_clubs_of_a_committee() throws Exception {
-        createClub("""
-                {"name": "Cercle fictif de Loury", "committeeCode": "45", "ffeClubId": "G45996", "communeCode": "45188", "registeredOffice": {"street": "3 place de l'Église", "postcode": "45470", "town": "Loury"},
-                 "playingVenue": {"street": "3 place de l'Église", "postcode": "45470", "town": "Loury"}}""");
-        HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/clubs?committee=45")).GET().build();
+    void the_towns_la_poste_delivers_with_a_postcode_are_offered_for_an_address() throws Exception {
+        HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/api/towns?postcode=45240")).GET().build();
 
         HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
 
         assertEquals(200, response.statusCode());
-        assertTrue(response.body().contains("{\"name\":\"Cercle fictif de Loury\",\"commune\":\"Loury\",\"ffeClubId\":\"G45996\"}"),
+        assertEquals("[\"LA FERTE ST AUBIN\",\"LIGNY LE RIBAULT\",\"MARCILLY EN VILLETTE\",\"MENESTREAU EN VILLETTE\",\"SENNELY\"]",
+                response.body());
+    }
+
+    @Test
+    void no_town_is_offered_for_a_postcode_that_is_not_made_of_five_digits() throws Exception {
+        HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/api/towns?postcode=45A00")).GET().build();
+
+        HttpResponse<Void> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.discarding());
+
+        assertEquals(400, response.statusCode());
+    }
+
+    @Test
+    void the_postcodes_la_poste_delivers_a_town_with_are_offered_for_an_address() throws Exception {
+        HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/api/postcodes?town=ORLEANS")).GET().build();
+
+        HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+
+        assertEquals(200, response.statusCode());
+        assertEquals("[\"45000\",\"45100\"]", response.body());
+    }
+
+    @Test
+    void the_town_la_poste_delivers_a_commune_as_is_offered_with_its_postcodes() throws Exception {
+        HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/api/towns?commune=45232")).GET().build();
+
+        HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+
+        assertEquals(200, response.statusCode());
+        assertEquals("[{\"name\":\"OLIVET\",\"postcodes\":[\"45160\"]}]", response.body());
+    }
+
+    @Test
+    void an_administrator_consults_the_clubs_of_a_committee() throws Exception {
+        ClubId loury = createClub("""
+                {"name": "Cercle fictif de Loury", "committeeCode": "45", "ffeClubId": "G45996", "communeCode": "45188", "registeredOffice": {"street": "3 place de l'Église", "postcode": "45470", "town": "Loury"},
+                 "playingVenue": {"street": "3 place de l'Église", "postcode": "45470", "town": "Loury"}}""");
+        HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/api/clubs?committee=45")).GET().build();
+
+        HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+
+        assertEquals(200, response.statusCode());
+        assertTrue(response.body().contains("{\"id\":\"" + loury.clubId() + "\",\"name\":\"Cercle fictif de Loury\",\"commune\":\"Loury\",\"ffeClubId\":\"G45996\"}"),
                 response.body());
     }
 
@@ -184,11 +224,12 @@ class CreateClubEndToEndTests {
 
         assertEquals(201, response.statusCode());
         String location = response.headers().firstValue("Location").orElseThrow();
+        assertTrue(location.contains("/api/clubs/"), location);
         return new ClubId(UUID.fromString(location.substring(location.lastIndexOf('/') + 1)));
     }
 
     private HttpResponse<Void> post(String json) throws Exception {
-        HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/clubs"))
+        HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/api/clubs"))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .build();
