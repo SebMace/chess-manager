@@ -42,7 +42,7 @@ On finalise d'abord la création d'un club ; les slices sur les joueurs viendron
 |---|---|---|---|
 | Define the opening hours of a club | `defineopeninghours` | à venir | Create a club |
 | Move the registered office of a club | `moveregisteredoffice` | à venir | Create a club |
-| Find the postcodes of a town | `postcodesoftown` | à venir | — |
+| Find the postcodes of a town | `postcodesoftown` | prochaine | — |
 
 - *Define the opening hours of a club* s'appuiera sur le bounded context Craft Calendar (voir
   les thèmes). Le terme métier (« horaires d'ouverture », « séances de jeu », « tranches
@@ -70,8 +70,17 @@ On finalise d'abord la création d'un club ; les slices sur les joueurs viendron
     suggéré et la saisie reste libre, sans message.
 - **Questions ouvertes** : refuser une localité absente de la base, ou la laisser libre ?
 
-*Find the postcodes of a town* est le sens inverse (ORLEANS → 45000, 45100) ; on la détaillera
-quand on la démarrera.
+### Find the postcodes of a town
+
+- **Intention** : quand l'administrateur saisit la localité d'une adresse, l'application lui
+  propose les codes postaux qui la desservent, par exemple ORLEANS → 45000, 45100. C'est le
+  sens inverse de *Find the towns of a postcode*, avec la même source La Poste.
+- **Décisions** :
+  - une localité peut avoir plusieurs codes postaux, et des localités homonymes existent dans
+    plusieurs départements (OLIVET → 45160, 53410) : l'application propose tous leurs codes.
+- **Questions ouvertes** : comment rapprocher la saisie de l'administrateur (« Orléans »,
+  « Saint-Paul ») du libellé de La Poste (ORLEANS, ST PAUL) ? À l'écran, remplir le code postal
+  quand il est unique, même s'il est déjà saisi ?
 
 ## Thèmes, à découper le moment venu
 
