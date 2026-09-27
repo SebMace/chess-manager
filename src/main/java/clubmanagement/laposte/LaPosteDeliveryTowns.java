@@ -1,6 +1,8 @@
 package clubmanagement.laposte;
 
+import clubmanagement.domain.club.vo.DeliveryTown;
 import clubmanagement.domain.club.vo.Postcode;
+import clubmanagement.domain.commune.CommuneCode;
 import clubmanagement.ports.DeliveryTowns;
 
 import java.io.BufferedReader;
@@ -58,6 +60,11 @@ public class LaPosteDeliveryTowns implements DeliveryTowns {
                 .map(Map.Entry::getKey)
                 .sorted(Comparator.comparing(Postcode::value))
                 .toList();
+    }
+
+    @Override
+    public List<DeliveryTown> ofCommune(CommuneCode commune) {
+        return List.of();
     }
 
     // La Poste writes a town in capitals, without accents nor punctuation, and abbreviates the words
