@@ -161,6 +161,20 @@ class CreateClubEndToEndTests {
     }
 
     @Test
+    void an_administrator_consults_the_clubs_of_a_committee() throws Exception {
+        createClub("""
+                {"name": "Cercle fictif de Loury", "committeeCode": "45", "ffeClubId": "G45996", "communeCode": "45188", "registeredOffice": {"street": "3 place de l'Église", "postcode": "45470", "town": "Loury"},
+                 "playingVenue": {"street": "3 place de l'Église", "postcode": "45470", "town": "Loury"}}""");
+        HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/clubs?committee=45")).GET().build();
+
+        HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+
+        assertEquals(200, response.statusCode());
+        assertTrue(response.body().contains("{\"name\":\"Cercle fictif de Loury\",\"commune\":\"Loury\",\"ffeClubId\":\"G45996\"}"),
+                response.body());
+    }
+
+    @Test
     void no_demonstration_club_is_created_outside_the_development_profile() {
         assertFalse(clubs.existsWithFfeClubId(new FfeClubId("DEMO01")));
     }

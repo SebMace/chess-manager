@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, throwError } from 'rxjs';
-import { Clubs, FfeClubIdAlreadyUsed, NewClub } from '../ports/clubs';
+import { ClubOfCommittee, Clubs, FfeClubIdAlreadyUsed, NewClub } from '../ports/clubs';
 
 @Injectable()
 export class HttpClubs implements Clubs {
@@ -27,5 +27,9 @@ export class HttpClubs implements Clubs {
       catchError((error: HttpErrorResponse) =>
         throwError(() => (error.status === 409 ? new FfeClubIdAlreadyUsed(club.ffeClubId) : error))),
     );
+  }
+
+  ofCommittee(committeeCode: string): Observable<ClubOfCommittee[]> {
+    return this.http.get<ClubOfCommittee[]>('/clubs', { params: { committee: committeeCode } });
   }
 }

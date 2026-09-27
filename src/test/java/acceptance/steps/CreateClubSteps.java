@@ -1,6 +1,8 @@
 package acceptance.steps;
 
 import clubmanagement.createclub.CommuneNotInCommitteeDepartment;
+import clubmanagement.clubsofcommittee.ClubOfCommittee;
+import clubmanagement.clubsofcommittee.ClubsOfCommittee;
 import clubmanagement.communesofcommittee.CommunesOfCommittee;
 import clubmanagement.createclub.CreateClub;
 import clubmanagement.createclub.FfeClubIdAlreadyUsed;
@@ -27,22 +29,27 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class CreateClubSteps {
-    private static final UUID CREATED_CLUB_ID = UUID.fromString("00000000-0000-0000-0000-000000000006");
+    private static final Map<String, CommitteeCode> COMMITTEES = Map.of(
+            "Loiret", new CommitteeCode("45"),
+            "Mayenne", new CommitteeCode("53"));
     private static final Map<String, CommuneCode> COMMUNES = Map.of(
             "Orléans", InMemoryCommunes.ORLEANS.code(),
             "Olivet", InMemoryCommunes.OLIVET.code(),
+            "Montargis", InMemoryCommunes.MONTARGIS.code(),
             "Saint-Pryvé-Saint-Mesmin", InMemoryCommunes.SAINT_PRYVE_SAINT_MESMIN.code(),
             "Olivet (Mayenne)", InMemoryCommunes.OLIVET_IN_MAYENNE.code());
     private final InMemoryClubRepository clubs = new InMemoryClubRepository();
     private final InMemoryCommunes communes = new InMemoryCommunes();
-    private final CreateClub createClub = new CreateClub(clubs, communes, () -> new ClubId(CREATED_CLUB_ID));
+    private final CreateClub createClub = new CreateClub(clubs, communes, this::nextClubId);
+    private long createdClubCount;
     private final Map<String, ClubId> createdClubs = new HashMap<>();
     private final Map<String, CommitteeCode> committees = new HashMap<>();
     private final Map<String, RuntimeException> refusals = new HashMap<>();
     private List<Commune> offeredCommunes = List.of();
+    private List<ClubOfCommittee> consultedClubs = List.of();
 
     @Given("{string} is a departmental committee of the FFE")
-    public void departmentalCommittee(String name) { committees.put(name, new CommitteeCode("45")); }
+    public void departmentalCommittee(String name) { committees.put(name, COMMITTEES.get(name)); }
 
     @When("an administrator creates the club {string} with:")
     public void createClubWith(String name, DataTable information) {
@@ -70,6 +77,36 @@ public class CreateClubSteps {
     @When("an administrator looks for the communes of a club of the departmental committee {string}")
     public void lookForCommunes(String committee) {
         offeredCommunes = new CommunesOfCommittee(communes).execute(committees.get(committee));
+    }
+
+    @When("an administrator consults the clubs of the departmental committee {string}")
+    public void consultClubs(String committee) {
+        consultedClubs = new ClubsOfCommittee(clubs, communes).execute(committees.get(committee));
+    }
+
+    @Then("the administrator is shown the club {string}")
+    public void clubShown(String name) {
+        assertTrue(consultedClubs.stream().anyMatch(club -> club.name().equals(name)));
+    }
+
+    @Then("the administrator is shown the club {string} located in {string} with the FFE identifier {string}")
+    public void clubShownWithItsCommuneAndFfeIdentifier(String name, String commune, String ffeIdentifier) {
+        assertTrue(consultedClubs.contains(new ClubOfCommittee(name, commune, new FfeClubId(ffeIdentifier))));
+    }
+
+    @Then("the administrator is shown the clubs in this order:")
+    public void clubsShownInOrder(List<String> names) {
+        assertEquals(names, consultedClubs.stream().map(ClubOfCommittee::name).toList());
+    }
+
+    @Then("the administrator is told that no club is managed by the application in this committee")
+    public void noClubShown() {
+        assertTrue(consultedClubs.isEmpty());
+    }
+
+    @Then("the administrator is not shown the club {string}")
+    public void clubNotShown(String name) {
+        assertTrue(consultedClubs.stream().noneMatch(club -> club.name().equals(name)));
     }
 
     @Then("the administrator is offered the commune {string}")
@@ -134,6 +171,8 @@ public class CreateClubSteps {
     private static CommuneCode commune(String name) {
         return name == null ? null : COMMUNES.get(name);
     }
+
+    private ClubId nextClubId() { return new ClubId(new UUID(0, ++createdClubCount)); }
 
     private Club createdClub(String name) { return clubs.find(createdClubs.get(name)).orElseThrow(); }
 

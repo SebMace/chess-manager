@@ -8,9 +8,30 @@
 .masthead h1 {
   margin: 0 auto;
   max-width: 56rem;
-  padding: 1rem var(--space);
+  padding: 1rem var(--space) 0.25rem;
   font-size: 1.6rem;
   letter-spacing: 0.02em;
+}
+
+.masthead nav {
+  display: flex;
+  gap: 1.25rem;
+  margin: 0 auto;
+  max-width: 56rem;
+  padding: 0.25rem var(--space) 0.9rem;
+}
+
+.masthead a {
+  color: var(--square-light);
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+}
+
+.masthead a:hover,
+.masthead a:focus-visible {
+  border-bottom-color: var(--square-light);
+  outline: none;
 }
 
 .brand-piece {

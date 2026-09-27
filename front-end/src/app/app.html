@@ -1,6 +1,10 @@
 <header class="masthead">
   <h1><span class="brand-piece" aria-hidden="true">♞</span> Chess Manager</h1>
+  <nav aria-label="Navigation principale">
+    <a routerLink="/">Clubs</a>
+    <a routerLink="/clubs/new">Créer un club</a>
+  </nav>
 </header>
 <main class="page">
-  <app-create-club />
+  <router-outlet />
 </main>
