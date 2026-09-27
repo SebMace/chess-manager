@@ -55,15 +55,16 @@ On finalise d'abord la création d'un club ; les slices sur les joueurs viendron
     hebdomadaire (jour, heure de début, heure de fin) est une *session* ;
   - une session peut être consacrée à une activité, ou à aucune. Les activités forment une liste
     ouverte : l'application en propose, chaque club peut en ajouter ;
-  - deux sessions d'un club ne se chevauchent pas, pour l'instant ;
+  - une session a lieu à une adresse quelconque, par défaut à la salle de jeu du club. Ce défaut
+    désigne la salle de jeu actuelle : si le club en change, la session la suit ;
+  - des sessions peuvent se chevaucher ;
   - l'administrateur définit toutes les sessions d'un coup ;
   - les horaires s'appuient sur le bounded context Craft Calendar. Craft Calendar est en amont
     (Open Host Service et Published Language) ; Club Management est en aval et traduit dans une
     couche anticorruption. Le club ne connaît aucune classe de Craft Calendar, et Craft Calendar
     ne connaît pas les activités d'un club d'échecs ;
   - les concepts de Craft Calendar émergent des tests de cette slice, sans conception préalable.
-- **Reporté** : lieux, saisons, vacances scolaires, abonnement depuis un agenda externe,
-  chevauchement de sessions.
+- **Reporté** : saisons, vacances scolaires, abonnement depuis un agenda externe.
 - **Questions ouvertes** : refuser un club non géré par l'application ? Une session peut-elle
   franchir minuit ? Quelles activités l'application propose-t-elle ?
 
