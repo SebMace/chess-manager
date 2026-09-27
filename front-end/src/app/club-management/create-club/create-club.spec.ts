@@ -48,8 +48,9 @@ describe('CreateClub', () => {
   }
 
   async function createValidClub(name: string): Promise<void> {
-    fillFields(page, { 'Nom du club': name, 'Code du comité': '45', 'Identifiant FFE': 'G45001', ...REGISTERED_OFFICE });
+    fillFields(page, { 'Nom du club': name, 'Code du comité': '45', 'Identifiant FFE': 'G45001' });
     await chooseCommune('Orl', 'Orléans');
+    fillFields(page, REGISTERED_OFFICE);
     playsAtRegisteredOffice(page);
     buttonNamed(page, 'Créer le club').click();
   }
@@ -103,6 +104,40 @@ describe('CreateClub', () => {
 
     expect(fieldInGroup(page, 'Siège social', 'Localité').value).toBe('ORLEANS');
     expect(fieldInGroup(page, 'Salle de jeu', 'Localité').value).toBe('ORLEANS');
+  });
+
+  async function flushTownsOfCommune(communeCode: string, towns: { name: string; postcodes: string[] }[]): Promise<void> {
+    server.expectOne(request => request.url === '/towns' && request.params.get('commune') === communeCode).flush(towns);
+    await fixture.whenStable();
+  }
+
+  it('replaces the postcode chosen for the previous commune when another commune is chosen', async () => {
+    fill(fieldLabelled(page, 'Code du comité'), '45');
+    await chooseCommune('Orl', 'Orléans');
+    await flushTownsOfCommune('45234', [{ name: 'ORLEANS', postcodes: ['45000', '45100'] }]);
+    fill(fieldInGroup(page, 'Siège social', 'Code postal'), '45000');
+    for (const request of server.match(request => request.url === '/towns')) request.flush(['ORLEANS']);
+    await fixture.whenStable();
+
+    await chooseCommune('Oli', 'Olivet');
+    await flushTownsOfCommune('45232', [{ name: 'OLIVET', postcodes: ['45160'] }]);
+
+    expect(fieldInGroup(page, 'Siège social', 'Code postal').value).toBe('45160');
+    expect(fieldInGroup(page, 'Siège social', 'Localité').value).toBe('OLIVET');
+  });
+
+  it('forgets the town and the postcode of the addresses as soon as the commune is changed', async () => {
+    fill(fieldLabelled(page, 'Code du comité'), '45');
+    await chooseCommune('Oli', 'Olivet');
+    await flushTownsOfCommune('45232', [{ name: 'OLIVET', postcodes: ['45160'] }]);
+
+    fill(fieldLabelled(page, 'Commune'), 'Orl');
+    await fixture.whenStable();
+
+    for (const group of ['Siège social', 'Salle de jeu']) {
+      expect(fieldInGroup(page, group, 'Localité').value).toBe('');
+      expect(fieldInGroup(page, group, 'Code postal').value).toBe('');
+    }
   });
 
   it('proposes no town when the towns of the chosen commune cannot be found', async () => {
