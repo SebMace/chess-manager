@@ -25,6 +25,7 @@ public class JdbcClubCalendar implements ClubCalendar {
 
     @Override
     public void defineOpeningHours(ClubId club, Set<Session> sessions) {
+        jdbc.sql("DELETE FROM club_session WHERE club_id = :club").param("club", club.clubId()).update();
         sessions.forEach(session -> insert(club, session));
     }
 
