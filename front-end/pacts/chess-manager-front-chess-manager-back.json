@@ -1,0 +1,269 @@
+{
+  "consumer": {
+    "name": "chess-manager-front"
+  },
+  "interactions": [
+    {
+      "description": "a request for the clubs of a committee",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "the committee 45 has the club G45100"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/api/clubs",
+        "query": {
+          "committee": [
+            "45"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "content": [
+            {
+              "commune": "Montargis",
+              "ffeClubId": "G45100",
+              "id": "6f1c1c7e-3c1a-4b0e-9d4e-2b7a5f0c8a11",
+              "name": "Echiquier du Gâtinais"
+            }
+          ],
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$[*].id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request for the communes of a committee",
+      "pending": false,
+      "request": {
+        "method": "GET",
+        "path": "/api/communes",
+        "query": {
+          "committee": [
+            "45"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "content": [
+            {
+              "code": "45232",
+              "name": "Olivet"
+            }
+          ],
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "the creation of a club",
+      "pending": false,
+      "request": {
+        "body": {
+          "content": {
+            "committeeCode": "45",
+            "communeCode": "45208",
+            "ffeClubId": "G45201",
+            "name": "Échiquier de Montargis",
+            "playingVenue": {
+              "postcode": "45200",
+              "street": "5 rue du Roi",
+              "town": "Montargis"
+            },
+            "registeredOffice": {
+              "postcode": "45200",
+              "street": "12 rue des Échecs",
+              "town": "Montargis"
+            }
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "method": "POST",
+        "path": "/api/clubs"
+      },
+      "response": {
+        "status": 201
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "the creation of a club with an FFE identifier already used",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "a club already uses the FFE identifier G45200"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "committeeCode": "45",
+            "communeCode": "45208",
+            "ffeClubId": "G45200",
+            "name": "Échiquier de Montargis",
+            "playingVenue": {
+              "postcode": "45200",
+              "street": "5 rue du Roi",
+              "town": "Montargis"
+            },
+            "registeredOffice": {
+              "postcode": "45200",
+              "street": "12 rue des Échecs",
+              "town": "Montargis"
+            }
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "method": "POST",
+        "path": "/api/clubs"
+      },
+      "response": {
+        "status": 409
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "the definition of the opening hours of a club",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "the club G45300 is managed by the application"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": [
+            {
+              "activity": "Jeu libre",
+              "day": "FRIDAY",
+              "from": "20:00",
+              "to": "22:00",
+              "venue": null
+            },
+            {
+              "activity": null,
+              "day": "SATURDAY",
+              "from": "15:00",
+              "to": "17:00",
+              "venue": {
+                "postcode": "45200",
+                "street": "1 place du Marché",
+                "town": "Montargis"
+              }
+            }
+          ],
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "generators": {
+          "path": {
+            "expression": "/api/clubs/${clubId}/opening-hours",
+            "type": "ProviderState"
+          }
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "path": {
+            "combine": "AND",
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          }
+        },
+        "method": "PUT",
+        "path": "/api/clubs/0b6e3d52-7a4f-4c1e-8f2a-9d3c5e7b1a24/opening-hours"
+      },
+      "response": {
+        "status": 204
+      },
+      "type": "Synchronous/HTTP"
+    }
+  ],
+  "metadata": {
+    "pact-js": {
+      "version": "17.1.4"
+    },
+    "pactRust": {
+      "ffi": "0.5.8",
+      "models": "1.3.16"
+    },
+    "pactSpecification": {
+      "version": "4.0"
+    }
+  },
+  "provider": {
+    "name": "chess-manager-back"
+  }
+}

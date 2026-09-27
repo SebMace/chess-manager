@@ -287,6 +287,38 @@ npm test -- --watch=false
 npm run build
 ```
 
+## Contract tests between the front-end and the back-end
+
+The front-end and the back-end are checked against a shared contract with
+[Pact](https://docs.pact.io/) (consumer-driven: the front-end states what it uses).
+
+- **Consumer side**: the specs of the HTTP adapters (`front-end/src/app/club-management/http/*.spec.ts`)
+  run the real adapter against the Pact mock server and record each interaction in
+  `front-end/pacts/chess-manager-front-chess-manager-back.json`. This file is committed.
+  These specs share `front-end/src/testing/front-end-contract.ts`, so that they all write to
+  the one contract the back-end verifies. Test files run one after the other
+  (`vitest-base.config.mts`): run in parallel, they would overwrite each other's interactions.
+- **Provider states**: an interaction can start from a business situation (`given(...)`), set up
+  by the matching `@State` method of `FrontEndContractTests` through the use cases, never
+  directly in the database. When the back-end generates a value the interaction needs, such as
+  the identifier of a club, the `@State` method returns it and the consumer spec refers to it
+  with `MatchersV3.fromProviderState`.
+- **Provider side**: `contract.FrontEndContractTests` starts the back-end (with PostgreSQL in
+  Testcontainers) and replays every recorded interaction against it; it runs with `mvn test`,
+  without Node.
+
+After changing an HTTP adapter or its spec, regenerate the contract from scratch (Pact merges
+interactions into an existing file, so a removed interaction would otherwise linger) and commit it:
+
+```sh
+cd front-end
+rm -rf pacts && npm test -- --watch=false
+```
+
+The CI regenerates the contract the same way and fails if it differs from the committed file.
+Pact's anonymous usage metrics are disabled (`PACT_DO_NOT_TRACK`, `pact_do_not_track`), as is
+the install-time analytics of its Scarf dependency (`scarfSettings` in `package.json`).
+
 ## Personal identity and FFE licenses
 
 Personal equality depends on `PersonId`, not names. A person can exist without a
@@ -330,7 +362,7 @@ infrastructure/            Spring Boot application, explicit wiring, development
 
 The domain model and the ports stay shared: an aggregate has one model, never one per
 slice. Unit tests live in the package of what they test; the in-memory fakes live beside
-the ports. Acceptance, architecture, end-to-end and infrastructure tests are
+the ports. Acceptance, architecture, contract, end-to-end and infrastructure tests are
 cross-cutting. ArchUnit enforces these boundaries (see below).
 
 ## Acceptance specifications and Cucumber

@@ -108,8 +108,23 @@ jobs:
       - name: Install dependencies from the lockfile
         run: npm ci
 
-      - name: Run the component tests
-        run: npm test -- --watch=false
+      # Pact merges interactions into an existing pact file, so a removed interaction would
+      # linger: the contract is regenerated from scratch, then compared with the committed one.
+      - name: Run the component and contract tests
+        run: |
+          rm -rf pacts
+          npm test -- --watch=false
+        env:
+          PACT_DO_NOT_TRACK: 'true'
+
+      - name: Check that the committed contract matches the front-end
+        run: |
+          if [ -n "$(git status --porcelain -- pacts)" ]; then
+            git status --short -- pacts
+            git diff -- pacts
+            echo "::error::front-end/pacts is out of date: run 'rm -rf pacts && npm test -- --watch=false' in front-end and commit the result."
+            exit 1
+          fi
 
       - name: Build the application
         run: npm run build

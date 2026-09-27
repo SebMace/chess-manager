@@ -24,9 +24,13 @@
     "@angular/build": "^22.2.0",
     "@angular/cli": "^22.2.0",
     "@angular/compiler-cli": "^22.2.0",
+    "@pact-foundation/pact": "^17.1.4",
     "jsdom": "^30.0.0",
     "prettier": "^3.8.1",
     "typescript": "~6.0.2",
     "vitest": "^5.0.0"
+  },
+  "scarfSettings": {
+    "enabled": false
   }
 }
