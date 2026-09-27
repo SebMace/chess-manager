@@ -1,4 +1,6 @@
-import { Component, effect, inject, input, model, signal, untracked } from '@angular/core';
+import { Component, DestroyRef, WritableSignal, computed, effect, inject, input, signal, untracked } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { catchError, filter, of } from 'rxjs';
 import { AddressProblem, PostalAddress, isPostcode } from './postal-address';
 import { DeliveryTown, Towns } from '../ports/towns';
 
@@ -18,7 +20,7 @@ import { DeliveryTown, Towns } from '../ports/towns';
         aria-required="true"
         [attr.autocomplete]="'section-' + id + ' address-line1'"
         placeholder="ex. 12 rue des Échecs"
-        [value]="address().street"
+        [value]="given().street"
         [attr.aria-invalid]="problems().has('missingStreet') || null"
         [attr.aria-describedby]="problems().has('missingStreet') ? id + '-street-error' : null"
         (input)="describe({ street: street.value })"
@@ -37,7 +39,7 @@ import { DeliveryTown, Towns } from '../ports/towns';
         inputmode="numeric"
         [attr.list]="id + '-postcodes'"
         placeholder="ex. 45000"
-        [value]="address().postcode"
+        [value]="given().postcode"
         [attr.aria-invalid]="problems().has('missingPostcode') || problems().has('malformedPostcode') || null"
         [attr.aria-describedby]="problems().has('missingPostcode') || problems().has('malformedPostcode') ? id + '-postcode-error' : null"
         (input)="typePostcode(postcode.value)"
@@ -62,7 +64,7 @@ import { DeliveryTown, Towns } from '../ports/towns';
         [attr.autocomplete]="'section-' + id + ' address-level2'"
         [attr.list]="id + '-towns'"
         placeholder="ex. Orléans"
-        [value]="address().town"
+        [value]="given().town"
         [attr.aria-invalid]="problems().has('missingTown') || null"
         [attr.aria-describedby]="problems().has('missingTown') ? id + '-town-error' : null"
         (input)="typeTown(town.value)"
@@ -82,14 +84,29 @@ import { DeliveryTown, Towns } from '../ports/towns';
 export class PostalAddressFields {
   /** Makes the ids of the fields unique when a form holds several addresses. */
   readonly idPrefix = input.required<string>();
-  readonly address = model.required<PostalAddress>();
+  /**
+   * The address, owned by the enclosing form: the fields read and change it in place, so that a late
+   * answer always meets the address as it is, even before the fields are refreshed.
+   */
+  readonly address = input.required<WritableSignal<PostalAddress>>();
+  protected readonly given = computed(() => this.address()());
   readonly problems = input<ReadonlySet<AddressProblem>>(new Set());
   /** The town of the commune of the club, proposed until the administrator gives another. */
   readonly defaultTown = input<DeliveryTown | null>(null);
 
   private readonly towns = inject(Towns);
-  protected readonly servedTowns = signal<readonly string[]>([]);
-  protected readonly servingPostcodes = signal<readonly string[]>([]);
+  private readonly destroyRef = inject(DestroyRef);
+  // A suggestion only helps with the address as it is: it fades once what it was found for changes.
+  private readonly townsFound = signal<{ postcode: string; towns: readonly string[] }>({ postcode: '', towns: [] });
+  protected readonly servedTowns = computed(() => {
+    const found = this.townsFound();
+    return found.postcode === this.given().postcode ? found.towns : [];
+  });
+  private readonly postcodesFound = signal<{ town: string; postcodes: readonly string[] }>({ town: '', postcodes: [] });
+  protected readonly servingPostcodes = computed(() => {
+    const found = this.postcodesFound();
+    return found.town === this.given().town ? found.postcodes : [];
+  });
   // What the commune last proposed: the administrator has not changed it while the address still holds it.
   private proposed = { town: '', postcode: '' };
 
@@ -102,41 +119,46 @@ export class PostalAddressFields {
   }
 
   private propose(town: DeliveryTown): void {
-    const given = this.address();
+    const given = this.given();
     const proposed = { town: town.name, postcode: town.postcodes.length === 1 ? town.postcodes[0] : '' };
     if (!given.town || given.town === this.proposed.town) this.describe({ town: proposed.town });
     if (!given.postcode || given.postcode === this.proposed.postcode) this.describe({ postcode: proposed.postcode });
-    this.servingPostcodes.set(town.postcodes);
+    this.postcodesFound.set({ town: this.given().town, postcodes: town.postcodes });
     this.proposed = proposed;
   }
 
   protected typePostcode(postcode: string): void {
     this.describe({ postcode });
     if (!isPostcode(postcode)) return;
-    this.towns.ofPostcode(postcode).subscribe({
-      next: towns => {
-        this.servedTowns.set(towns);
-        if (towns.length === 1) this.describe({ town: towns[0] });
-      },
+    const town = this.given().town;
+    this.towns.ofPostcode(postcode).pipe(
       // The towns are only a help: without them, the administrator still types the town freely.
-      error: () => this.servedTowns.set([]),
+      catchError(() => of([])),
+      // Only the towns of the postcode still given are of any help.
+      filter(() => this.given().postcode === postcode),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(towns => {
+      this.townsFound.set({ postcode, towns });
+      if (towns.length === 1 && this.given().town === town) this.describe({ town: towns[0] });
     });
   }
 
   protected typeTown(town: string): void {
     this.describe({ town });
     if (!town.trim()) return;
-    this.towns.postcodesOf(town).subscribe({
-      next: postcodes => {
-        this.servingPostcodes.set(postcodes);
-        if (postcodes.length === 1 && !this.address().postcode) this.describe({ postcode: postcodes[0] });
-      },
+    this.towns.postcodesOf(town).pipe(
       // The postcodes are only a help: without them, the administrator still types the postcode freely.
-      error: () => this.servingPostcodes.set([]),
+      catchError(() => of([])),
+      // Only the postcodes of the town still given are of any help.
+      filter(() => this.given().town === town),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(postcodes => {
+      this.postcodesFound.set({ town, postcodes });
+      if (postcodes.length === 1 && !this.given().postcode) this.describe({ postcode: postcodes[0] });
     });
   }
 
   protected describe(part: Partial<PostalAddress>): void {
-    this.address.update(address => ({ ...address, ...part }));
+    this.address().update(address => ({ ...address, ...part }));
   }
 }

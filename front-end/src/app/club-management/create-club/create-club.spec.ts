@@ -140,6 +140,109 @@ describe('CreateClub', () => {
     }
   });
 
+  it('proposes no town when the commune is no longer chosen by the time its towns are found', async () => {
+    fill(fieldLabelled(page, 'Code du comité'), '45');
+    await chooseCommune('Orl', 'Orléans');
+
+    fill(fieldLabelled(page, 'Commune'), 'Ol');
+    await flushTownsOfCommune('45234', [{ name: 'ORLEANS', postcodes: ['45000', '45100'] }]);
+
+    expect(fieldInGroup(page, 'Siège social', 'Localité').value).toBe('');
+    expect(fieldInGroup(page, 'Salle de jeu', 'Localité').value).toBe('');
+  });
+
+  it('proposes the town of the latest commune chosen when the towns of a previous one arrive late', async () => {
+    fill(fieldLabelled(page, 'Code du comité'), '45');
+    await chooseCommune('Orl', 'Orléans');
+    await chooseCommune('Oli', 'Olivet');
+
+    await flushTownsOfCommune('45232', [{ name: 'OLIVET', postcodes: ['45160'] }]);
+    await flushTownsOfCommune('45234', [{ name: 'ORLEANS', postcodes: ['45000', '45100'] }]);
+
+    expect(fieldInGroup(page, 'Siège social', 'Localité').value).toBe('OLIVET');
+    expect(fieldInGroup(page, 'Siège social', 'Code postal').value).toBe('45160');
+  });
+
+  it('keeps proposing the town of the latest commune chosen when the search for a previous one fails', async () => {
+    fill(fieldLabelled(page, 'Code du comité'), '45');
+    playsAtRegisteredOffice(page);
+    await chooseCommune('Orl', 'Orléans');
+    await chooseCommune('Oli', 'Olivet');
+    await flushTownsOfCommune('45232', [{ name: 'OLIVET', postcodes: ['45160'] }]);
+    server.expectOne(request => request.url === '/api/towns' && request.params.get('commune') === '45234')
+      .flush(null, { status: 500, statusText: 'Internal Server Error' });
+
+    fieldLabelled(page, 'La salle de jeu est au siège social').click();
+    await fixture.whenStable();
+
+    expect(fieldInGroup(page, 'Salle de jeu', 'Localité').value).toBe('OLIVET');
+  });
+
+  it('gives up the towns of the postcode typed for the previous commune once the commune is changed', async () => {
+    fill(fieldLabelled(page, 'Code du comité'), '45');
+    await chooseCommune('Orl', 'Orléans');
+    await flushTownsOfCommune('45234', []);
+    fill(fieldInGroup(page, 'Siège social', 'Code postal'), '45100');
+
+    fill(fieldLabelled(page, 'Commune'), 'Ol');
+    await fixture.whenStable();
+    server.expectOne(request => request.url === '/api/towns' && request.params.get('postcode') === '45100').flush(['ORLEANS']);
+    await fixture.whenStable();
+
+    expect(fieldInGroup(page, 'Siège social', 'Localité').value).toBe('');
+  });
+
+  it('gives up the towns of the postcode typed for the previous commune even when they arrive before the screen is refreshed', async () => {
+    fill(fieldLabelled(page, 'Code du comité'), '45');
+    await chooseCommune('Orl', 'Orléans');
+    await flushTownsOfCommune('45234', []);
+    fill(fieldInGroup(page, 'Siège social', 'Code postal'), '45100');
+    await fixture.whenStable();
+
+    fill(fieldLabelled(page, 'Commune'), 'Ol');
+    server.expectOne(request => request.url === '/api/towns' && request.params.get('postcode') === '45100').flush(['ORLEANS']);
+    await fixture.whenStable();
+
+    expect(fieldInGroup(page, 'Siège social', 'Code postal').value).toBe('');
+    expect(fieldInGroup(page, 'Siège social', 'Localité').value).toBe('');
+  });
+
+  it('no longer suggests the postcodes of the town of the commune once the commune is changed', async () => {
+    fill(fieldLabelled(page, 'Code du comité'), '45');
+    await chooseCommune('Orl', 'Orléans');
+    await flushTownsOfCommune('45234', [{ name: 'ORLEANS', postcodes: ['45000', '45100'] }]);
+
+    fill(fieldLabelled(page, 'Commune'), 'Ol');
+    await fixture.whenStable();
+
+    expect(suggestionsFor(page, fieldInGroup(page, 'Siège social', 'Code postal'))).toEqual([]);
+  });
+
+  it('no longer suggests the towns of the postcode typed for the previous commune once the commune is changed', async () => {
+    fill(fieldLabelled(page, 'Code du comité'), '45');
+    await chooseCommune('Orl', 'Orléans');
+    await flushTownsOfCommune('45234', []);
+    fill(fieldInGroup(page, 'Siège social', 'Code postal'), '45240');
+    server.expectOne(request => request.url === '/api/towns' && request.params.get('postcode') === '45240')
+      .flush(['LA FERTE ST AUBIN', 'LIGNY LE RIBAULT', 'SENNELY']);
+    await fixture.whenStable();
+
+    fill(fieldLabelled(page, 'Commune'), 'Ol');
+    await fixture.whenStable();
+
+    expect(suggestionsFor(page, fieldInGroup(page, 'Siège social', 'Localité'))).toEqual([]);
+  });
+
+  it('stops looking for the towns of the chosen commune once the form is no longer shown', async () => {
+    fill(fieldLabelled(page, 'Code du comité'), '45');
+    await chooseCommune('Orl', 'Orléans');
+
+    fixture.destroy();
+
+    expect(server.expectOne(request => request.url === '/api/towns' && request.params.get('commune') === '45234').cancelled)
+      .toBe(true);
+  });
+
   it('proposes no town when the towns of the chosen commune cannot be found', async () => {
     fill(fieldLabelled(page, 'Code du comité'), '45');
     await chooseCommune('Orl', 'Orléans');
@@ -398,6 +501,12 @@ function fill(field: HTMLInputElement, value: string): void {
 function playsAtRegisteredOffice(page: HTMLElement): void {
   const atRegisteredOffice = fieldLabelled(page, 'La salle de jeu est au siège social');
   if (!atRegisteredOffice.checked) atRegisteredOffice.click();
+}
+
+function suggestionsFor(page: HTMLElement, field: HTMLInputElement): string[] {
+  const list = field.getAttribute('list');
+  if (!list) return [];
+  return Array.from(page.querySelectorAll<HTMLOptionElement>(`datalist[id="${list}"] option`)).map(option => option.value);
 }
 
 function fieldInGroup(page: HTMLElement, group: string, text: string): HTMLInputElement {

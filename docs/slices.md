@@ -45,6 +45,18 @@ Les règles des horaires d'ouverture (sessions, activités, lieu, remplacement) 
 le README. Club Management enregistre lui-même les sessions derrière son port `ClubCalendar` :
 Craft Calendar sera extrait quand un exemple réclamera un vrai comportement de calendrier.
 
+Durcissement de l'aide à la saisie des adresses (*Find the towns of a postcode*, *Find the
+postcodes of a town*, *Find the towns of a commune*), sans nouvelle capacité :
+
+- une recherche ne sert que si la saisie qui l'a lancée est toujours celle de l'adresse : une
+  réponse tardive pour un code postal, une localité ou une commune remplacés, effacés ou
+  désélectionnés entre-temps ne change plus l'adresse ni ses suggestions, même quand elle échoue ;
+- une suggestion disparaît dès que change ce pour quoi elle a été trouvée, que l'administrateur
+  l'ait modifié ou que le changement de commune l'ait remis à blanc ;
+- une localité unique ne remplace plus une localité que l'administrateur a saisie pendant la
+  recherche ;
+- les recherches en cours sont abandonnées quand l'adresse ou le formulaire ne sont plus affichés.
+
 ## Slices à venir
 
 On finalise d'abord la création d'un club ; les slices sur les joueurs viendront plus tard.

@@ -1,6 +1,7 @@
+import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, TestRequest, provideHttpClientTesting } from '@angular/common/http/testing';
 import { PostalAddressFields } from './postal-address-fields';
 import { NO_ADDRESS } from './postal-address';
 import { DeliveryTown, Towns } from '../ports/towns';
@@ -17,7 +18,7 @@ describe('PostalAddressFields', () => {
     });
     fixture = TestBed.createComponent(PostalAddressFields);
     fixture.componentRef.setInput('idPrefix', 'office');
-    fixture.componentRef.setInput('address', NO_ADDRESS);
+    fixture.componentRef.setInput('address', signal(NO_ADDRESS));
     server = TestBed.inject(HttpTestingController);
     page = fixture.nativeElement as HTMLElement;
     await fixture.whenStable();
@@ -148,6 +149,155 @@ describe('PostalAddressFields', () => {
     await fixture.whenStable();
 
     server.expectNone(request => request.url === '/api/towns');
+  });
+
+  function townsSought(postcode: string): TestRequest {
+    return server.expectOne(request => request.url === '/api/towns' && request.params.get('postcode') === postcode);
+  }
+
+  it('keeps the town of the latest postcode when the towns of a previous one arrive late', async () => {
+    fill(fieldLabelled(page, 'Code postal'), '45000');
+    fill(fieldLabelled(page, 'Code postal'), '45160');
+
+    townsSought('45160').flush(['OLIVET']);
+    townsSought('45000').flush(['ORLEANS']);
+    await fixture.whenStable();
+
+    const town = fieldLabelled(page, 'Localité');
+    expect(town.value).toBe('OLIVET');
+    expect(suggestionsFor(page, town)).toEqual(['OLIVET']);
+  });
+
+  it('gives up the towns of a postcode as soon as another one is being typed', async () => {
+    fill(fieldLabelled(page, 'Code postal'), '45000');
+    fill(fieldLabelled(page, 'Code postal'), '4516');
+
+    townsSought('45000').flush(['ORLEANS']);
+    await fixture.whenStable();
+
+    const town = fieldLabelled(page, 'Localité');
+    expect(town.value).toBe('');
+    expect(suggestionsFor(page, town)).toEqual([]);
+  });
+
+  it('no longer suggests the towns of a postcode once it is changed', async () => {
+    await typePostcode('45240', ['LA FERTE ST AUBIN', 'LIGNY LE RIBAULT', 'SENNELY']);
+
+    fill(fieldLabelled(page, 'Code postal'), '4524');
+    await fixture.whenStable();
+
+    expect(suggestionsFor(page, fieldLabelled(page, 'Localité'))).toEqual([]);
+  });
+
+  it('keeps suggesting the towns of the latest postcode when the search for a previous one fails', async () => {
+    fill(fieldLabelled(page, 'Code postal'), '45000');
+    fill(fieldLabelled(page, 'Code postal'), '45240');
+
+    townsSought('45240').flush(['LA FERTE ST AUBIN', 'LIGNY LE RIBAULT', 'SENNELY']);
+    townsSought('45000').flush(null, { status: 500, statusText: 'Internal Server Error' });
+    await fixture.whenStable();
+
+    expect(suggestionsFor(page, fieldLabelled(page, 'Localité'))).toEqual(['LA FERTE ST AUBIN', 'LIGNY LE RIBAULT', 'SENNELY']);
+  });
+
+  it('keeps the town the administrator typed while the towns of the postcode were being looked for', async () => {
+    fill(fieldLabelled(page, 'Code postal'), '45000');
+    await typeTown('Orléans', ['45000', '45100']);
+
+    townsSought('45000').flush(['ORLEANS']);
+    await fixture.whenStable();
+
+    expect(fieldLabelled(page, 'Localité').value).toBe('Orléans');
+  });
+
+  function postcodesSought(town: string): TestRequest {
+    return server.expectOne(request => request.url === '/api/postcodes' && request.params.get('town') === town);
+  }
+
+  it('suggests the postcodes of the latest town when those of a previous one arrive late', async () => {
+    fill(fieldLabelled(page, 'Localité'), 'Orléans');
+    fill(fieldLabelled(page, 'Localité'), 'Olivet');
+
+    postcodesSought('Olivet').flush(['45160', '53410']);
+    postcodesSought('Orléans').flush(['45000', '45100']);
+    await fixture.whenStable();
+
+    expect(suggestionsFor(page, fieldLabelled(page, 'Code postal'))).toEqual(['45160', '53410']);
+  });
+
+  it('gives up the postcodes of a town as soon as it is erased', async () => {
+    fill(fieldLabelled(page, 'Localité'), 'Saint-Jean-de-Braye');
+    fill(fieldLabelled(page, 'Localité'), '');
+
+    postcodesSought('Saint-Jean-de-Braye').flush(['45800']);
+    await fixture.whenStable();
+
+    expect(fieldLabelled(page, 'Code postal').value).toBe('');
+  });
+
+  it('no longer suggests the postcodes of a town once it is changed', async () => {
+    await typeTown('Orléans', ['45000', '45100']);
+
+    fill(fieldLabelled(page, 'Localité'), '');
+    await fixture.whenStable();
+
+    expect(suggestionsFor(page, fieldLabelled(page, 'Code postal'))).toEqual([]);
+  });
+
+  it('keeps suggesting the postcodes of the latest town when the search for a previous one fails', async () => {
+    fill(fieldLabelled(page, 'Localité'), 'Orléans');
+    fill(fieldLabelled(page, 'Localité'), 'Olivet');
+
+    postcodesSought('Olivet').flush(['45160', '53410']);
+    postcodesSought('Orléans').flush(null, { status: 500, statusText: 'Internal Server Error' });
+    await fixture.whenStable();
+
+    expect(suggestionsFor(page, fieldLabelled(page, 'Code postal'))).toEqual(['45160', '53410']);
+  });
+
+  it('keeps the town typed meanwhile when the first search for a postcode typed again arrives', async () => {
+    fill(fieldLabelled(page, 'Code postal'), '45000');
+    fill(fieldLabelled(page, 'Code postal'), '45160');
+    fill(fieldLabelled(page, 'Code postal'), '45000');
+    fill(fieldLabelled(page, 'Localité'), 'Orléans');
+    const [first, again] = server.match(request => request.url === '/api/towns' && request.params.get('postcode') === '45000');
+
+    first.flush(['ORLEANS']);
+    townsSought('45160').flush(['OLIVET']);
+    again.flush(['ORLEANS']);
+    await fixture.whenStable();
+
+    const town = fieldLabelled(page, 'Localité');
+    expect(town.value).toBe('Orléans');
+    expect(suggestionsFor(page, town)).toEqual(['ORLEANS']);
+    expect(fieldLabelled(page, 'Code postal').value).toBe('45000');
+  });
+
+  it('suggests no postcode of a town replaced by the town of the postcode in the meantime', async () => {
+    fill(fieldLabelled(page, 'Localité'), 'Olivet');
+    await typePostcode('45000', ['ORLEANS']);
+
+    postcodesSought('Olivet').flush(['45160', '53410']);
+    await fixture.whenStable();
+
+    expect(fieldLabelled(page, 'Localité').value).toBe('ORLEANS');
+    expect(suggestionsFor(page, fieldLabelled(page, 'Code postal'))).toEqual([]);
+  });
+
+  it('stops looking for the towns of the postcode once the address is no longer shown', () => {
+    fill(fieldLabelled(page, 'Code postal'), '45000');
+
+    fixture.destroy();
+
+    expect(townsSought('45000').cancelled).toBe(true);
+  });
+
+  it('stops looking for the postcodes of the town once the address is no longer shown', () => {
+    fill(fieldLabelled(page, 'Localité'), 'Orléans');
+
+    fixture.destroy();
+
+    expect(postcodesSought('Orléans').cancelled).toBe(true);
   });
 });
 
