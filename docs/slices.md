@@ -39,15 +39,26 @@ On finalise d'abord la création d'un club ; les slices sur les joueurs viendron
 
 | Slice | Package | Statut | Dépend de |
 |---|---|---|---|
-| Define the opening hours of a club | `defineopeninghours` | à venir | Create a club |
+| Define the opening hours of a club | `defineopeninghours` | prochaine | Create a club |
 | Move the registered office of a club | `moveregisteredoffice` | à venir | Create a club |
 
-- *Define the opening hours of a club* s'appuiera sur le bounded context Craft Calendar (voir
-  les thèmes). Le terme métier (« horaires d'ouverture », « séances de jeu », « tranches
-  horaires ») reste à confirmer.
-- La prochaine slice reste à choisir entre les deux.
 - Évolutions prévues de *Create a club* : revenir à la liste après la création, pré-remplir le
   comité à partir du département consulté.
+
+### Define the opening hours of a club
+
+- **Intention** : l'administrateur définit les horaires d'ouverture d'un club, par exemple « le
+  club ouvre chaque vendredi de 15:00 à 17:00 ».
+- **Décisions** :
+  - le terme métier est *opening hours* (horaires d'ouverture du club), pas les séances de jeu ;
+  - les horaires s'appuient sur le bounded context Craft Calendar. Craft Calendar est en amont
+    (Open Host Service et Published Language) ; Club Management est en aval et traduit dans une
+    couche anticorruption. Le club ne connaît aucune classe de Craft Calendar ;
+  - les concepts de Craft Calendar émergent des tests de cette slice, sans conception préalable.
+- **Reporté** : activités, lieux, saisons, vacances scolaires, abonnement depuis un agenda
+  externe.
+- **Questions ouvertes** : refuser un club non géré par l'application ? Une plage peut-elle
+  franchir minuit ? Définir des horaires ajoute-t-il une plage ou remplace-t-il les précédentes ?
 
 ## Thèmes, à découper le moment venu
 
