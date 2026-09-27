@@ -1,4 +1,6 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { catchError, filter, of } from 'rxjs';
 import { Clubs, FfeClubIdAlreadyUsed, NewClub } from '../ports/clubs';
 import { Commune, Communes } from '../ports/communes';
 import { DeliveryTown, Towns } from '../ports/towns';
@@ -117,7 +119,7 @@ type CreationOutcome =
           <div class="fields">
             <app-postal-address-fields
               idPrefix="office"
-              [(address)]="registeredOffice"
+              [address]="registeredOffice"
               [problems]="officeProblems()"
               [defaultTown]="townOfCommune()"
             />
@@ -139,7 +141,7 @@ type CreationOutcome =
             @if (!venueAtOffice()) {
               <app-postal-address-fields
                 idPrefix="venue"
-                [(address)]="venue"
+                [address]="venue"
                 [problems]="venueProblems()"
                 [defaultTown]="townOfCommune()"
               />
@@ -180,6 +182,7 @@ export class CreateClub {
   private readonly typedCommune = signal('');
   protected readonly chosenCommune = signal<Commune | null>(null);
   private readonly towns = inject(Towns);
+  private readonly destroyRef = inject(DestroyRef);
   // A commune served under several towns proposes none of them: the administrator chooses.
   protected readonly townOfCommune = signal<DeliveryTown | null>(null);
   protected readonly activeCommune = signal(-1);
@@ -206,11 +209,13 @@ export class CreateClub {
 
   protected chooseCommune(commune: Commune, field: HTMLInputElement): void {
     this.chosenCommune.set(commune);
-    this.towns.ofCommune(commune.code).subscribe({
-      next: towns => this.townOfCommune.set(towns.length === 1 ? towns[0] : null),
+    this.towns.ofCommune(commune.code).pipe(
       // The town is only a help: without it, the administrator still types the addresses freely.
-      error: () => this.townOfCommune.set(null),
-    });
+      catchError(() => of([])),
+      // Only the town of the commune still chosen is of any help.
+      filter(() => this.chosenCommune() === commune),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(towns => this.townOfCommune.set(towns.length === 1 ? towns[0] : null));
     this.typedCommune.set('');
     this.activeCommune.set(-1);
     field.value = commune.name;
