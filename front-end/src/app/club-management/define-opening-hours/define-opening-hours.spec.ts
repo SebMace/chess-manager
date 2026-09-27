@@ -6,7 +6,7 @@ import { DefineOpeningHours } from './define-opening-hours';
 import { OpeningHours } from '../ports/opening-hours';
 import { HttpOpeningHours } from '../http/http-opening-hours';
 
-const OPENING_HOURS = '/clubs/club-1/opening-hours';
+const OPENING_HOURS = '/api/clubs/club-1/opening-hours';
 
 describe('DefineOpeningHours', () => {
   let fixture: ComponentFixture<DefineOpeningHours>;

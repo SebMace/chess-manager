@@ -31,7 +31,7 @@ describe('ClubsOfCommittee', () => {
     buttonNamed(page, 'Afficher les clubs').click();
     server
       .expectOne(
-        (request) => request.url === '/clubs' && request.params.get('committee') === committeeCode,
+        (request) => request.url === '/api/clubs' && request.params.get('committee') === committeeCode,
       )
       .flush(clubs);
     await fixture.whenStable();

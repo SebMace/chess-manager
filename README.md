@@ -171,7 +171,7 @@ persisted state. Removing `save()` was checked to make the membership test fail.
 Creating a club is the first use case wired end to end, from HTTP to PostgreSQL:
 
 ```
-POST /clubs {"name": "Montargis"}  →  201 Created, Location: /clubs/<id>
+POST /api/clubs {"name": "Montargis"}  →  201 Created, Location: /api/clubs/<id>
 ```
 
 | Package | Role |
@@ -211,7 +211,7 @@ is therefore lost at the next start. Real club names and FFE identifiers are FFE
 must not be committed. No other profile creates or deletes data.
 
 ```sh
-curl -i -X POST localhost:8080/clubs -H 'Content-Type: application/json' -d '{
+curl -i -X POST localhost:8080/api/clubs -H 'Content-Type: application/json' -d '{
   "name": "Échiquier de Montargis", "committeeCode": "45", "ffeClubId": "DEMO04", "communeCode": "45208",
   "registeredOffice": {"street": "1 rue du Marché", "postcode": "45200", "town": "Montargis"},
   "playingVenue": {"street": "1 rue du Marché", "postcode": "45200", "town": "Montargis"}}'
@@ -234,7 +234,7 @@ administrator creates a club and is told whether the club has been created. It n
 | `src/app/club-management/ports/communes.ts` | `Communes` port: the communes of a departmental committee. |
 | `src/app/club-management/http/http-clubs.ts` | `HttpClubs` adapter: implements `Clubs` over the REST API. |
 | `src/app/club-management/http/http-communes.ts` | `HttpCommunes` adapter: implements `Communes` over the REST API. |
-| `src/app/app.routes.ts` | The clubs of a committee at `/`, the creation of a club at `/clubs/new`. |
+| `src/app/app.routes.ts` | The clubs of a committee at `/`, the creation of a club at `/clubs/new`, the opening hours of a club at `/clubs/<id>/opening-hours`. |
 | `src/app/app.config.ts` | Provides the router and wires `Clubs` to `HttpClubs` and `Communes` to `HttpCommunes`. |
 
 As in the back-end, each slice has its own folder named after its use case (`create-club`);
@@ -250,9 +250,11 @@ npm ci
 npm start
 ```
 
-Open <http://localhost:4200>. During development, `proxy.conf.json` forwards `/clubs`
+Open <http://localhost:4200>. During development, `proxy.conf.json` forwards `/api`
 to the back-end on port 8080, so the browser only talks to port 4200 and the back-end
-needs no CORS configuration.
+needs no CORS configuration. Every REST controller is served under `/api`
+(`infrastructure.WebConfiguration`), so the paths of the API never collide with the paths of the
+screens: reloading `/clubs/new` shows the screen instead of calling the API.
 
 Component tests use Vitest with jsdom (no browser); the server is simulated with
 Angular's `HttpTestingController`:
