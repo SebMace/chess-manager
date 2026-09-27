@@ -221,7 +221,8 @@ Work is planned and delivered as vertical slices. The ordered backlog of slices 
 `docs/slices.md`; read it before proposing or starting any new behavior.
 
 - A slice is one observable business capability, delivered end to end: acceptance scenario, use
-  case, domain behavior, persistence, REST, and screen, each technical layer driven by its own test.
+  case, domain behavior, persistence, REST, contract, and screen, each technical layer driven by
+  its own test.
 - Choose the next slice from `docs/slices.md`. Do not start a behavior that is absent from it:
   propose adding it first, with its intention, dependencies, and open questions.
 - Order slices so that each one relies only on behaviors already built. A business precondition
@@ -298,11 +299,34 @@ Maintain complementary levels of confidence:
 - many fast domain unit tests for invariants and rules;
 - focused application tests for use-case orchestration;
 - integration or contract tests for database mappings and external adapters;
+- consumer-driven contract tests between the front-end and the back-end (see 8.4);
 - frontend unit/component tests for state and user interactions;
 - a small number of end-to-end tests for critical journeys.
 
 For existing untested behavior, first consider a characterization test or a narrow golden master.
 Do not freeze accidental behavior more broadly than necessary.
+
+### 8.4 Contract between the front-end and the back-end
+
+The front-end and the back-end agree on the HTTP API through a consumer-driven contract, checked
+with Pact (see the README):
+
+- every change that adds or modifies an interaction between the front-end and the back-end —
+  path, parameters, request or response body, response codes and how the front-end interprets
+  them — updates the contract in the same branch;
+- the front-end states what it uses: the spec of the HTTP adapter records the interaction, and
+  the committed pact file is regenerated from scratch (`rm -rf pacts && npm test -- --watch=false`);
+- the back-end verifies the contract in `contract.FrontEndContractTests`; a provider state sets up
+  its business situation through the use cases, never directly in the database, and is named in
+  the ubiquitous language;
+- a change on either side that breaks the contract is a breaking change of the API: fix the side
+  that drifted, or change both sides and the contract together, never the contract alone;
+- a change that alters no interaction, such as a domain rule behind an unchanged API or the
+  presentation of a screen, needs no contract change;
+- the contract records the shape the front-end relies on, not the business rules: those stay in
+  domain, application and acceptance tests.
+
+When an existing interaction is not yet in the contract, add it when a change touches it.
 
 ## 9. Domain-Driven Design
 
@@ -635,6 +659,8 @@ A change is complete only when:
 - dependency direction is preserved;
 - no unrelated files or behavior changed;
 - documentation is updated when a public contract or workflow changed;
+- the front-end/back-end contract is updated and verified on both sides when an interaction
+  between them changed;
 - remaining risks, assumptions, and unverified checks are disclosed.
 
 ## 21. Completion report
