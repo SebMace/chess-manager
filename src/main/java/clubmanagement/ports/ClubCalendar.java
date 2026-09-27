@@ -1,11 +1,11 @@
 package clubmanagement.ports;
 
 import clubmanagement.domain.club.vo.ClubId;
-import clubmanagement.domain.club.vo.OpeningHours;
+import clubmanagement.domain.club.vo.Session;
 
 import java.util.List;
 
 public interface ClubCalendar {
-    void defineOpeningHours(ClubId club, OpeningHours openingHours);
-    List<OpeningHours> openingHoursOf(ClubId club);
+    void defineOpeningHours(ClubId club, Session session);
+    List<Session> openingHoursOf(ClubId club);
 }

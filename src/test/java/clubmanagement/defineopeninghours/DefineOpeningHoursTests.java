@@ -1,7 +1,7 @@
 package clubmanagement.defineopeninghours;
 
 import clubmanagement.domain.club.vo.ClubId;
-import clubmanagement.domain.club.vo.OpeningHours;
+import clubmanagement.domain.club.vo.Session;
 import clubmanagement.ports.InMemoryClubCalendar;
 import org.junit.jupiter.api.Test;
 
@@ -19,7 +19,7 @@ class DefineOpeningHoursTests {
 
     @Test
     void should_open_the_club_during_the_opening_hours_defined_for_it() {
-        OpeningHours fridayAfternoon = new OpeningHours(DayOfWeek.FRIDAY, LocalTime.of(15, 0), LocalTime.of(17, 0));
+        Session fridayAfternoon = new Session(DayOfWeek.FRIDAY, LocalTime.of(15, 0), LocalTime.of(17, 0));
 
         defineOpeningHours.execute(CLUB, fridayAfternoon);
 

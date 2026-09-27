@@ -3,7 +3,7 @@ package acceptance.steps;
 import acceptance.support.CreatedClubs;
 import clubmanagement.defineopeninghours.DefineOpeningHours;
 import clubmanagement.domain.club.vo.ClubId;
-import clubmanagement.domain.club.vo.OpeningHours;
+import clubmanagement.domain.club.vo.Session;
 import clubmanagement.ports.InMemoryClubCalendar;
 import io.cucumber.java.ParameterType;
 import io.cucumber.java.en.Then;
@@ -33,12 +33,12 @@ public class DefineOpeningHoursSteps {
 
     @When("an administrator defines that {string} opens every {day} from {time} to {time}")
     public void defineOpeningHours(String club, DayOfWeek day, LocalTime from, LocalTime to) {
-        defineOpeningHours.execute(clubId(club), new OpeningHours(day, from, to));
+        defineOpeningHours.execute(clubId(club), new Session(day, from, to));
     }
 
     @Then("{string} opens every {day} from {time} to {time}")
     public void clubOpens(String club, DayOfWeek day, LocalTime from, LocalTime to) {
-        assertEquals(List.of(new OpeningHours(day, from, to)), clubCalendar.openingHoursOf(clubId(club)));
+        assertEquals(List.of(new Session(day, from, to)), clubCalendar.openingHoursOf(clubId(club)));
     }
 
     private ClubId clubId(String club) { return createdClubs.idOf(club).orElseThrow(); }

@@ -1,7 +1,7 @@
 package clubmanagement.defineopeninghours;
 
 import clubmanagement.domain.club.vo.ClubId;
-import clubmanagement.domain.club.vo.OpeningHours;
+import clubmanagement.domain.club.vo.Session;
 import clubmanagement.ports.ClubCalendar;
 
 public class DefineOpeningHours {
@@ -11,7 +11,7 @@ public class DefineOpeningHours {
         this.clubCalendar = clubCalendar;
     }
 
-    public void execute(ClubId club, OpeningHours openingHours) {
-        clubCalendar.defineOpeningHours(club, openingHours);
+    public void execute(ClubId club, Session session) {
+        clubCalendar.defineOpeningHours(club, session);
     }
 }
