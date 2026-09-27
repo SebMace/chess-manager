@@ -1,11 +1,13 @@
 package clubmanagement.ports;
 
+import clubmanagement.domain.club.vo.Activity;
 import clubmanagement.domain.club.vo.ClubId;
 import clubmanagement.domain.club.vo.Session;
 import org.junit.jupiter.api.Test;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -27,5 +29,17 @@ public abstract class ClubCalendarContract {
         clubCalendar.defineOpeningHours(club, Set.of(friday));
 
         assertEquals(Set.of(friday), clubCalendar.openingHoursOf(club));
+    }
+
+    @Test
+    void should_read_the_activity_of_a_session() {
+        ClubId club = aClub();
+        ClubCalendar clubCalendar = clubCalendar();
+        Session freePlay = new Session(DayOfWeek.FRIDAY, LocalTime.of(20, 0), LocalTime.of(22, 0),
+                Optional.of(new Activity("free play")));
+
+        clubCalendar.defineOpeningHours(club, Set.of(freePlay));
+
+        assertEquals(Set.of(freePlay), clubCalendar.openingHoursOf(club));
     }
 }
