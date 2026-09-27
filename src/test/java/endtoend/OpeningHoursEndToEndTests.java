@@ -50,7 +50,7 @@ class OpeningHoursEndToEndTests {
     void an_administrator_defines_the_opening_hours_of_a_club() throws Exception {
         ClubId club = createClub();
 
-        HttpResponse<String> response = send("PUT", "/clubs/" + club.clubId() + "/opening-hours", """
+        HttpResponse<String> response = send("PUT", "/api/clubs/" + club.clubId() + "/opening-hours", """
                 [{"day": "FRIDAY", "from": "20:00", "to": "22:00", "activity": "free play"},
                  {"day": "MONDAY", "from": "20:00", "to": "22:00", "activity": "children's lessons",
                   "venue": {"street": "3 rue de l'École", "postcode": "45000", "town": "Orléans"}}]""");
@@ -73,7 +73,7 @@ class OpeningHoursEndToEndTests {
                 new Venue.Address(new PostalAddress("3 rue de l'École", "45000", "Orléans")))));
 
         HttpResponse<String> response = HttpClient.newHttpClient().send(HttpRequest.newBuilder(
-                URI.create("http://localhost:" + port + "/clubs/" + club.clubId() + "/opening-hours")).GET().build(),
+                URI.create("http://localhost:" + port + "/api/clubs/" + club.clubId() + "/opening-hours")).GET().build(),
                 HttpResponse.BodyHandlers.ofString());
 
         assertEquals(200, response.statusCode());
@@ -88,7 +88,7 @@ class OpeningHoursEndToEndTests {
         clubCalendar.defineOpeningHours(club, Set.of(new Session(DayOfWeek.FRIDAY, LocalTime.of(20, 0), LocalTime.of(22, 0))));
 
         HttpResponse<String> response = HttpClient.newHttpClient().send(HttpRequest.newBuilder(
-                URI.create("http://localhost:" + port + "/clubs/" + club.clubId() + "/opening-hours")).GET().build(),
+                URI.create("http://localhost:" + port + "/api/clubs/" + club.clubId() + "/opening-hours")).GET().build(),
                 HttpResponse.BodyHandlers.ofString());
 
         assertEquals("""
@@ -97,7 +97,7 @@ class OpeningHoursEndToEndTests {
 
     private ClubId createClub() throws Exception {
         createdClubs++;
-        HttpResponse<String> response = send("POST", "/clubs", """
+        HttpResponse<String> response = send("POST", "/api/clubs", """
                 {"name": "Cercle fictif %d", "committeeCode": "45", "ffeClubId": "G45%03d", "communeCode": "45234",
                  "registeredOffice": {"street": "12 rue des Échecs", "postcode": "45000", "town": "Orléans"},
                  "playingVenue": {"street": "5 rue du Roi", "postcode": "45100", "town": "Orléans"}}"""

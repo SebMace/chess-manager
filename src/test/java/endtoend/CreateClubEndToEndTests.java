@@ -151,7 +151,7 @@ class CreateClubEndToEndTests {
 
     @Test
     void the_communes_of_the_department_of_its_committee_are_offered_for_a_club() throws Exception {
-        HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/communes?committee=45")).GET().build();
+        HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/api/communes?committee=45")).GET().build();
 
         HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
 
@@ -165,7 +165,7 @@ class CreateClubEndToEndTests {
         ClubId loury = createClub("""
                 {"name": "Cercle fictif de Loury", "committeeCode": "45", "ffeClubId": "G45996", "communeCode": "45188", "registeredOffice": {"street": "3 place de l'Église", "postcode": "45470", "town": "Loury"},
                  "playingVenue": {"street": "3 place de l'Église", "postcode": "45470", "town": "Loury"}}""");
-        HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/clubs?committee=45")).GET().build();
+        HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/api/clubs?committee=45")).GET().build();
 
         HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
 
@@ -184,11 +184,12 @@ class CreateClubEndToEndTests {
 
         assertEquals(201, response.statusCode());
         String location = response.headers().firstValue("Location").orElseThrow();
+        assertTrue(location.contains("/api/clubs/"), location);
         return new ClubId(UUID.fromString(location.substring(location.lastIndexOf('/') + 1)));
     }
 
     private HttpResponse<Void> post(String json) throws Exception {
-        HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/clubs"))
+        HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/api/clubs"))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .build();
