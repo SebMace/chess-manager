@@ -59,11 +59,17 @@ On finalise d'abord la création d'un club ; les slices sur les joueurs viendron
     désigne la salle de jeu actuelle : si le club en change, la session la suit ;
   - des sessions peuvent se chevaucher ;
   - l'administrateur définit toutes les sessions d'un coup ;
-  - les horaires s'appuient sur le bounded context Craft Calendar. Craft Calendar est en amont
-    (Open Host Service et Published Language) ; Club Management est en aval et traduit dans une
-    couche anticorruption. Le club ne connaît aucune classe de Craft Calendar, et Craft Calendar
-    ne connaît pas les activités d'un club d'échecs ;
-  - les concepts de Craft Calendar émergent des tests de cette slice, sans conception préalable.
+  - Club Management enregistre lui-même les sessions (`JdbcClubCalendar`, table `club_session`)
+    derrière son port `ClubCalendar`. Aucun exemple ne demande encore un comportement de calendrier
+    (dates d'occurrence, exclusions, export) : Craft Calendar ne ferait que stocker les mêmes
+    données sous d'autres noms (YAGNI). Il reste la cible de la Context Map du README ; il sera
+    extrait derrière le même port quand un exemple réclamera un vrai comportement de calendrier ;
+  - la salle de jeu par défaut est enregistrée comme une référence (aucune adresse), pour que la
+    session suive le club s'il change de salle ;
+  - redéfinir les horaires supprime puis réinsère les sessions dans une seule transaction, portée
+    par l'adaptateur (le cas d'usage reste sans Spring). Une panne entre les deux ne doit pas
+    laisser le club sans horaires ou avec une partie seulement. Aucun test ne provoque cette
+    panne : c'est un choix de conception, pas un comportement prouvé.
 - **Reporté** : saisons, vacances scolaires, abonnement depuis un agenda externe.
 - **Questions ouvertes** : refuser un club non géré par l'application ? Une session peut-elle
   franchir minuit ? Quelles activités l'application propose-t-elle ?

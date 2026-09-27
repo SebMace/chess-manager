@@ -26,10 +26,12 @@ depends on chess: it knows neither clubs, players, the FFE, tournaments nor memb
 language will grow from calendars, events, recurrences, time slots and exclusion periods, and
 only as far as a requested use case demands it.
 
-**Status.** This is a validated architectural direction, not existing code yet. Today the
-slice *Define the opening hours of a club* depends on the `ClubCalendar` port, implemented
-only by an in-memory fake in the tests. The concepts of Craft Calendar will emerge from the
-tests of that slice, when its adapter is written.
+**Status.** This is a validated architectural direction, not existing code yet. The slice
+*Define the opening hours of a club* depends on the `ClubCalendar` port. No example asks yet for
+calendar behavior (dates of occurrence, exclusions, export), so Club Management stores the
+sessions itself (`JdbcClubCalendar`): Craft Calendar would only have stored the same data under
+other names. It will be extracted behind the same port when an example needs real calendar
+behavior; the use case and the domain will not change.
 
 ### Context map
 
@@ -150,6 +152,14 @@ and `ClubRepository`. The relationship repository can find a pair, list a person
 relationships, save and remove a relationship; the club repository finds and saves
 clubs. These are core-owned application ports. `ClubRepository` has a PostgreSQL
 implementation (see below); the other ports are implemented only by in-memory test fakes.
+
+`ClubCalendar` holds the opening hours of a club, as a set of sessions. Its in-memory fake and
+its PostgreSQL implementation, `JdbcClubCalendar`, run the same tests (`ClubCalendarContract`),
+so the fast tests that rely on the fake can be trusted. Defining the opening hours replaces the
+previous sessions: `JdbcClubCalendar` deletes and inserts them in one transaction, so that a
+failure in between cannot leave a club with no or partial opening hours. No test forces that
+failure; it is a design decision, not a proven behavior. The transaction belongs to the adapter,
+because the use case must not depend on Spring.
 
 `ClubRelationship` is immutable. `registerLicense` returns a new state with the same
 identity; the application must save that state. The fake keys records by the two IDs.
