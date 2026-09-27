@@ -23,6 +23,8 @@ Seule la prochaine slice est détaillée ; les autres le seront quand on les dé
 | Create a club | `createclub` | livrée | — |
 | Find the communes of a committee | `communesofcommittee` | livrée | — |
 | Consult the clubs of a committee | `clubsofcommittee` | livrée | Create a club |
+| Define the opening hours of a club | `defineopeninghours` | livrée | Create a club |
+| Consult the opening hours of a club | `openinghoursofclub` | livrée | Define the opening hours of a club |
 | Record a person | `recordperson` | cas d'usage seulement | — |
 | Update a person | `updateperson` | cas d'usage seulement | Record a person |
 | Register a prospect | `registerprospect` | cas d'usage seulement | Create a club |
@@ -33,46 +35,28 @@ Seule la prochaine slice est détaillée ; les autres le seront quand on les dé
 Évolutions de *Create a club* : comité départemental, identifiant FFE, commune, siège social,
 salle de jeu.
 
+Évolution de *Consult the clubs of a committee* : chaque club porte son identifiant, pour mener
+à ses horaires d'ouverture.
+
+Les règles des horaires d'ouverture (sessions, activités, lieu, remplacement) sont décrites dans
+le README. Club Management enregistre lui-même les sessions derrière son port `ClubCalendar` :
+Craft Calendar sera extrait quand un exemple réclamera un vrai comportement de calendrier.
+
 ## Slices à venir
 
 On finalise d'abord la création d'un club ; les slices sur les joueurs viendront plus tard.
 
 | Slice | Package | Statut | Dépend de |
 |---|---|---|---|
-| Define the opening hours of a club | `defineopeninghours` | prochaine | Create a club |
 | Move the registered office of a club | `moveregisteredoffice` | à venir | Create a club |
 
 - Évolutions prévues de *Create a club* : revenir à la liste après la création, pré-remplir le
   comité à partir du département consulté.
-
-### Define the opening hours of a club
-
-- **Intention** : l'administrateur définit les horaires d'ouverture d'un club, par exemple
-  « vendredi 20:00–22:00 : jeu libre ; samedi 15:00–17:00 : cours adultes ; lundi 20:00–22:00 :
-  cours enfants ».
-- **Décisions** :
-  - *opening hours* désigne l'ensemble des horaires d'ouverture du club ; chaque tranche
-    hebdomadaire (jour, heure de début, heure de fin) est une *session* ;
-  - une session peut être consacrée à une activité, ou à aucune. Les activités forment une liste
-    ouverte : l'application en propose, chaque club peut en ajouter ;
-  - une session a lieu à une adresse quelconque, par défaut à la salle de jeu du club. Ce défaut
-    désigne la salle de jeu actuelle : si le club en change, la session la suit ;
-  - des sessions peuvent se chevaucher ;
-  - l'administrateur définit toutes les sessions d'un coup ;
-  - Club Management enregistre lui-même les sessions (`JdbcClubCalendar`, table `club_session`)
-    derrière son port `ClubCalendar`. Aucun exemple ne demande encore un comportement de calendrier
-    (dates d'occurrence, exclusions, export) : Craft Calendar ne ferait que stocker les mêmes
-    données sous d'autres noms (YAGNI). Il reste la cible de la Context Map du README ; il sera
-    extrait derrière le même port quand un exemple réclamera un vrai comportement de calendrier ;
-  - la salle de jeu par défaut est enregistrée comme une référence (aucune adresse), pour que la
-    session suive le club s'il change de salle ;
-  - redéfinir les horaires supprime puis réinsère les sessions dans une seule transaction, portée
-    par l'adaptateur (le cas d'usage reste sans Spring). Une panne entre les deux ne doit pas
-    laisser le club sans horaires ou avec une partie seulement. Aucun test ne provoque cette
-    panne : c'est un choix de conception, pas un comportement prouvé.
-- **Reporté** : saisons, vacances scolaires, abonnement depuis un agenda externe.
-- **Questions ouvertes** : refuser un club non géré par l'application ? Une session peut-elle
-  franchir minuit ? Quelles activités l'application propose-t-elle ?
+- Évolutions possibles de *Define the opening hours of a club*, à passer au crible YAGNI : refuser
+  un club non géré par l'application ou inconnu ; décider si une session peut franchir minuit ;
+  présenter les sessions du lundi au dimanche ; afficher le nom du club sur l'écran des horaires.
+- Reporté : saisons, vacances scolaires, abonnement depuis un agenda externe.
+- La prochaine slice reste à choisir.
 
 ## Thèmes, à découper le moment venu
 

@@ -217,25 +217,48 @@ curl -i -X POST localhost:8080/api/clubs -H 'Content-Type: application/json' -d 
   "playingVenue": {"street": "1 rue du Marché", "postcode": "45200", "town": "Montargis"}}'
 ```
 
+## Opening hours of a club
+
+The opening hours of a club are a set of weekly *sessions*: a day, a start time and an end time.
+
+- A session may be for an activity, or for none. Activities form an open list: the screen
+  proposes "jeu libre", "cours adultes" and "cours enfants", and a club may type others.
+- A session takes place at any address; by default, at the playing venue of the club. That
+  default is a reference, not a copy of the address: if the club moves its playing venue, the
+  session follows it.
+- Sessions may overlap, and their order does not matter.
+- The administrator defines all the sessions at once: the new ones replace the previous ones.
+
+```
+GET /api/clubs/<id>/opening-hours   →  200 [{"day": "FRIDAY", "from": "20:00", "to": "22:00",
+                                             "activity": "jeu libre", "venue": null}, …]
+PUT /api/clubs/<id>/opening-hours   →  204 (a missing venue means the playing venue of the club)
+```
+
 ## Front-end (Angular)
 
 The Angular 22 application in `front-end/` is a separate npm project, not built by Maven.
 It opens on the clubs managed by the application in a departmental committee: the
 administrator types the number of their department and is shown each club with its commune
 and its FFE identifier, sorted by name. A link leads to the French screen where the
-administrator creates a club and is told whether the club has been created. It needs Node.js 22.22, 24.15 or 26 and npm.
+administrator creates a club and is told whether the club has been created. Each club of the
+list leads to its opening hours: the administrator sees the sessions already defined, adds or
+removes sessions, and saves them all at once. It needs Node.js 22.22, 24.15 or 26 and npm.
 
 | File | Role |
 |---|---|
 | `src/app/club-management/clubs-of-committee/clubs-of-committee.ts` | `ClubsOfCommittee` component: the clubs of the committee the administrator asks for. |
 | `src/app/club-management/create-club/create-club.ts` | `CreateClub` component: the form and the creation outcome. |
 | `src/app/club-management/create-club/commune-search.ts` | The communes matching what the administrator types. |
+| `src/app/club-management/define-opening-hours/define-opening-hours.ts` | `DefineOpeningHours` component: the sessions of a club, with their activity and their venue. |
+| `src/app/club-management/ports/opening-hours.ts` | `OpeningHours` port: read and define the opening hours of a club. |
+| `src/app/club-management/http/http-opening-hours.ts` | `HttpOpeningHours` adapter: implements `OpeningHours` over the REST API. |
 | `src/app/club-management/ports/clubs.ts` | `Clubs` port: what the club screens need, with no HTTP detail. |
 | `src/app/club-management/ports/communes.ts` | `Communes` port: the communes of a departmental committee. |
 | `src/app/club-management/http/http-clubs.ts` | `HttpClubs` adapter: implements `Clubs` over the REST API. |
 | `src/app/club-management/http/http-communes.ts` | `HttpCommunes` adapter: implements `Communes` over the REST API. |
 | `src/app/app.routes.ts` | The clubs of a committee at `/`, the creation of a club at `/clubs/new`, the opening hours of a club at `/clubs/<id>/opening-hours`. |
-| `src/app/app.config.ts` | Provides the router and wires `Clubs` to `HttpClubs` and `Communes` to `HttpCommunes`. |
+| `src/app/app.config.ts` | Provides the router and wires `Clubs`, `Communes` and `OpeningHours` to their HTTP adapters. |
 
 As in the back-end, each slice has its own folder named after its use case (`create-club`);
 the ports and their HTTP adapters are shared by the slices of Club Management.
@@ -290,7 +313,8 @@ clubmanagement/
   domain/                  shared model: Club, ClubRelationship, Person, value objects
   ports/                   shared ports: ClubRepository, ClubRelationshipRepository, ClubCalendar, Communes, PersonRepository
   createclub/              CreateClub, its refusals, rest/CreateClubController
-  defineopeninghours/      DefineOpeningHours, use case only for now (see Craft Calendar above)
+  defineopeninghours/      DefineOpeningHours, rest/DefineOpeningHoursController
+  openinghoursofclub/      OpeningHoursOfClub, rest/OpeningHoursOfClubController
   communesofcommittee/     CommunesOfCommittee, rest/CommunesOfCommitteeController
   clubsofcommittee/        ClubsOfCommittee, ClubOfCommittee, rest/ClubsOfCommitteeController
   isexternalplayer/        IsExternalPlayer
@@ -299,7 +323,7 @@ clubmanagement/
   registerpartnership/     RegisterPartnership
   registerprospect/        RegisterProspect
   updateperson/            UpdatePerson
-  persistence/             JdbcClubRepository, shared: it persists the Club aggregate
+  persistence/             JdbcClubRepository and JdbcClubCalendar, shared: the clubs and their opening hours
   insee/                   InseeCommunes, shared: the INSEE communes reference
 infrastructure/            Spring Boot application, explicit wiring, development data
 ```
