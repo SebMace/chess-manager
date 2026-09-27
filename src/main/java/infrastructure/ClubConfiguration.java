@@ -14,6 +14,8 @@ import clubmanagement.ports.Communes;
 import clubmanagement.ports.DeliveryTowns;
 import clubmanagement.postcodesoftown.PostcodesOfTown;
 import clubmanagement.postcodesoftown.rest.PostcodesOfTownController;
+import clubmanagement.townsofcommune.TownsOfCommune;
+import clubmanagement.townsofcommune.rest.TownsOfCommuneController;
 import clubmanagement.townsofpostcode.TownsOfPostcode;
 import clubmanagement.townsofpostcode.rest.TownsOfPostcodeController;
 import clubmanagement.domain.club.vo.ClubId;
@@ -88,5 +90,15 @@ class ClubConfiguration {
     @Bean
     PostcodesOfTownController postcodesOfTownController(PostcodesOfTown postcodesOfTown) {
         return new PostcodesOfTownController(postcodesOfTown);
+    }
+
+    @Bean
+    TownsOfCommune townsOfCommune(DeliveryTowns deliveryTowns) {
+        return new TownsOfCommune(deliveryTowns);
+    }
+
+    @Bean
+    TownsOfCommuneController townsOfCommuneController(TownsOfCommune townsOfCommune) {
+        return new TownsOfCommuneController(townsOfCommune);
     }
 }
