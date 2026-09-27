@@ -46,6 +46,17 @@ describe('PostalAddressFields', () => {
     expect(suggestionsFor(page, town)).toEqual(laFerteStAubin);
   });
 
+  it('suggests no town and leaves the town free when the towns cannot be found', async () => {
+    fill(fieldLabelled(page, 'Code postal'), '45240');
+    server.expectOne(request => request.url === '/towns')
+      .flush(null, { status: 500, statusText: 'Internal Server Error' });
+    await fixture.whenStable();
+
+    const town = fieldLabelled(page, 'Localité');
+    expect(town.value).toBe('');
+    expect(suggestionsFor(page, town)).toEqual([]);
+  });
+
   it('does not look for the towns until the postcode is complete', async () => {
     fill(fieldLabelled(page, 'Code postal'), '450');
     await fixture.whenStable();
