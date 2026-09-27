@@ -31,9 +31,10 @@ Seule la prochaine slice est détaillée ; les autres le seront quand on les dé
 | Recognize an external player | `isexternalplayer` | cas d'usage seulement | Register a license |
 | Find the towns of a postcode | `townsofpostcode` | livrée | — |
 | Find the postcodes of a town | `postcodesoftown` | livrée | — |
+| Find the towns of a commune | `townsofcommune` | livrée | — |
 
 Évolutions de *Create a club* : comité départemental, identifiant FFE, commune, siège social,
-salle de jeu.
+salle de jeu, localité et code postal proposés à partir de la commune choisie.
 
 ## Slices à venir
 
@@ -43,16 +44,13 @@ On finalise d'abord la création d'un club ; les slices sur les joueurs viendron
 |---|---|---|---|
 | Define the opening hours of a club | `defineopeninghours` | à venir | Create a club |
 | Move the registered office of a club | `moveregisteredoffice` | à venir | Create a club |
-| Find the towns of a commune | `townsofcommune` | prochaine | — |
 
 - *Define the opening hours of a club* s'appuiera sur le bounded context Craft Calendar (voir
   les thèmes). Le terme métier (« horaires d'ouverture », « séances de jeu », « tranches
   horaires ») reste à confirmer.
 - La prochaine slice reste à choisir entre les deux.
 - Évolutions prévues de *Create a club* : revenir à la liste après la création, pré-remplir le
-  comité à partir du département consulté, proposer la localité et le code postal du siège
-  social et de la salle de jeu à partir de la commune choisie (voir *Find the towns of a
-  commune*).
+  comité à partir du département consulté.
 
 ### Find the towns of a commune
 
