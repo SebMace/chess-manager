@@ -60,8 +60,12 @@ public class LaPosteDeliveryTowns implements DeliveryTowns {
                 .toList();
     }
 
+    // La Poste writes a town in capitals, without accents nor punctuation, and abbreviates the words
+    // SAINT and SAINTE; a town such as SAINTES keeps its name in full.
     private static String asLaPosteWritesIt(String town) {
-        return Normalizer.normalize(town, Normalizer.Form.NFD).replaceAll("\\p{M}", "").replaceAll("[^\\p{L}\\p{N}]", " ").toUpperCase(Locale.ROOT)
+        String withoutAccents = Normalizer.normalize(town, Normalizer.Form.NFD).replaceAll("\\p{M}", "");
+        return withoutAccents.replaceAll("[^\\p{L}\\p{N}]", " ")
+                .toUpperCase(Locale.ROOT)
                 .replaceAll("\\bSAINT(E?)\\b", "ST$1");
     }
 }
