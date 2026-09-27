@@ -46,4 +46,9 @@ public class LaPosteDeliveryTowns implements DeliveryTowns {
     public List<String> servedBy(Postcode postcode) {
         return towns.getOrDefault(postcode, List.of());
     }
+
+    @Override
+    public List<Postcode> postcodesOf(String town) {
+        return List.of();
+    }
 }

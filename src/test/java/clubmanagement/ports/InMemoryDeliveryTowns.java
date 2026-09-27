@@ -2,6 +2,7 @@ package clubmanagement.ports;
 
 import clubmanagement.domain.club.vo.Postcode;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -15,5 +16,14 @@ public class InMemoryDeliveryTowns implements DeliveryTowns {
     @Override
     public List<String> servedBy(Postcode postcode) {
         return towns.getOrDefault(postcode, List.of());
+    }
+
+    @Override
+    public List<Postcode> postcodesOf(String town) {
+        return towns.entrySet().stream()
+                .filter(served -> served.getValue().contains(town))
+                .map(Map.Entry::getKey)
+                .sorted(Comparator.comparing(Postcode::value))
+                .toList();
     }
 }
