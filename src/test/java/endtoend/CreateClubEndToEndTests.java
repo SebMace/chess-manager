@@ -191,6 +191,16 @@ class CreateClubEndToEndTests {
     }
 
     @Test
+    void the_town_la_poste_delivers_a_commune_as_is_offered_with_its_postcodes() throws Exception {
+        HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/towns?commune=45232")).GET().build();
+
+        HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+
+        assertEquals(200, response.statusCode());
+        assertEquals("[{\"name\":\"OLIVET\",\"postcodes\":[\"45160\"]}]", response.body());
+    }
+
+    @Test
     void an_administrator_consults_the_clubs_of_a_committee() throws Exception {
         createClub("""
                 {"name": "Cercle fictif de Loury", "committeeCode": "45", "ffeClubId": "G45996", "communeCode": "45188", "registeredOffice": {"street": "3 place de l'Église", "postcode": "45470", "town": "Loury"},
