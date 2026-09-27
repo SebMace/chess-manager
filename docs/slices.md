@@ -47,18 +47,25 @@ On finalise d'abord la création d'un club ; les slices sur les joueurs viendron
 
 ### Define the opening hours of a club
 
-- **Intention** : l'administrateur définit les horaires d'ouverture d'un club, par exemple « le
-  club ouvre chaque vendredi de 15:00 à 17:00 ».
+- **Intention** : l'administrateur définit les horaires d'ouverture d'un club, par exemple
+  « vendredi 20:00–22:00 : jeu libre ; samedi 15:00–17:00 : cours adultes ; lundi 20:00–22:00 :
+  cours enfants ».
 - **Décisions** :
-  - le terme métier est *opening hours* (horaires d'ouverture du club), pas les séances de jeu ;
+  - *opening hours* désigne l'ensemble des horaires d'ouverture du club ; chaque tranche
+    hebdomadaire (jour, heure de début, heure de fin) est une *session* ;
+  - une session peut être consacrée à une activité, ou à aucune. Les activités forment une liste
+    ouverte : l'application en propose, chaque club peut en ajouter ;
+  - deux sessions d'un club ne se chevauchent pas, pour l'instant ;
+  - l'administrateur définit toutes les sessions d'un coup ;
   - les horaires s'appuient sur le bounded context Craft Calendar. Craft Calendar est en amont
     (Open Host Service et Published Language) ; Club Management est en aval et traduit dans une
-    couche anticorruption. Le club ne connaît aucune classe de Craft Calendar ;
+    couche anticorruption. Le club ne connaît aucune classe de Craft Calendar, et Craft Calendar
+    ne connaît pas les activités d'un club d'échecs ;
   - les concepts de Craft Calendar émergent des tests de cette slice, sans conception préalable.
-- **Reporté** : activités, lieux, saisons, vacances scolaires, abonnement depuis un agenda
-  externe.
-- **Questions ouvertes** : refuser un club non géré par l'application ? Une plage peut-elle
-  franchir minuit ? Définir des horaires ajoute-t-il une plage ou remplace-t-il les précédentes ?
+- **Reporté** : lieux, saisons, vacances scolaires, abonnement depuis un agenda externe,
+  chevauchement de sessions.
+- **Questions ouvertes** : refuser un club non géré par l'application ? Une session peut-elle
+  franchir minuit ? Quelles activités l'application propose-t-elle ?
 
 ## Thèmes, à découper le moment venu
 
