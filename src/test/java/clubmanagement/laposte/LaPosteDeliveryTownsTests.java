@@ -36,4 +36,34 @@ class LaPosteDeliveryTownsTests {
     void should_offer_the_postcodes_of_every_town_of_the_same_name() {
         assertEquals(List.of(new Postcode("45160"), new Postcode("53410")), deliveryTowns.postcodesOf("OLIVET"));
     }
+
+    @Test
+    void should_find_a_town_typed_in_small_letters_and_with_its_accents() {
+        assertEquals(List.of(new Postcode("45000"), new Postcode("45100")), deliveryTowns.postcodesOf("Orléans"));
+    }
+
+    @Test
+    void should_find_a_town_typed_with_hyphens() {
+        assertEquals(List.of(new Postcode("45240")), deliveryTowns.postcodesOf("Ligny-le-Ribault"));
+    }
+
+    @Test
+    void should_find_a_town_typed_with_an_apostrophe() {
+        assertEquals(List.of(new Postcode("01400")), deliveryTowns.postcodesOf("L'Abergement-Clémenciat"));
+    }
+
+    @Test
+    void should_find_a_town_typed_with_saint_in_full() {
+        assertEquals(List.of(new Postcode("45800")), deliveryTowns.postcodesOf("Saint-Jean-de-Braye"));
+    }
+
+    @Test
+    void should_find_a_town_typed_with_sainte_in_full() {
+        assertEquals(List.of(new Postcode("45230"), new Postcode("91700")), deliveryTowns.postcodesOf("Sainte-Geneviève-des-Bois"));
+    }
+
+    @Test
+    void should_not_abbreviate_a_town_that_only_begins_with_saint() {
+        assertEquals(List.of(new Postcode("17100")), deliveryTowns.postcodesOf("Saintes"));
+    }
 }
