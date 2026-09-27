@@ -25,7 +25,7 @@ describe('PostalAddressFields', () => {
 
   async function typePostcode(postcode: string, towns: string[]): Promise<void> {
     fill(fieldLabelled(page, 'Code postal'), postcode);
-    server.expectOne(request => request.method === 'GET' && request.url === '/towns'
+    server.expectOne(request => request.method === 'GET' && request.url === '/api/towns'
       && request.params.get('postcode') === postcode).flush(towns);
     await fixture.whenStable();
   }
@@ -48,7 +48,7 @@ describe('PostalAddressFields', () => {
 
   it('suggests no town and leaves the town free when the towns cannot be found', async () => {
     fill(fieldLabelled(page, 'Code postal'), '45240');
-    server.expectOne(request => request.url === '/towns')
+    server.expectOne(request => request.url === '/api/towns')
       .flush(null, { status: 500, statusText: 'Internal Server Error' });
     await fixture.whenStable();
 
@@ -59,7 +59,7 @@ describe('PostalAddressFields', () => {
 
   async function typeTown(town: string, postcodes: string[]): Promise<void> {
     fill(fieldLabelled(page, 'Localité'), town);
-    server.expectOne(request => request.method === 'GET' && request.url === '/postcodes'
+    server.expectOne(request => request.method === 'GET' && request.url === '/api/postcodes'
       && request.params.get('town') === town).flush(postcodes);
     await fixture.whenStable();
   }
@@ -88,7 +88,7 @@ describe('PostalAddressFields', () => {
 
   it('suggests no postcode and leaves the postcode free when the postcodes cannot be found', async () => {
     fill(fieldLabelled(page, 'Localité'), 'Orléans');
-    server.expectOne(request => request.url === '/postcodes')
+    server.expectOne(request => request.url === '/api/postcodes')
       .flush(null, { status: 500, statusText: 'Internal Server Error' });
     await fixture.whenStable();
 
@@ -101,7 +101,7 @@ describe('PostalAddressFields', () => {
     fill(fieldLabelled(page, 'Localité'), '  ');
     await fixture.whenStable();
 
-    server.expectNone(request => request.url === '/postcodes');
+    server.expectNone(request => request.url === '/api/postcodes');
   });
 
   async function defaultTo(town: DeliveryTown): Promise<void> {
@@ -147,7 +147,7 @@ describe('PostalAddressFields', () => {
     fill(fieldLabelled(page, 'Code postal'), '450');
     await fixture.whenStable();
 
-    server.expectNone(request => request.url === '/towns');
+    server.expectNone(request => request.url === '/api/towns');
   });
 });
 

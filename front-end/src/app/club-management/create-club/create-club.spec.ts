@@ -98,7 +98,7 @@ describe('CreateClub', () => {
     fill(fieldLabelled(page, 'Code du comité'), '45');
     await chooseCommune('Orl', 'Orléans');
 
-    server.expectOne(request => request.method === 'GET' && request.url === '/towns'
+    server.expectOne(request => request.method === 'GET' && request.url === '/api/towns'
       && request.params.get('commune') === '45234').flush([{ name: 'ORLEANS', postcodes: ['45000', '45100'] }]);
     await fixture.whenStable();
 
@@ -107,7 +107,7 @@ describe('CreateClub', () => {
   });
 
   async function flushTownsOfCommune(communeCode: string, towns: { name: string; postcodes: string[] }[]): Promise<void> {
-    server.expectOne(request => request.url === '/towns' && request.params.get('commune') === communeCode).flush(towns);
+    server.expectOne(request => request.url === '/api/towns' && request.params.get('commune') === communeCode).flush(towns);
     await fixture.whenStable();
   }
 
@@ -116,7 +116,7 @@ describe('CreateClub', () => {
     await chooseCommune('Orl', 'Orléans');
     await flushTownsOfCommune('45234', [{ name: 'ORLEANS', postcodes: ['45000', '45100'] }]);
     fill(fieldInGroup(page, 'Siège social', 'Code postal'), '45000');
-    for (const request of server.match(request => request.url === '/towns')) request.flush(['ORLEANS']);
+    for (const request of server.match(request => request.url === '/api/towns')) request.flush(['ORLEANS']);
     await fixture.whenStable();
 
     await chooseCommune('Oli', 'Olivet');
@@ -144,7 +144,7 @@ describe('CreateClub', () => {
     fill(fieldLabelled(page, 'Code du comité'), '45');
     await chooseCommune('Orl', 'Orléans');
 
-    server.expectOne(request => request.url === '/towns' && request.params.has('commune'))
+    server.expectOne(request => request.url === '/api/towns' && request.params.has('commune'))
       .flush(null, { status: 500, statusText: 'Internal Server Error' });
     await fixture.whenStable();
 

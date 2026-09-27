@@ -8,14 +8,14 @@ export class HttpTowns implements Towns {
   private readonly http = inject(HttpClient);
 
   ofPostcode(postcode: string): Observable<string[]> {
-    return this.http.get<string[]>('/towns', { params: { postcode } });
+    return this.http.get<string[]>('/api/towns', { params: { postcode } });
   }
 
   postcodesOf(town: string): Observable<string[]> {
-    return this.http.get<string[]>('/postcodes', { params: { town } });
+    return this.http.get<string[]>('/api/postcodes', { params: { town } });
   }
 
   ofCommune(communeCode: string): Observable<DeliveryTown[]> {
-    return this.http.get<DeliveryTown[]>('/towns', { params: { commune: communeCode } });
+    return this.http.get<DeliveryTown[]>('/api/towns', { params: { commune: communeCode } });
   }
 }

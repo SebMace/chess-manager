@@ -162,7 +162,7 @@ class CreateClubEndToEndTests {
 
     @Test
     void the_towns_la_poste_delivers_with_a_postcode_are_offered_for_an_address() throws Exception {
-        HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/towns?postcode=45240")).GET().build();
+        HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/api/towns?postcode=45240")).GET().build();
 
         HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
 
@@ -173,7 +173,7 @@ class CreateClubEndToEndTests {
 
     @Test
     void no_town_is_offered_for_a_postcode_that_is_not_made_of_five_digits() throws Exception {
-        HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/towns?postcode=45A00")).GET().build();
+        HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/api/towns?postcode=45A00")).GET().build();
 
         HttpResponse<Void> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.discarding());
 
@@ -182,7 +182,7 @@ class CreateClubEndToEndTests {
 
     @Test
     void the_postcodes_la_poste_delivers_a_town_with_are_offered_for_an_address() throws Exception {
-        HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/postcodes?town=ORLEANS")).GET().build();
+        HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/api/postcodes?town=ORLEANS")).GET().build();
 
         HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
 
@@ -192,7 +192,7 @@ class CreateClubEndToEndTests {
 
     @Test
     void the_town_la_poste_delivers_a_commune_as_is_offered_with_its_postcodes() throws Exception {
-        HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/towns?commune=45232")).GET().build();
+        HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/api/towns?commune=45232")).GET().build();
 
         HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
 
