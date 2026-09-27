@@ -85,9 +85,13 @@ export class PostalAddressFields {
   protected typePostcode(postcode: string): void {
     this.describe({ postcode });
     if (!isPostcode(postcode)) return;
-    this.towns.ofPostcode(postcode).subscribe(towns => {
-      this.servedTowns.set(towns);
-      if (towns.length === 1) this.describe({ town: towns[0] });
+    this.towns.ofPostcode(postcode).subscribe({
+      next: towns => {
+        this.servedTowns.set(towns);
+        if (towns.length === 1) this.describe({ town: towns[0] });
+      },
+      // The towns are only a help: without them, the administrator still types the town freely.
+      error: () => this.servedTowns.set([]),
     });
   }
 
