@@ -25,7 +25,12 @@ public class JdbcClubCalendar implements ClubCalendar {
 
     @Override
     public void defineOpeningHours(ClubId club, Set<Session> sessions) {
-        sessions.forEach(session -> jdbc.sql("""
+        sessions.forEach(session -> insert(club, session));
+    }
+
+    private void insert(ClubId club, Session session) {
+        Optional<PostalAddress> address = address(session.venue());
+        jdbc.sql("""
                         INSERT INTO club_session (club_id, day_of_week, starts_at, ends_at, activity,
                                                   venue_street, venue_postcode, venue_town)
                         VALUES (:club, :day, :from, :to, :activity, :street, :postcode, :town)""")
@@ -34,10 +39,10 @@ public class JdbcClubCalendar implements ClubCalendar {
                 .param("from", session.from())
                 .param("to", session.to())
                 .param("activity", session.activity().map(Activity::name).orElse(null))
-                .param("street", address(session.venue()).map(PostalAddress::street).orElse(null))
-                .param("postcode", address(session.venue()).map(PostalAddress::postcode).orElse(null))
-                .param("town", address(session.venue()).map(PostalAddress::town).orElse(null))
-                .update());
+                .param("street", address.map(PostalAddress::street).orElse(null))
+                .param("postcode", address.map(PostalAddress::postcode).orElse(null))
+                .param("town", address.map(PostalAddress::town).orElse(null))
+                .update();
     }
 
     @Override
