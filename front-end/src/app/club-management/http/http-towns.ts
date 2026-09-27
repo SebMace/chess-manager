@@ -10,4 +10,8 @@ export class HttpTowns implements Towns {
   ofPostcode(postcode: string): Observable<string[]> {
     return this.http.get<string[]>('/towns', { params: { postcode } });
   }
+
+  postcodesOf(town: string): Observable<string[]> {
+    return this.http.get<string[]>('/postcodes', { params: { town } });
+  }
 }

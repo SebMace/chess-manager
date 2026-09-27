@@ -57,6 +57,53 @@ describe('PostalAddressFields', () => {
     expect(suggestionsFor(page, town)).toEqual([]);
   });
 
+  async function typeTown(town: string, postcodes: string[]): Promise<void> {
+    fill(fieldLabelled(page, 'Localité'), town);
+    server.expectOne(request => request.method === 'GET' && request.url === '/postcodes'
+      && request.params.get('town') === town).flush(postcodes);
+    await fixture.whenStable();
+  }
+
+  it('fills in the postcode when the town has only one and none is given yet', async () => {
+    await typeTown('Saint-Jean-de-Braye', ['45800']);
+
+    expect(fieldLabelled(page, 'Code postal').value).toBe('45800');
+  });
+
+  it('suggests the postcodes without choosing one when the town has several', async () => {
+    await typeTown('Orléans', ['45000', '45100']);
+
+    const postcode = fieldLabelled(page, 'Code postal');
+    expect(postcode.value).toBe('');
+    expect(suggestionsFor(page, postcode)).toEqual(['45000', '45100']);
+  });
+
+  it('keeps the postcode already given even when the town has only one', async () => {
+    await typePostcode('45100', ['ORLEANS']);
+
+    await typeTown('Saint-Jean-de-Braye', ['45800']);
+
+    expect(fieldLabelled(page, 'Code postal').value).toBe('45100');
+  });
+
+  it('suggests no postcode and leaves the postcode free when the postcodes cannot be found', async () => {
+    fill(fieldLabelled(page, 'Localité'), 'Orléans');
+    server.expectOne(request => request.url === '/postcodes')
+      .flush(null, { status: 500, statusText: 'Internal Server Error' });
+    await fixture.whenStable();
+
+    const postcode = fieldLabelled(page, 'Code postal');
+    expect(postcode.value).toBe('');
+    expect(suggestionsFor(page, postcode)).toEqual([]);
+  });
+
+  it('does not look for the postcodes of a blank town', async () => {
+    fill(fieldLabelled(page, 'Localité'), '  ');
+    await fixture.whenStable();
+
+    server.expectNone(request => request.url === '/postcodes');
+  });
+
   it('does not look for the towns until the postcode is complete', async () => {
     fill(fieldLabelled(page, 'Code postal'), '450');
     await fixture.whenStable();
