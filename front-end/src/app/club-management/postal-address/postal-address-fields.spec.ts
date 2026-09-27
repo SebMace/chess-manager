@@ -255,6 +255,24 @@ describe('PostalAddressFields', () => {
     expect(suggestionsFor(page, fieldLabelled(page, 'Code postal'))).toEqual(['45160', '53410']);
   });
 
+  it('keeps the town typed meanwhile when the first search for a postcode typed again arrives', async () => {
+    fill(fieldLabelled(page, 'Code postal'), '45000');
+    fill(fieldLabelled(page, 'Code postal'), '45160');
+    fill(fieldLabelled(page, 'Code postal'), '45000');
+    fill(fieldLabelled(page, 'Localité'), 'Orléans');
+    const [first, again] = server.match(request => request.url === '/towns' && request.params.get('postcode') === '45000');
+
+    first.flush(['ORLEANS']);
+    townsSought('45160').flush(['OLIVET']);
+    again.flush(['ORLEANS']);
+    await fixture.whenStable();
+
+    const town = fieldLabelled(page, 'Localité');
+    expect(town.value).toBe('Orléans');
+    expect(suggestionsFor(page, town)).toEqual(['ORLEANS']);
+    expect(fieldLabelled(page, 'Code postal').value).toBe('45000');
+  });
+
   it('suggests no postcode of a town replaced by the town of the postcode in the meantime', async () => {
     fill(fieldLabelled(page, 'Localité'), 'Olivet');
     await typePostcode('45000', ['ORLEANS']);
