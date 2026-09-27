@@ -93,6 +93,29 @@ describe('CreateClub', () => {
       .toEqual({ street: '12 rue des Échecs', postcode: '45000', town: 'Orléans' });
   });
 
+  it('proposes the town of the chosen commune for the registered office and the playing venue', async () => {
+    fill(fieldLabelled(page, 'Code du comité'), '45');
+    await chooseCommune('Orl', 'Orléans');
+
+    server.expectOne(request => request.method === 'GET' && request.url === '/towns'
+      && request.params.get('commune') === '45234').flush([{ name: 'ORLEANS', postcodes: ['45000', '45100'] }]);
+    await fixture.whenStable();
+
+    expect(fieldInGroup(page, 'Siège social', 'Localité').value).toBe('ORLEANS');
+    expect(fieldInGroup(page, 'Salle de jeu', 'Localité').value).toBe('ORLEANS');
+  });
+
+  it('proposes no town when the towns of the chosen commune cannot be found', async () => {
+    fill(fieldLabelled(page, 'Code du comité'), '45');
+    await chooseCommune('Orl', 'Orléans');
+
+    server.expectOne(request => request.url === '/towns' && request.params.has('commune'))
+      .flush(null, { status: 500, statusText: 'Internal Server Error' });
+    await fixture.whenStable();
+
+    expect(fieldInGroup(page, 'Siège social', 'Localité').value).toBe('');
+  });
+
   it('offers the communes of the department of the committee that start with the letters typed', async () => {
     fill(fieldLabelled(page, 'Code du comité'), '45');
     fill(fieldLabelled(page, 'Commune'), 'Ol');

@@ -1,6 +1,6 @@
 import { Component, inject, input, model, signal } from '@angular/core';
 import { AddressProblem, PostalAddress, isPostcode } from './postal-address';
-import { Towns } from '../ports/towns';
+import { DeliveryTown, Towns } from '../ports/towns';
 
 /**
  * The fields of a postal address, always laid out the same way. The problems are shown as given:
@@ -84,6 +84,8 @@ export class PostalAddressFields {
   readonly idPrefix = input.required<string>();
   readonly address = model.required<PostalAddress>();
   readonly problems = input<ReadonlySet<AddressProblem>>(new Set());
+  /** The town of the commune of the club, proposed until the administrator gives another. */
+  readonly defaultTown = input<DeliveryTown | null>(null);
 
   private readonly towns = inject(Towns);
   protected readonly servedTowns = signal<readonly string[]>([]);

@@ -3,7 +3,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { PostalAddressFields } from './postal-address-fields';
 import { NO_ADDRESS } from './postal-address';
-import { Towns } from '../ports/towns';
+import { DeliveryTown, Towns } from '../ports/towns';
 import { HttpTowns } from '../http/http-towns';
 
 describe('PostalAddressFields', () => {
@@ -102,6 +102,45 @@ describe('PostalAddressFields', () => {
     await fixture.whenStable();
 
     server.expectNone(request => request.url === '/postcodes');
+  });
+
+  async function defaultTo(town: DeliveryTown): Promise<void> {
+    fixture.componentRef.setInput('defaultTown', town);
+    await fixture.whenStable();
+  }
+
+  it('takes the town of the commune, with its postcode, when nothing is given yet', async () => {
+    await defaultTo({ name: 'OLIVET', postcodes: ['45160'] });
+
+    expect(fieldLabelled(page, 'Localité').value).toBe('OLIVET');
+    expect(fieldLabelled(page, 'Code postal').value).toBe('45160');
+  });
+
+  it('suggests the postcodes of the town of the commune without choosing one when it has several', async () => {
+    await defaultTo({ name: 'ORLEANS', postcodes: ['45000', '45100'] });
+
+    const postcode = fieldLabelled(page, 'Code postal');
+    expect(fieldLabelled(page, 'Localité').value).toBe('ORLEANS');
+    expect(postcode.value).toBe('');
+    expect(suggestionsFor(page, postcode)).toEqual(['45000', '45100']);
+  });
+
+  it('keeps the town and the postcode the administrator gave', async () => {
+    await typePostcode('45100', ['ORLEANS']);
+
+    await defaultTo({ name: 'OLIVET', postcodes: ['45160'] });
+
+    expect(fieldLabelled(page, 'Localité').value).toBe('ORLEANS');
+    expect(fieldLabelled(page, 'Code postal').value).toBe('45100');
+  });
+
+  it('replaces the town and the postcode of the commune chosen before', async () => {
+    await defaultTo({ name: 'OLIVET', postcodes: ['45160'] });
+
+    await defaultTo({ name: 'COLMARS LES ALPES', postcodes: ['04370'] });
+
+    expect(fieldLabelled(page, 'Localité').value).toBe('COLMARS LES ALPES');
+    expect(fieldLabelled(page, 'Code postal').value).toBe('04370');
   });
 
   it('does not look for the towns until the postcode is complete', async () => {
