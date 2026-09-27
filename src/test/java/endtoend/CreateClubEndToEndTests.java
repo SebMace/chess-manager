@@ -172,6 +172,15 @@ class CreateClubEndToEndTests {
     }
 
     @Test
+    void no_town_is_offered_for_a_postcode_that_is_not_made_of_five_digits() throws Exception {
+        HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/towns?postcode=45A00")).GET().build();
+
+        HttpResponse<Void> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.discarding());
+
+        assertEquals(400, response.statusCode());
+    }
+
+    @Test
     void an_administrator_consults_the_clubs_of_a_committee() throws Exception {
         createClub("""
                 {"name": "Cercle fictif de Loury", "committeeCode": "45", "ffeClubId": "G45996", "communeCode": "45188", "registeredOffice": {"street": "3 place de l'Église", "postcode": "45470", "town": "Loury"},
