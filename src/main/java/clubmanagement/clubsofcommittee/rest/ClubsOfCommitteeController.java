@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 public class ClubsOfCommitteeController {
@@ -19,10 +20,10 @@ public class ClubsOfCommitteeController {
     @GetMapping("/clubs")
     public List<ClubResponse> ofCommittee(@RequestParam String committee) {
         return clubsOfCommittee.execute(new CommitteeCode(committee)).stream()
-                .map(club -> new ClubResponse(club.name(), club.commune(), club.ffeClubId().value()))
+                .map(club -> new ClubResponse(club.id().clubId(), club.name(), club.commune(), club.ffeClubId().value()))
                 .toList();
     }
 
-    public record ClubResponse(String name, String commune, String ffeClubId) {
+    public record ClubResponse(UUID id, String name, String commune, String ffeClubId) {
     }
 }

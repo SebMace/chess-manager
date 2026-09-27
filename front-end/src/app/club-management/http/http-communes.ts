@@ -8,6 +8,6 @@ export class HttpCommunes implements Communes {
   private readonly http = inject(HttpClient);
 
   ofCommittee(committeeCode: string): Observable<Commune[]> {
-    return this.http.get<Commune[]>('/communes', { params: { committee: committeeCode } });
+    return this.http.get<Commune[]>('/api/communes', { params: { committee: committeeCode } });
   }
 }

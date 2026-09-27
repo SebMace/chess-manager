@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { App } from './app';
 import { appConfig } from './app.config';
 
@@ -7,7 +8,7 @@ describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App],
-      providers: appConfig.providers,
+      providers: [...appConfig.providers, provideHttpClientTesting()],
     })
       .compileComponents();
   });
@@ -51,6 +52,15 @@ describe('App', () => {
     await fixture.whenStable();
 
     expect(labels(page)).toContain('Numéro de votre département');
+  });
+
+  it('lets the administrator define the opening hours of a club', async () => {
+    const fixture = TestBed.createComponent(App);
+    await TestBed.inject(Router).navigateByUrl('/clubs/club-1/opening-hours');
+    await fixture.whenStable();
+    const page = fixture.nativeElement as HTMLElement;
+
+    expect(page.querySelector('h2')?.textContent).toBe("Horaires d'ouverture du club");
   });
 });
 

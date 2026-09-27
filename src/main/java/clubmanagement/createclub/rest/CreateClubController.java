@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 
@@ -31,7 +32,8 @@ public class CreateClubController {
         ClubId id = createClub.execute(request.name(), new CommitteeCode(request.committeeCode()),
                 new FfeClubId(request.ffeClubId()), new CommuneCode(request.communeCode()),
                 postalAddress(request.registeredOffice()), postalAddress(request.playingVenue()));
-        return ResponseEntity.created(URI.create("/clubs/" + id.clubId())).build();
+        URI location = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{id}").buildAndExpand(id.clubId()).toUri();
+        return ResponseEntity.created(location).build();
     }
 
     private static PostalAddress postalAddress(AddressRequest address) {
