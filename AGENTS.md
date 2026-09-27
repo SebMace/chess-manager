@@ -627,6 +627,19 @@ the task to fix them.
 - Prefer small, reviewable diffs corresponding to one behavior.
 - If a requested change overlaps unresolved user edits, stop and explain the conflict.
 
+### 18.1 One pull request at a time
+
+Keep a single work in progress so that the Git history stays linear and easy to follow.
+
+- Before starting a branch, a slice, or a fix, check the open pull requests and the branches or
+  worktrees still in progress (`gh pr list`, `git worktree list`).
+- If another one is in progress, warn the user that parallel work goes against the simplicity of
+  the project: crossed merges of `main`, conflicts, and a tangled graph. Recommend finishing or
+  merging it first.
+- Do not block: the user may decide to proceed, typically when the other pull request is under
+  control (small, independent, touching other files). Then name the overlapping files, if any,
+  and the order in which the two should be merged.
+
 ## 19. Verification
 
 Discover commands from wrapper files, `pom.xml`, `build.gradle`, `package.json`, workspace files,
