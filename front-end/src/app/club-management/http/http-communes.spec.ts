@@ -8,7 +8,7 @@ describe('HttpCommunes', () => {
     frontEndContract
       .addInteraction()
       .uponReceiving('a request for the communes of a committee')
-      .withRequest('GET', '/communes', (request) => request.query({ committee: '45' }))
+      .withRequest('GET', '/api/communes', (request) => request.query({ committee: '45' }))
       .willRespondWith(200, (response) => response.jsonBody(MatchersV3.eachLike({ code: '45232', name: 'Olivet' })))
       .executeTest(async (mockServer) => {
         const communes = await firstValueFrom(adapterAgainst(HttpCommunes, mockServer.url).ofCommittee('45'));

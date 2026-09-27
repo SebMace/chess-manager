@@ -13,7 +13,7 @@
       ],
       "request": {
         "method": "GET",
-        "path": "/clubs",
+        "path": "/api/clubs",
         "query": {
           "committee": [
             "45"
@@ -26,6 +26,7 @@
             {
               "commune": "Montargis",
               "ffeClubId": "G45100",
+              "id": "6f1c1c7e-3c1a-4b0e-9d4e-2b7a5f0c8a11",
               "name": "Echiquier du Gâtinais"
             }
           ],
@@ -47,6 +48,15 @@
                   "min": 1
                 }
               ]
+            },
+            "$[*].id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
             }
           }
         },
@@ -59,7 +69,7 @@
       "pending": false,
       "request": {
         "method": "GET",
-        "path": "/communes",
+        "path": "/api/communes",
         "query": {
           "committee": [
             "45"
