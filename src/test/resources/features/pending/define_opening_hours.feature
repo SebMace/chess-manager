@@ -31,3 +31,25 @@ Feature: Define the opening hours of a club
       | playing venue              | at the registered office |
     When an administrator defines that "U.S. Orléans.Echecs" opens every Friday from 20:00 to 22:00 for free play
     Then "U.S. Orléans.Echecs" opens every Friday from 20:00 to 22:00 for free play
+
+  @acceptance
+  Scenario: A club opens during several sessions, each for its activity
+    Given "Loiret" is a departmental committee of the FFE
+    And an administrator has created the club "U.S. Orléans.Echecs" with:
+      | departmental committee     | Loiret                   |
+      | FFE identifier             | G45001                   |
+      | commune                    | Orléans                  |
+      | registered office street   | 12 rue des Échecs        |
+      | registered office postcode | 45000                    |
+      | registered office town     | Orléans                  |
+      | playing venue              | at the registered office |
+    When an administrator defines the opening hours of "U.S. Orléans.Echecs":
+      | day      | from  | to    | activity           |
+      | Friday   | 20:00 | 22:00 | free play          |
+      | Saturday | 15:00 | 17:00 | adult lessons      |
+      | Monday   | 20:00 | 22:00 | children's lessons |
+    Then "U.S. Orléans.Echecs" opens during these sessions:
+      | day      | from  | to    | activity           |
+      | Friday   | 20:00 | 22:00 | free play          |
+      | Saturday | 15:00 | 17:00 | adult lessons      |
+      | Monday   | 20:00 | 22:00 | children's lessons |
