@@ -3,6 +3,7 @@ package infrastructure;
 import clubmanagement.createclub.rest.CreateClubController;
 import clubmanagement.communesofcommittee.rest.CommunesOfCommitteeController;
 import clubmanagement.insee.InseeCommunes;
+import clubmanagement.laposte.LaPosteDeliveryTowns;
 import clubmanagement.persistence.JdbcClubRepository;
 import clubmanagement.ports.ClubRepository;
 import clubmanagement.clubsofcommittee.ClubsOfCommittee;
@@ -10,6 +11,9 @@ import clubmanagement.clubsofcommittee.rest.ClubsOfCommitteeController;
 import clubmanagement.communesofcommittee.CommunesOfCommittee;
 import clubmanagement.createclub.CreateClub;
 import clubmanagement.ports.Communes;
+import clubmanagement.ports.DeliveryTowns;
+import clubmanagement.townsofpostcode.TownsOfPostcode;
+import clubmanagement.townsofpostcode.rest.TownsOfPostcodeController;
 import clubmanagement.domain.club.vo.ClubId;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -57,5 +61,20 @@ class ClubConfiguration {
     @Bean
     ClubsOfCommitteeController clubsOfCommitteeController(ClubsOfCommittee clubsOfCommittee) {
         return new ClubsOfCommitteeController(clubsOfCommittee);
+    }
+
+    @Bean
+    DeliveryTowns deliveryTowns() {
+        return LaPosteDeliveryTowns.fromOfficialPostcodes();
+    }
+
+    @Bean
+    TownsOfPostcode townsOfPostcode(DeliveryTowns deliveryTowns) {
+        return new TownsOfPostcode(deliveryTowns);
+    }
+
+    @Bean
+    TownsOfPostcodeController townsOfPostcodeController(TownsOfPostcode townsOfPostcode) {
+        return new TownsOfPostcodeController(townsOfPostcode);
     }
 }
