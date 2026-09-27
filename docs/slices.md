@@ -30,6 +30,7 @@ Seule la prochaine slice est détaillée ; les autres le seront quand on les dé
 | Register a partnership | `registerpartnership` | cas d'usage seulement | Create a club |
 | Recognize an external player | `isexternalplayer` | cas d'usage seulement | Register a license |
 | Find the towns of a postcode | `townsofpostcode` | livrée | — |
+| Find the postcodes of a town | `postcodesoftown` | livrée | — |
 
 Évolutions de *Create a club* : comité départemental, identifiant FFE, commune, siège social,
 salle de jeu.
@@ -42,7 +43,6 @@ On finalise d'abord la création d'un club ; les slices sur les joueurs viendron
 |---|---|---|---|
 | Define the opening hours of a club | `defineopeninghours` | à venir | Create a club |
 | Move the registered office of a club | `moveregisteredoffice` | à venir | Create a club |
-| Find the postcodes of a town | `postcodesoftown` | prochaine | — |
 
 - *Define the opening hours of a club* s'appuiera sur le bounded context Craft Calendar (voir
   les thèmes). Le terme métier (« horaires d'ouverture », « séances de jeu », « tranches
@@ -77,10 +77,12 @@ On finalise d'abord la création d'un club ; les slices sur les joueurs viendron
   sens inverse de *Find the towns of a postcode*, avec la même source La Poste.
 - **Décisions** :
   - une localité peut avoir plusieurs codes postaux, et des localités homonymes existent dans
-    plusieurs départements (OLIVET → 45160, 53410) : l'application propose tous leurs codes.
-- **Questions ouvertes** : comment rapprocher la saisie de l'administrateur (« Orléans »,
-  « Saint-Paul ») du libellé de La Poste (ORLEANS, ST PAUL) ? À l'écran, remplir le code postal
-  quand il est unique, même s'il est déjà saisi ?
+    plusieurs départements (OLIVET → 45160, 53410) : l'application propose tous leurs codes ;
+  - l'adaptateur La Poste met la saisie à la norme de La Poste : majuscules sans accents, tirets
+    et apostrophes remplacés par des espaces, les mots SAINT et SAINTE abrégés en ST et STE
+    (mais SAINTES, la ville, reste en toutes lettres) ;
+  - à l'écran, un code postal unique remplit le champ seulement s'il est vide ; plusieurs codes
+    sont suggérés ; si la recherche échoue, rien n'est suggéré, sans message.
 
 ## Thèmes, à découper le moment venu
 
