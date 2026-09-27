@@ -56,4 +56,17 @@ public abstract class ClubCalendarContract {
 
         assertEquals(Set.of(atSchool), clubCalendar.openingHoursOf(club));
     }
+
+    @Test
+    void should_replace_the_sessions_previously_defined_for_a_club() {
+        ClubId club = aClub();
+        ClubCalendar clubCalendar = clubCalendar();
+        Session friday = new Session(DayOfWeek.FRIDAY, LocalTime.of(20, 0), LocalTime.of(22, 0));
+        Session saturday = new Session(DayOfWeek.SATURDAY, LocalTime.of(15, 0), LocalTime.of(17, 0));
+        clubCalendar.defineOpeningHours(club, Set.of(friday));
+
+        clubCalendar.defineOpeningHours(club, Set.of(saturday));
+
+        assertEquals(Set.of(saturday), clubCalendar.openingHoursOf(club));
+    }
 }
