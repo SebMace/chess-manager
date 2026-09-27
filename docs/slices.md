@@ -62,9 +62,10 @@ On finalise d'abord la création d'un club ; les slices sur les joueurs viendron
     nom : pas d'homonyme (Olivet de la Mayenne) et la localité est celle de La Poste, même quand
     elle diffère du nom de la commune ;
   - une commune peut avoir plusieurs localités postales (44 cas, surtout en Polynésie) ;
-  - à l'écran, la localité et le code postal d'une adresse sont remplacés s'ils sont vides ou
-    s'ils viennent de la commune choisie auparavant ; une saisie de l'administrateur n'est jamais
-    écrasée. Plusieurs codes postaux sont suggérés sans être choisis.
+  - à l'écran, quand la commune choisie change, la localité et le code postal du siège social et
+    de la salle de jeu sont remis à blanc, puis la nouvelle commune propose les siens ; au premier
+    choix d'une commune, une localité ou un code postal déjà saisis sont gardés. Plusieurs codes
+    postaux sont suggérés sans être choisis.
 
 ### Find the towns of a postcode
 

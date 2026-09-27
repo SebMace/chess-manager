@@ -217,6 +217,7 @@ export class CreateClub {
   }
 
   protected typeCommune(typed: string, committeeCode: string): void {
+    if (this.chosenCommune()) this.forgetTownOfCommune();
     this.chosenCommune.set(null);
     this.communeWritten.set(typed.trim().length > 0);
     this.typedCommune.set(typed);
@@ -224,6 +225,14 @@ export class CreateClub {
     if (!committeeCode || committeeCode === this.committeeOfCommunes) return;
     this.committeeOfCommunes = committeeCode;
     this.communes.ofCommittee(committeeCode).subscribe(communes => this.communesOfCommittee.set(communes));
+  }
+
+  // The town and the postcode of the addresses follow the commune: changing the one chosen starts them afresh.
+  private forgetTownOfCommune(): void {
+    const withoutTown = (address: PostalAddress) => ({ ...address, town: '', postcode: '' });
+    this.townOfCommune.set(null);
+    this.registeredOffice.update(withoutTown);
+    this.venue.update(withoutTown);
   }
 
   protected create(event: Event, club: NewClub): void {
