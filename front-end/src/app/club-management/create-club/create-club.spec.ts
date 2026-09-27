@@ -6,6 +6,8 @@ import { Clubs } from '../ports/clubs';
 import { HttpClubs } from '../http/http-clubs';
 import { Commune, Communes } from '../ports/communes';
 import { HttpCommunes } from '../http/http-communes';
+import { Towns } from '../ports/towns';
+import { HttpTowns } from '../http/http-towns';
 
 const REGISTERED_OFFICE = { 'Numéro et voie': '12 rue des Échecs', 'Code postal': '45000', 'Localité': 'Orléans' };
 
@@ -28,6 +30,7 @@ describe('CreateClub', () => {
         provideHttpClientTesting(),
         { provide: Clubs, useClass: HttpClubs },
         { provide: Communes, useClass: HttpCommunes },
+        { provide: Towns, useClass: HttpTowns },
       ],
     });
     fixture = TestBed.createComponent(CreateClub);
