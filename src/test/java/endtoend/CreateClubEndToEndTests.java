@@ -181,6 +181,16 @@ class CreateClubEndToEndTests {
     }
 
     @Test
+    void the_postcodes_la_poste_delivers_a_town_with_are_offered_for_an_address() throws Exception {
+        HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/postcodes?town=ORLEANS")).GET().build();
+
+        HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+
+        assertEquals(200, response.statusCode());
+        assertEquals("[\"45000\",\"45100\"]", response.body());
+    }
+
+    @Test
     void an_administrator_consults_the_clubs_of_a_committee() throws Exception {
         createClub("""
                 {"name": "Cercle fictif de Loury", "committeeCode": "45", "ffeClubId": "G45996", "communeCode": "45188", "registeredOffice": {"street": "3 place de l'Église", "postcode": "45470", "town": "Loury"},
