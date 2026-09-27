@@ -43,13 +43,30 @@ On finalise d'abord la création d'un club ; les slices sur les joueurs viendron
 |---|---|---|---|
 | Define the opening hours of a club | `defineopeninghours` | à venir | Create a club |
 | Move the registered office of a club | `moveregisteredoffice` | à venir | Create a club |
+| Find the towns of a commune | `townsofcommune` | prochaine | — |
 
 - *Define the opening hours of a club* s'appuiera sur le bounded context Craft Calendar (voir
   les thèmes). Le terme métier (« horaires d'ouverture », « séances de jeu », « tranches
   horaires ») reste à confirmer.
 - La prochaine slice reste à choisir entre les deux.
 - Évolutions prévues de *Create a club* : revenir à la liste après la création, pré-remplir le
-  comité à partir du département consulté.
+  comité à partir du département consulté, proposer la localité et le code postal du siège
+  social et de la salle de jeu à partir de la commune choisie (voir *Find the towns of a
+  commune*).
+
+### Find the towns of a commune
+
+- **Intention** : quand l'administrateur choisit la commune d'un club, l'application propose
+  par défaut sa localité postale, et ses codes postaux, pour le siège social et la salle de jeu.
+  Par exemple Olivet (45232) → OLIVET, 45160 ; Colmars (04061) → COLMARS LES ALPES, 04370.
+- **Décisions** :
+  - la localité est trouvée par le code INSEE de la commune dans la base La Poste, pas par son
+    nom : pas d'homonyme (Olivet de la Mayenne) et la localité est celle de La Poste, même quand
+    elle diffère du nom de la commune ;
+  - une commune peut avoir plusieurs localités postales (44 cas, surtout en Polynésie) ;
+  - à l'écran, la localité et le code postal d'une adresse sont remplacés s'ils sont vides ou
+    s'ils viennent de la commune choisie auparavant ; une saisie de l'administrateur n'est jamais
+    écrasée. Plusieurs codes postaux sont suggérés sans être choisis.
 
 ### Find the towns of a postcode
 
