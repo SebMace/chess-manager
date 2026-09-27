@@ -119,7 +119,7 @@ type CreationOutcome =
           <div class="fields">
             <app-postal-address-fields
               idPrefix="office"
-              [(address)]="registeredOffice"
+              [address]="registeredOffice"
               [problems]="officeProblems()"
               [defaultTown]="townOfCommune()"
             />
@@ -141,7 +141,7 @@ type CreationOutcome =
             @if (!venueAtOffice()) {
               <app-postal-address-fields
                 idPrefix="venue"
-                [(address)]="venue"
+                [address]="venue"
                 [problems]="venueProblems()"
                 [defaultTown]="townOfCommune()"
               />

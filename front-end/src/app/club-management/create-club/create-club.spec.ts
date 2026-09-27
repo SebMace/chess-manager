@@ -192,6 +192,21 @@ describe('CreateClub', () => {
     expect(fieldInGroup(page, 'Siège social', 'Localité').value).toBe('');
   });
 
+  it('gives up the towns of the postcode typed for the previous commune even when they arrive before the screen is refreshed', async () => {
+    fill(fieldLabelled(page, 'Code du comité'), '45');
+    await chooseCommune('Orl', 'Orléans');
+    await flushTownsOfCommune('45234', []);
+    fill(fieldInGroup(page, 'Siège social', 'Code postal'), '45100');
+    await fixture.whenStable();
+
+    fill(fieldLabelled(page, 'Commune'), 'Ol');
+    server.expectOne(request => request.url === '/towns' && request.params.get('postcode') === '45100').flush(['ORLEANS']);
+    await fixture.whenStable();
+
+    expect(fieldInGroup(page, 'Siège social', 'Code postal').value).toBe('');
+    expect(fieldInGroup(page, 'Siège social', 'Localité').value).toBe('');
+  });
+
   it('no longer suggests the postcodes of the town of the commune once the commune is changed', async () => {
     fill(fieldLabelled(page, 'Code du comité'), '45');
     await chooseCommune('Orl', 'Orléans');

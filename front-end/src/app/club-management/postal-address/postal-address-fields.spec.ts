@@ -1,3 +1,4 @@
+import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, TestRequest, provideHttpClientTesting } from '@angular/common/http/testing';
@@ -17,7 +18,7 @@ describe('PostalAddressFields', () => {
     });
     fixture = TestBed.createComponent(PostalAddressFields);
     fixture.componentRef.setInput('idPrefix', 'office');
-    fixture.componentRef.setInput('address', NO_ADDRESS);
+    fixture.componentRef.setInput('address', signal(NO_ADDRESS));
     server = TestBed.inject(HttpTestingController);
     page = fixture.nativeElement as HTMLElement;
     await fixture.whenStable();
