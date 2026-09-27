@@ -9,9 +9,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.text.Normalizer;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -50,10 +52,16 @@ public class LaPosteDeliveryTowns implements DeliveryTowns {
 
     @Override
     public List<Postcode> postcodesOf(String town) {
+        String asLaPosteWritesIt = asLaPosteWritesIt(town);
         return towns.entrySet().stream()
-                .filter(served -> served.getValue().contains(town))
+                .filter(served -> served.getValue().contains(asLaPosteWritesIt))
                 .map(Map.Entry::getKey)
                 .sorted(Comparator.comparing(Postcode::value))
                 .toList();
+    }
+
+    private static String asLaPosteWritesIt(String town) {
+        return Normalizer.normalize(town, Normalizer.Form.NFD).replaceAll("\\p{M}", "").replaceAll("[^\\p{L}\\p{N}]", " ").toUpperCase(Locale.ROOT)
+                .replaceAll("\\bSAINT(E?)\\b", "ST$1");
     }
 }
