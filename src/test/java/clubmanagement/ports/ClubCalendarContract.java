@@ -2,7 +2,9 @@ package clubmanagement.ports;
 
 import clubmanagement.domain.club.vo.Activity;
 import clubmanagement.domain.club.vo.ClubId;
+import clubmanagement.domain.club.vo.PostalAddress;
 import clubmanagement.domain.club.vo.Session;
+import clubmanagement.domain.club.vo.Venue;
 import org.junit.jupiter.api.Test;
 
 import java.time.DayOfWeek;
@@ -41,5 +43,17 @@ public abstract class ClubCalendarContract {
         clubCalendar.defineOpeningHours(club, Set.of(freePlay));
 
         assertEquals(Set.of(freePlay), clubCalendar.openingHoursOf(club));
+    }
+
+    @Test
+    void should_read_the_address_where_a_session_takes_place() {
+        ClubId club = aClub();
+        ClubCalendar clubCalendar = clubCalendar();
+        Session atSchool = new Session(DayOfWeek.MONDAY, LocalTime.of(20, 0), LocalTime.of(22, 0), Optional.empty(),
+                new Venue.Address(new PostalAddress("3 rue de l'École", "45000", "Orléans")));
+
+        clubCalendar.defineOpeningHours(club, Set.of(atSchool));
+
+        assertEquals(Set.of(atSchool), clubCalendar.openingHoursOf(club));
     }
 }
