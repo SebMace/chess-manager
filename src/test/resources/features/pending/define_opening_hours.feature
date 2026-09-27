@@ -53,3 +53,19 @@ Feature: Define the opening hours of a club
       | Friday   | 20:00 | 22:00 | free play          |
       | Saturday | 15:00 | 17:00 | adult lessons      |
       | Monday   | 20:00 | 22:00 | children's lessons |
+
+  @acceptance
+  Scenario: A session takes place at the playing venue of the club by default
+    Given "Loiret" is a departmental committee of the FFE
+    And an administrator has created the club "U.S. Orléans.Echecs" with:
+      | departmental committee     | Loiret            |
+      | FFE identifier             | G45001            |
+      | commune                    | Orléans           |
+      | registered office street   | 12 rue des Échecs |
+      | registered office postcode | 45000             |
+      | registered office town     | Orléans           |
+      | playing venue street       | 5 rue du Roi      |
+      | playing venue postcode     | 45100             |
+      | playing venue town         | Orléans           |
+    When an administrator defines that "U.S. Orléans.Echecs" opens every Friday from 20:00 to 22:00 for free play
+    Then the session of "U.S. Orléans.Echecs" every Friday from 20:00 to 22:00 takes place at its playing venue
