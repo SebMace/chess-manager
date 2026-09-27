@@ -1,0 +1,78 @@
+import { Component, input, model } from '@angular/core';
+import { AddressProblem, PostalAddress } from './postal-address';
+
+/**
+ * The fields of a postal address, always laid out the same way. The problems are shown as given:
+ * the enclosing form decides when the address is checked.
+ */
+@Component({
+  selector: 'app-postal-address-fields',
+  styleUrl: './postal-address-fields.css',
+  template: `
+    @let id = idPrefix();
+    <div class="field field--wide">
+      <label [for]="id + '-street'" class="required">Numéro et voie</label>
+      <input
+        [id]="id + '-street'"
+        aria-required="true"
+        [attr.autocomplete]="'section-' + id + ' address-line1'"
+        placeholder="ex. 12 rue des Échecs"
+        [value]="address().street"
+        [attr.aria-invalid]="problems().has('missingStreet') || null"
+        [attr.aria-describedby]="problems().has('missingStreet') ? id + '-street-error' : null"
+        (input)="describe({ street: street.value })"
+        #street
+      />
+      @if (problems().has('missingStreet')) {
+        <p [id]="id + '-street-error'" class="field-error">Le numéro et la voie sont obligatoires.</p>
+      }
+    </div>
+    <div class="field">
+      <label [for]="id + '-postcode'" class="required">Code postal</label>
+      <input
+        [id]="id + '-postcode'"
+        aria-required="true"
+        [attr.autocomplete]="'section-' + id + ' postal-code'"
+        inputmode="numeric"
+        placeholder="ex. 45000"
+        [value]="address().postcode"
+        [attr.aria-invalid]="problems().has('missingPostcode') || problems().has('malformedPostcode') || null"
+        [attr.aria-describedby]="problems().has('missingPostcode') || problems().has('malformedPostcode') ? id + '-postcode-error' : null"
+        (input)="describe({ postcode: postcode.value })"
+        #postcode
+      />
+      @if (problems().has('missingPostcode')) {
+        <p [id]="id + '-postcode-error'" class="field-error">Le code postal est obligatoire.</p>
+      } @else if (problems().has('malformedPostcode')) {
+        <p [id]="id + '-postcode-error'" class="field-error">Le code postal doit comporter 5 chiffres.</p>
+      }
+    </div>
+    <div class="field">
+      <label [for]="id + '-town'" class="required">Localité</label>
+      <input
+        [id]="id + '-town'"
+        aria-required="true"
+        [attr.autocomplete]="'section-' + id + ' address-level2'"
+        placeholder="ex. Orléans"
+        [value]="address().town"
+        [attr.aria-invalid]="problems().has('missingTown') || null"
+        [attr.aria-describedby]="problems().has('missingTown') ? id + '-town-error' : null"
+        (input)="describe({ town: town.value })"
+        #town
+      />
+      @if (problems().has('missingTown')) {
+        <p [id]="id + '-town-error'" class="field-error">La localité est obligatoire.</p>
+      }
+    </div>
+  `,
+})
+export class PostalAddressFields {
+  /** Makes the ids of the fields unique when a form holds several addresses. */
+  readonly idPrefix = input.required<string>();
+  readonly address = model.required<PostalAddress>();
+  readonly problems = input<ReadonlySet<AddressProblem>>(new Set());
+
+  protected describe(part: Partial<PostalAddress>): void {
+    this.address.update(address => ({ ...address, ...part }));
+  }
+}
