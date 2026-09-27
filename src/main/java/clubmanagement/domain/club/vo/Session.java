@@ -2,6 +2,11 @@ package clubmanagement.domain.club.vo;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
+import java.util.Optional;
 
-public record Session(DayOfWeek day, LocalTime from, LocalTime to) {
+public record Session(DayOfWeek day, LocalTime from, LocalTime to, Optional<Activity> activity) {
+
+    public Session(DayOfWeek day, LocalTime from, LocalTime to) {
+        this(day, from, to, Optional.empty());
+    }
 }

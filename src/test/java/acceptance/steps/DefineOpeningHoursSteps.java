@@ -2,6 +2,7 @@ package acceptance.steps;
 
 import acceptance.support.CreatedClubs;
 import clubmanagement.defineopeninghours.DefineOpeningHours;
+import clubmanagement.domain.club.vo.Activity;
 import clubmanagement.domain.club.vo.ClubId;
 import clubmanagement.domain.club.vo.Session;
 import clubmanagement.ports.InMemoryClubCalendar;
@@ -13,6 +14,7 @@ import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -31,6 +33,9 @@ public class DefineOpeningHoursSteps {
     @ParameterType("\\d{2}:\\d{2}")
     public LocalTime time(String time) { return LocalTime.parse(time); }
 
+    @ParameterType(".+")
+    public Activity activity(String name) { return new Activity(name); }
+
     @When("an administrator defines that {string} opens every {day} from {time} to {time}")
     public void defineOpeningHours(String club, DayOfWeek day, LocalTime from, LocalTime to) {
         defineOpeningHours.execute(clubId(club), new Session(day, from, to));
@@ -39,6 +44,16 @@ public class DefineOpeningHoursSteps {
     @Then("{string} opens every {day} from {time} to {time}")
     public void clubOpens(String club, DayOfWeek day, LocalTime from, LocalTime to) {
         assertEquals(List.of(new Session(day, from, to)), clubCalendar.openingHoursOf(clubId(club)));
+    }
+
+    @When("an administrator defines that {string} opens every {day} from {time} to {time} for {activity}")
+    public void defineOpeningHoursForActivity(String club, DayOfWeek day, LocalTime from, LocalTime to, Activity activity) {
+        defineOpeningHours.execute(clubId(club), new Session(day, from, to, Optional.of(activity)));
+    }
+
+    @Then("{string} opens every {day} from {time} to {time} for {activity}")
+    public void clubOpensForActivity(String club, DayOfWeek day, LocalTime from, LocalTime to, Activity activity) {
+        assertEquals(List.of(new Session(day, from, to, Optional.of(activity))), clubCalendar.openingHoursOf(clubId(club)));
     }
 
     private ClubId clubId(String club) { return createdClubs.idOf(club).orElseThrow(); }
