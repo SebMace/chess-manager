@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +50,10 @@ public class LaPosteDeliveryTowns implements DeliveryTowns {
 
     @Override
     public List<Postcode> postcodesOf(String town) {
-        return List.of();
+        return towns.entrySet().stream()
+                .filter(served -> served.getValue().contains(town))
+                .map(Map.Entry::getKey)
+                .sorted(Comparator.comparing(Postcode::value))
+                .toList();
     }
 }
