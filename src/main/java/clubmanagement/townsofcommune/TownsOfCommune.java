@@ -15,6 +15,6 @@ public class TownsOfCommune {
     }
 
     public List<DeliveryTown> execute(CommuneCode commune) {
-        return List.of();
+        return deliveryTowns.ofCommune(commune);
     }
 }
