@@ -9,4 +9,8 @@ public record Session(DayOfWeek day, LocalTime from, LocalTime to, Optional<Acti
     public Session(DayOfWeek day, LocalTime from, LocalTime to) {
         this(day, from, to, Optional.empty());
     }
+
+    public Venue venue() {
+        return Venue.PLAYING_VENUE;
+    }
 }

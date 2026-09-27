@@ -5,6 +5,7 @@ import clubmanagement.defineopeninghours.DefineOpeningHours;
 import clubmanagement.domain.club.vo.Activity;
 import clubmanagement.domain.club.vo.ClubId;
 import clubmanagement.domain.club.vo.Session;
+import clubmanagement.domain.club.vo.Venue;
 import clubmanagement.ports.InMemoryClubCalendar;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.ParameterType;
@@ -67,6 +68,14 @@ public class DefineOpeningHoursSteps {
     @Then("{string} opens during these sessions:")
     public void clubOpensDuringSessions(String club, DataTable sessions) {
         assertEquals(sessions(sessions), clubCalendar.openingHoursOf(clubId(club)));
+    }
+
+    @Then("the session of {string} every {day} from {time} to {time} takes place at its playing venue")
+    public void sessionAtPlayingVenue(String club, DayOfWeek day, LocalTime from, LocalTime to) {
+        Session session = clubCalendar.openingHoursOf(clubId(club)).stream()
+                .filter(defined -> defined.day() == day && defined.from().equals(from) && defined.to().equals(to))
+                .findFirst().orElseThrow();
+        assertEquals(Venue.PLAYING_VENUE, session.venue());
     }
 
     private Set<Session> sessions(DataTable sessions) {
