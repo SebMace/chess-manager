@@ -81,14 +81,14 @@ public class ClubManagementDriver {
     public void registerLicense(String club, String type, Set<String> requestedPartners) {
         ensurePerson();
         FfeLicense license = type == null ? null : new FfeLicense(new FfeId("A12345"), FfeLicenseType.valueOf(type));
-        new RegisterLicense(relationships, season).execute(personId, clubId(club), license,
+        new RegisterLicense(relationships, season).registerLicenseOfKeepingPartnerships(personId, clubId(club), license,
                 requestedPartners.stream().map(this::clubId).collect(Collectors.toSet()));
     }
 
     public void registerLicenseDetails(String club, String ffeId, String type, Season currentSeason) {
         ensurePerson();
-        new RegisterLicense(relationships, currentSeason).execute(personId, clubId(club), ffeId,
-                type == null ? null : FfeLicenseType.valueOf(type));
+        new RegisterLicense(relationships, currentSeason).registerLicenseOf(personId, clubId(club),
+                new FfeLicense(new FfeId(ffeId), type == null ? null : FfeLicenseType.valueOf(type)));
     }
 
     public Optional<FfeLicense> license(String club) {

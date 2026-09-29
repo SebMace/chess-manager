@@ -57,7 +57,7 @@ class RegisterProspectTests {
         RegisterProspect register = new RegisterProspect(people, relationships, season, () -> personId);
         register.execute(clubId, "Camille", "Martin", "camille@example.org");
         FfeLicense license = new FfeLicense(new FfeId("A12345"), type);
-        new RegisterLicense(relationships, season).execute(personId, clubId, license);
+        new RegisterLicense(relationships, season).registerLicenseOf(personId, clubId, license);
         ClubId anotherClub = new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000003"));
 
         assertThrows(IllegalStateException.class, () -> register.execute(personId, clubId));

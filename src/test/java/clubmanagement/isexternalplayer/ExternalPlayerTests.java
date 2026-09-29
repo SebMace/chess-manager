@@ -61,7 +61,7 @@ class ExternalPlayerTests {
     }
 
     private void licensedAt(ClubId clubId, Season licenseSeason) {
-        new RegisterLicense(relationships, licenseSeason).execute(person, clubId, license);
+        new RegisterLicense(relationships, licenseSeason).registerLicenseOf(person, clubId, license);
     }
 
     private boolean isExternalPlayer(Season requestedSeason) {

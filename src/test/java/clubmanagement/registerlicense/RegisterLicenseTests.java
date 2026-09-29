@@ -29,7 +29,7 @@ class RegisterLicenseTests {
         ClubRelationship prospect = new ClubRelationship(personId, orleans);
         repository.save(prospect);
 
-        new RegisterLicense(repository, season).execute(personId, orleans, license);
+        new RegisterLicense(repository, season).registerLicenseOf(personId, orleans, license);
 
         ClubRelationship saved = repository.find(personId, orleans).orElseThrow();
         assertEquals(MEMBER, saved.status());
@@ -43,7 +43,7 @@ class RegisterLicenseTests {
         PersonId anotherPerson = new PersonId(UUID.fromString("00000000-0000-0000-0000-000000000004"));
         repository.save(new ClubRelationship(anotherPerson, olivet));
 
-        new RegisterLicense(repository, season).execute(personId, orleans, license);
+        new RegisterLicense(repository, season).registerLicenseOf(personId, orleans, license);
 
         assertTrue(repository.find(personId, olivet).isEmpty());
         assertEquals(MEMBER, repository.find(personId, orleans).orElseThrow().status());
@@ -56,7 +56,7 @@ class RegisterLicenseTests {
         repository.save(new ClubRelationship(personId, olivet));
         repository.save(new ClubRelationship(personId, gien));
 
-        new RegisterLicense(repository, season).execute(personId, orleans, license, Set.of(olivet));
+        new RegisterLicense(repository, season).registerLicenseOfKeepingPartnerships(personId, orleans, license, Set.of(olivet));
 
         ClubRelationship partner = repository.find(personId, olivet).orElseThrow();
         assertEquals(PARTNER, partner.status());
@@ -70,24 +70,15 @@ class RegisterLicenseTests {
         repository.save(new ClubRelationship(personId, olivet));
 
         assertThrows(IllegalStateException.class,
-                () -> new RegisterLicense(repository, season).execute(personId, olivet, license));
+                () -> new RegisterLicense(repository, season).registerLicenseOf(personId, olivet, license));
 
         assertEquals(license, repository.find(personId, orleans).orElseThrow().license(season).orElseThrow());
         assertEquals(PROSPECT, repository.find(personId, olivet).orElseThrow().status());
     }
     @Test
     void should_register_membership_without_a_prior_prospect_relationship() {
-        new RegisterLicense(repository, season).execute(personId, orleans, license);
+        new RegisterLicense(repository, season).registerLicenseOf(personId, orleans, license);
 
         assertEquals(license, repository.find(personId, orleans).orElseThrow().license(season).orElseThrow());
-    }
-    @Test
-    void should_validate_license_details_at_the_application_boundary() {
-        RegisterLicense register = new RegisterLicense(repository, season);
-        assertThrows(IllegalArgumentException.class,
-                () -> register.execute(personId, orleans, " ", FfeLicenseType.A));
-        assertTrue(repository.find(personId, orleans).isEmpty());
-        register.execute(personId, orleans, "A00123", FfeLicenseType.B);
-        assertEquals("A00123", repository.find(personId, orleans).orElseThrow().license(season).orElseThrow().ffeId().value());
     }
 }

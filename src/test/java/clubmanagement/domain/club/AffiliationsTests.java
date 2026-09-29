@@ -114,7 +114,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
         assertEquals(Optional.of(firstClub), club(firstSeason));
     }
     private void affiliateTo(ClubId clubId, Season currentSeason) {
-        new RegisterLicense(relationships, currentSeason).execute(personId, clubId, license);
+        new RegisterLicense(relationships, currentSeason).registerLicenseOf(personId, clubId, license);
     }
 
     private Optional<ClubId> club(Season season) {

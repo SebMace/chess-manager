@@ -24,7 +24,7 @@ class RegisterPartnershipTests {
 
     @Test
     void should_save_a_partnership_without_changing_membership_elsewhere() {
-        new RegisterLicense(relationships, season).execute(person, olivet, license);
+        new RegisterLicense(relationships, season).registerLicenseOf(person, olivet, license);
 
         new RegisterPartnership(relationships).execute(person, orleans);
 
