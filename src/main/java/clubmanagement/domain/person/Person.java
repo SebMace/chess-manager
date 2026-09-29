@@ -17,7 +17,7 @@ public class Person {
     private final String lastName;
     private final String email;
     /** Received with the first A or B license and never changed; absent for a person never licensed. */
-    private final FfeId ffeId;
+    private FfeId ffeId;
 
     private EloRating eloRating;
     private EloRating eloRatingLastRecorded;
@@ -48,6 +48,12 @@ public class Person {
     }
 
     public Optional<FfeId> ffeId() { return Optional.ofNullable(ffeId); }
+
+    /** Taking a first A or B license gives the person the FFE identifier they keep for good. */
+    public void takesFirstLicense(FfeId ffeId) {
+        if (this.ffeId != null) throw new IllegalStateException("A licensed player keeps the FFE identifier of their first license");
+        this.ffeId = ffeId;
+    }
 
 
     public String firstName() {

@@ -4,6 +4,7 @@ import clubmanagement.domain.club.vo.ClubId;
 import clubmanagement.domain.club.vo.Season;
 import clubmanagement.registerlicense.RegisterLicense;
 import clubmanagement.ports.InMemoryClubRelationshipRepository;
+import clubmanagement.ports.InMemoryPersonRepository;
 import clubmanagement.domain.person.vo.PersonId;
 import clubmanagement.domain.member.vo.FfeId;
 import clubmanagement.domain.member.vo.FfeLicense;
@@ -114,7 +115,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
         assertEquals(Optional.of(firstClub), club(firstSeason));
     }
     private void affiliateTo(ClubId clubId, Season currentSeason) {
-        new RegisterLicense(relationships, currentSeason).registerLicenseOf(personId, clubId, license);
+        new RegisterLicense(new InMemoryPersonRepository(), relationships, currentSeason).registerLicenseOf(personId, clubId, license);
     }
 
     private Optional<ClubId> club(Season season) {

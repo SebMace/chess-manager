@@ -53,7 +53,7 @@ public class PersonIdentitySteps {
     public void recordPerson(String first, String last) {
         id = record.execute(FIRST_ID, first, last);
         if (licensed) {
-            new RegisterLicense(relationships, new Season(2026, 2027)).registerLicenseOf(id,
+            new RegisterLicense(people, relationships, new Season(2026, 2027)).registerLicenseOf(id,
                     new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000002")),
                     new FfeLicense(new FfeId("A12345"), FfeLicenseType.A));
         }

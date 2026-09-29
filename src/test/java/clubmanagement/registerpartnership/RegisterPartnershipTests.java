@@ -10,6 +10,7 @@ import clubmanagement.domain.member.vo.FfeLicenseType;
 import clubmanagement.domain.person.vo.PersonId;
 import org.junit.jupiter.api.Test;
 import clubmanagement.ports.InMemoryClubRelationshipRepository;
+import clubmanagement.ports.InMemoryPersonRepository;
 
 import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,7 +25,7 @@ class RegisterPartnershipTests {
 
     @Test
     void should_save_a_partnership_without_changing_membership_elsewhere() {
-        new RegisterLicense(relationships, season).registerLicenseOf(person, olivet, license);
+        new RegisterLicense(new InMemoryPersonRepository(), relationships, season).registerLicenseOf(person, olivet, license);
 
         new RegisterPartnership(relationships).execute(person, orleans);
 

@@ -13,6 +13,7 @@ import clubmanagement.domain.member.vo.FfeLicenseType;
 import clubmanagement.domain.person.vo.PersonId;
 import org.junit.jupiter.api.Test;
 import clubmanagement.ports.InMemoryClubRelationshipRepository;
+import clubmanagement.ports.InMemoryPersonRepository;
 import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -61,7 +62,7 @@ class ExternalPlayerTests {
     }
 
     private void licensedAt(ClubId clubId, Season licenseSeason) {
-        new RegisterLicense(relationships, licenseSeason).registerLicenseOf(person, clubId, license);
+        new RegisterLicense(new InMemoryPersonRepository(), relationships, licenseSeason).registerLicenseOf(person, clubId, license);
     }
 
     private boolean isExternalPlayer(Season requestedSeason) {
