@@ -2,6 +2,7 @@ package clubmanagement.domain.person;
 
 import clubmanagement.domain.exceptions.FideIdAlreadyAssignedException;
 import clubmanagement.domain.member.vo.EloRating;
+import clubmanagement.domain.member.vo.FfeId;
 import clubmanagement.domain.member.vo.FideId;
 import clubmanagement.domain.person.vo.PersonId;
 
@@ -15,6 +16,8 @@ public class Person {
     private final String firstName;
     private final String lastName;
     private final String email;
+    /** Received with the first A or B license and never changed; absent for a person never licensed. */
+    private final FfeId ffeId;
 
     private EloRating eloRating;
     private EloRating eloRatingLastRecorded;
@@ -27,12 +30,24 @@ public class Person {
     }
 
     public Person(PersonId personId, String firstName, String lastName, String email) {
+        this(personId, firstName, lastName, email, null);
+    }
+
+    private Person(PersonId personId, String firstName, String lastName, String email, FfeId ffeId) {
         if (personId == null) throw new IllegalArgumentException("personId cannot be null");
         this.personId = personId;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
+        this.ffeId = ffeId;
     }
+
+    /** A person registered with an FFE license, and so with the personal FFE identifier it gave them. */
+    public static Person licensedPlayer(PersonId personId, String firstName, String lastName, FfeId ffeId) {
+        return new Person(personId, firstName, lastName, null, ffeId);
+    }
+
+    public Optional<FfeId> ffeId() { return Optional.ofNullable(ffeId); }
 
 
     public String firstName() {

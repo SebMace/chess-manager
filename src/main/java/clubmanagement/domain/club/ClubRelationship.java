@@ -1,5 +1,7 @@
 package clubmanagement.domain.club;
 
+import clubmanagement.domain.member.vo.FfeLicenseType;
+import clubmanagement.domain.person.Person;
 import clubmanagement.domain.person.vo.PersonId;
 import clubmanagement.domain.club.vo.ClubId;
 import clubmanagement.domain.club.vo.Season;
@@ -32,6 +34,13 @@ public final class ClubRelationship {
         this.clubId = clubId;
         this.licenses = Map.copyOf(licenses);
         this.status = status;
+    }
+
+    /** A licensed player is a member, for the season of their license, of the club where they were registered. */
+    public static ClubRelationship membershipOf(Person licensedPlayer, ClubId clubId, FfeLicenseType licenseType,
+                                                Season season) {
+        FfeLicense license = new FfeLicense(licensedPlayer.ffeId().orElseThrow(), licenseType);
+        return new ClubRelationship(licensedPlayer.id(), clubId).registerLicense(license, season);
     }
 
     public PersonId personId() { return personId; }
