@@ -8,8 +8,8 @@ import clubmanagement.domain.club.vo.PostalAddress;
 import clubmanagement.domain.commune.CommuneCode;
 import clubmanagement.domain.club.vo.Season;
 import clubmanagement.domain.member.vo.FfeId;
-import clubmanagement.domain.member.vo.FfeLicense;
 import clubmanagement.domain.member.vo.FfeLicenseType;
+import clubmanagement.domain.person.Person;
 import clubmanagement.domain.person.vo.PersonId;
 import org.junit.jupiter.api.Test;
 import clubmanagement.ports.InMemoryClubRelationshipRepository;
@@ -25,7 +25,7 @@ class ExternalPlayerTests {
     private final PersonId person = new PersonId(UUID.fromString("00000000-0000-0000-0000-000000000001"));
     private static final PostalAddress OFFICE = new PostalAddress("12 rue des Échecs", "45000", "Orléans");
     private final Season season = new Season(2026, 2027);
-    private final FfeLicense license = new FfeLicense(new FfeId("A12345"), FfeLicenseType.A);
+    private final InMemoryPersonRepository people = new InMemoryPersonRepository();
 
     @Test
     void should_recognize_external_affiliation_without_managing_the_club() {
@@ -34,7 +34,7 @@ class ExternalPlayerTests {
 
         assertTrue(isExternalPlayer(season));
         assertFalse(clubs.find(gien).orElseThrow().managedByApplication());
-        assertEquals(license, relationships.find(person, gien).orElseThrow().license(season).orElseThrow());
+        assertEquals(FfeLicenseType.A, relationships.find(person, gien).orElseThrow().license(season).orElseThrow());
     }
 
     @Test
@@ -62,7 +62,8 @@ class ExternalPlayerTests {
     }
 
     private void licensedAt(ClubId clubId, Season licenseSeason) {
-        new RegisterLicense(new InMemoryPersonRepository(), relationships, licenseSeason).registerLicenseOf(person, clubId, license);
+        people.save(Person.licensedPlayer(person, "Camille", "Martin", new FfeId("A12345")));
+        new RegisterLicense(people, relationships, licenseSeason).renewLicenseOf(person, clubId, FfeLicenseType.A);
     }
 
     private boolean isExternalPlayer(Season requestedSeason) {

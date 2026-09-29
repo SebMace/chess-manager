@@ -5,9 +5,9 @@ import clubmanagement.domain.club.vo.Season;
 import clubmanagement.registerlicense.RegisterLicense;
 import clubmanagement.ports.InMemoryClubRelationshipRepository;
 import clubmanagement.ports.InMemoryPersonRepository;
+import clubmanagement.domain.person.Person;
 import clubmanagement.domain.person.vo.PersonId;
 import clubmanagement.domain.member.vo.FfeId;
-import clubmanagement.domain.member.vo.FfeLicense;
 import clubmanagement.domain.member.vo.FfeLicenseType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  class AffiliationsTests {
     private PersonId personId;
     private final InMemoryClubRelationshipRepository relationships = new InMemoryClubRelationshipRepository();
-    private final FfeLicense license = new FfeLicense(new FfeId("A12345"), FfeLicenseType.A);
+    private final InMemoryPersonRepository people = new InMemoryPersonRepository();
     private ClubId firstClub;
     private ClubId anotherClub;
     private Season firstSeason;
@@ -30,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
     @BeforeEach
     void setUp() {
         personId = new PersonId(UUID.fromString("00000000-0000-0000-0000-000000000001"));
+        people.save(Person.licensedPlayer(personId, "Camille", "Martin", new FfeId("A12345")));
         firstClub = new ClubId(
                 UUID.fromString("00000000-0000-0000-0000-000000000002")
         );
@@ -115,7 +116,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
         assertEquals(Optional.of(firstClub), club(firstSeason));
     }
     private void affiliateTo(ClubId clubId, Season currentSeason) {
-        new RegisterLicense(new InMemoryPersonRepository(), relationships, currentSeason).registerLicenseOf(personId, clubId, license);
+        new RegisterLicense(people, relationships, currentSeason).renewLicenseOf(personId, clubId, FfeLicenseType.A);
     }
 
     private Optional<ClubId> club(Season season) {

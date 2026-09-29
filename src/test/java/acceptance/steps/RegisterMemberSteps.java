@@ -4,7 +4,6 @@ import acceptance.support.CreatedClubs;
 import clubmanagement.domain.club.ClubRelationship;
 import clubmanagement.domain.club.vo.Season;
 import clubmanagement.domain.member.vo.FfeId;
-import clubmanagement.domain.member.vo.FfeLicense;
 import clubmanagement.domain.member.vo.FfeLicenseType;
 import clubmanagement.domain.person.Person;
 import clubmanagement.domain.person.vo.PersonId;
@@ -54,8 +53,7 @@ public class RegisterMemberSteps {
         assertEquals(name, registeredPlayerName());
         ClubRelationship membership = relationships.find(registeredPlayer, createdClubs.idOf(clubName).orElseThrow()).orElseThrow();
         assertEquals(MEMBER, membership.status());
-        FfeLicense license = membership.license(new Season(yearBegin, yearEnd)).orElseThrow();
-        assertEquals(FfeLicenseType.valueOf(licenseType), license.type());
+        assertEquals(FfeLicenseType.valueOf(licenseType), membership.license(new Season(yearBegin, yearEnd)).orElseThrow());
     }
 
     @Then("the FFE identifier of {player} is {string}")

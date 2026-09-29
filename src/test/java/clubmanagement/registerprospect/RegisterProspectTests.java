@@ -2,7 +2,6 @@ package clubmanagement.registerprospect;
 
 import static clubmanagement.domain.club.RelationshipStatus.*;
 import clubmanagement.registerlicense.RegisterLicense;
-import clubmanagement.domain.member.vo.FfeLicense;
 import clubmanagement.domain.member.vo.FfeLicenseType;
 import clubmanagement.domain.member.vo.FfeId;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -56,15 +55,14 @@ class RegisterProspectTests {
     void should_reject_a_licensed_person_as_a_prospect_in_any_club(FfeLicenseType type) {
         RegisterProspect register = new RegisterProspect(people, relationships, season, () -> personId);
         register.execute(clubId, "Camille", "Martin", "camille@example.org");
-        FfeLicense license = new FfeLicense(new FfeId("A12345"), type);
-        new RegisterLicense(people, relationships, season).registerLicenseOf(personId, clubId, license);
+        new RegisterLicense(people, relationships, season).registerFirstLicenseOf(personId, clubId, new FfeId("A12345"), type);
         ClubId anotherClub = new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000003"));
 
         assertThrows(IllegalStateException.class, () -> register.execute(personId, clubId));
         assertThrows(IllegalStateException.class, () -> register.execute(personId, anotherClub));
 
         assertEquals(MEMBER, relationships.find(personId, clubId).orElseThrow().status());
-        assertEquals(license, relationships.find(personId, clubId).orElseThrow().license(season).orElseThrow());
+        assertEquals(type, relationships.find(personId, clubId).orElseThrow().license(season).orElseThrow());
         assertTrue(relationships.find(personId, anotherClub).isEmpty());
     }
 }

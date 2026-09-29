@@ -3,7 +3,6 @@ package acceptance.steps;
 import acceptance.support.ClubManagementDriver;
 import clubmanagement.domain.club.RelationshipStatus;
 import clubmanagement.domain.club.vo.Season;
-import clubmanagement.domain.member.vo.FfeLicense;
 import clubmanagement.domain.person.vo.PersonId;
 import java.util.Optional;
 import io.cucumber.java.en.Given;
@@ -148,13 +147,13 @@ public class ClubManagementSteps {
     @Then("the recorded FFE identifier is {string}")
     @Then("Camille's FFE identifier remains {string}")
     public void recordedFfe(String expected) {
-        assertEquals(expected, application.license("Orléans").orElseThrow().ffeId().value());
+        assertEquals(expected, application.person().ffeId().orElseThrow().value());
     }
 
     @Then("the recorded license category is {word}")
     @Then("Camille's license category remains {word}")
     public void recordedCategory(String expected) {
-        assertEquals(expected, application.license("Orléans").orElseThrow().type().name());
+        assertEquals(expected, application.license("Orléans").orElseThrow().name());
     }
 
     @Given("no FFE registration is recorded for Camille")
@@ -321,7 +320,7 @@ public class ClubManagementSteps {
     @Then("Camille remains affiliated with Gien for that season")
     public void retainsGien() {
         assertEquals(Optional.of("Gien"), application.affiliation(application.currentSeason()));
-        assertEquals(suppliedFfeId, application.license("Gien").orElseThrow().ffeId().value());
+        assertEquals(suppliedFfeId, application.person().ffeId().orElseThrow().value());
     }
 
     @Then("Gien does not become a club managed by the application")

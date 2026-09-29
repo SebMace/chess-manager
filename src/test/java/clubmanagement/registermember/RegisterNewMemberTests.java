@@ -37,6 +37,6 @@ class RegisterNewMemberTests {
         assertEquals(Optional.of(new FfeId("K58213")), camille.ffeId());
         var membership = relationships.find(newMember, orleans).orElseThrow();
         assertEquals(MEMBER, membership.status());
-        assertEquals(FfeLicenseType.A, membership.license(season).orElseThrow().type());
+        assertEquals(FfeLicenseType.A, membership.license(season).orElseThrow());
     }
 }
