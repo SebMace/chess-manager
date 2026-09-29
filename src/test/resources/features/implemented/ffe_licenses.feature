@@ -1,35 +1,39 @@
-# Executable acceptance specifications. FfeMembershipTests and FfeIdTests cover the core rules.
-# Licenses belong to club relationships and are recorded for a season.
+# Executable acceptance specifications. FfeMembershipTests, PersonTests and FfeIdTests cover the core rules.
+# The FFE identifier belongs to the person; a license is recorded with a club for a season.
 # Identifiers are synthetic: no official FFE pattern is asserted.
-# Expiry and restrictions on FFE identifier replacement remain undecided.
 @club_management @existing_domain_rules
 @licenses
-Feature: Associate FFE identification with an A or B license
+Feature: Identify a licensed player by their personal FFE identifier
   As a club administrator
-  I want every recorded FFE license to include an identifier and category
-  So that FFE registration cannot be incomplete
+  I want every licensed player to have a personal and stable FFE identifier
+  So that a player keeps the same FFE identity whatever their club and season
 
-  Scenario Outline: Record either supported license category
-    Given Camille's FFE identifier is "A12345"
-    When Camille's FFE registration is recorded with category <type>
-    Then the recorded FFE identifier is "A12345"
-    And the recorded license category is <type>
+  Scenario Outline: A first license of either type gives the player their FFE identifier
+    Given Camille is a prospect of Orléans
+    When Camille takes her first license, of type <type>, at Orléans under the FFE identifier "A12345"
+    Then Camille's FFE identifier is "A12345"
+    And Camille is a member of Orléans for the season with a license of type <type>
 
     Examples:
       | type |
       | A    |
       | B    |
 
-  Scenario Outline: Reject an incomplete registration
-    Given no FFE registration is recorded for Camille
-    When registration is requested without the "<missing_information>"
+  Scenario: A licensed player keeps their FFE identifier for good
+    Given Camille has taken her first license under the FFE identifier "A12345"
+    When a first license is requested again for Camille under the FFE identifier "B54321"
     Then the request is rejected
-    And no partial FFE registration is recorded
+    And Camille's FFE identifier remains "A12345"
 
-    Examples:
-      | missing_information  |
-      | FFE identifier       |
-      | FFE license category |
+  Scenario: A renewal keeps the FFE identifier
+    Given Camille has taken her first license at Orléans under the FFE identifier "A12345"
+    When Camille renews her license at Orléans for the next season
+    Then Camille's FFE identifier remains "A12345"
+
+  Scenario: Only a licensed player can be a member
+    Given Camille is a prospect of Orléans who has never been licensed
+    Then Camille has no FFE identifier
+    And Camille is not a member of Orléans
 
   Scenario Outline: Reject an identifier without a value
     When an FFE identifier is created with "<value>"
@@ -46,15 +50,3 @@ Feature: Associate FFE identification with an A or B license
   Scenario: Preserve the identifier as supplied
     When the FFE identifier "A00123" is recorded
     Then its value remains exactly "A00123"
-
-  Scenario Outline: Preserve registration after an invalid request
-    Given Camille has recorded FFE identifier "A12345" and category A
-    When a new registration is requested without the "<missing_information>"
-    Then the request is rejected
-    And Camille's FFE identifier remains "A12345"
-    And Camille's license category remains A
-
-    Examples:
-      | missing_information  |
-      | FFE identifier       |
-      | FFE license category |

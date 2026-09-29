@@ -367,11 +367,16 @@ Personal equality depends on `PersonId`, not names. A person can exist without a
 license or FIDE identifier. Replacing an assigned FIDE identifier is rejected;
 non-positive FIDE IDs and negative ratings are rejected as before.
 
-`FfeLicense` remains an immutable pair of `FfeId` and category A or B. Both are
-required. Blank FFE IDs are rejected and supplied values are preserved without an
-invented federation-specific format. Invalid license requests preserve saved state.
-A valid license can replace the pair recorded for the same season, as in the previous
-model; restrictions on changing an FFE identifier have not been specified.
+The FFE identifier belongs to the person, not to a license: a person receives it with
+their first A or B license (`Person.licensedPlayer` for a player unknown to the
+application, `takesFirstLicense` for a prospect) and keeps it for good; a person never
+licensed has none. A club relationship records only the license type for each season,
+and only a licensed player can be a member. Blank FFE IDs are rejected and supplied values
+are preserved without an invented federation-specific format. Invalid license requests
+preserve saved state. A valid license type can replace the one recorded for the same season.
+
+Taking the license of a new season in the same club is a renewal (`renewLicenseOf`);
+taking it in another club is a transfer ("mutation"), which is not a renewal.
 
 The existing value objects remain in `clubmanagement/domain/member/vo` to limit package movement.
 The former `Member` entity and `MemberId` have been replaced by `Person` and `PersonId`;

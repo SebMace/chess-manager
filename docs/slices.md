@@ -29,6 +29,7 @@ Seule la prochaine slice est détaillée ; les autres le seront quand on les dé
 | Update a person | `updateperson` | cas d'usage seulement | Record a person |
 | Register a prospect | `registerprospect` | cas d'usage seulement | Create a club |
 | Register a license | `registerlicense` | cas d'usage seulement | Create a club |
+| Register a new member | `registermember` | prochaine (cas d'usage) | Create a club |
 | Register a partnership | `registerpartnership` | cas d'usage seulement | Create a club |
 | Recognize an external player | `isexternalplayer` | cas d'usage seulement | Register a license |
 | Find the towns of a postcode | `townsofpostcode` | livrée | — |
@@ -85,11 +86,30 @@ plus de durcissement ni de cas limite, et ses questions ouvertes attendent.
 
 ## Slices à venir
 
-On finalise d'abord la création d'un club ; les slices sur les joueurs viendront plus tard.
+*Move the registered office of a club* est écartée (YAGNI : un déménagement de siège est un
+geste rare). Les slices sur les joueurs commencent avec *Register a new member*.
 
-| Slice | Package | Statut | Dépend de |
-|---|---|---|---|
-| Move the registered office of a club | `moveregisteredoffice` | à venir | Create a club |
+### Register a new member
+
+- **Intention** : l'administrateur inscrit comme membre d'un club un joueur licencié que
+  l'application ne connaît pas encore, avec son prénom, son nom, son identifiant FFE et le type
+  de sa licence pour la saison. Par exemple Camille Martin, K58213, licence A, U.S. Orléans.Echecs,
+  2026-2027.
+- **Invariant** : une personne connue comme licenciée FFE possède nécessairement un identifiant
+  FFE personnel et stable, et elle est membre, pour la saison de sa licence, du club dans lequel
+  elle a été inscrite.
+- **Décisions** :
+  - l'identifiant FFE appartient à la personne, pas à la licence : il vient avec la première
+    licence A ou B et ne change plus ; `FfeLicense` a été supprimée, la relation au club ne garde
+    que le type de licence par saison ;
+  - le domaine crée les deux agrégats cohérents (`Person.licensedPlayer`, puis
+    `ClubRelationship.membershipOf`) ; le cas d'usage `RegisterNewMember` les enregistre ;
+  - le joueur est retrouvé par son identité, jamais par son nom ;
+  - un renouvellement se fait dans le même club ; une licence prise dans un autre club est une
+    mutation, pas un renouvellement.
+- **Couches** : acceptation et cas d'usage faits ; persistance, REST, contrat, écran à venir.
+- **Questions ouvertes** : la frontière de transaction qui enregistrera les deux agrégats
+  ensemble ; la mutation n'a pas encore d'opération propre.
 
 - Évolutions prévues de *Create a club* : revenir à la liste après la création, pré-remplir le
   comité à partir du département consulté.
