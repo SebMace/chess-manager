@@ -16,6 +16,29 @@ Statuts :
 
 Seule la prochaine slice est détaillée ; les autres le seront quand on les démarrera.
 
+## Priorité : Chess Decision
+
+Depuis le 2 octobre 2026, Chess Manager devient d'abord un outil personnel de progression aux
+échecs. Son cœur, **Chess Decision** : le joueur soumet une position, éventuellement des thèmes,
+son analyse, ses coups candidats et son plan ; l'outil confronte ce raisonnement aux ressources
+concrètes de la position et lui répond de façon pédagogique, en séparant les faits vérifiés, les
+interprétations et les incertitudes.
+
+- Les thèmes sont des hypothèses ou des objectifs d'apprentissage, jamais des vérités. Les
+  déséquilibres de Silman peuvent inspirer, sans devenir une grille obligatoire, et aucun contenu
+  de Silman n'est inventé.
+- Quatre responsabilités restent distinctes : le domaine (positions, propositions, thèmes,
+  retours), le moteur (vérification tactique, évaluations, variantes), le LLM (formuler des
+  explications à partir des éléments disponibles) et un éventuel serveur MCP (exposer ces
+  capacités à un client IA, sans être le moteur du raisonnement).
+- Pas d'infrastructure, MCP compris, avant un premier usage utile identifié.
+- Faire de Chess Decision un bounded context distinct reste une proposition, à valider.
+- La première slice de Chess Decision reste à choisir.
+
+La gestion de club (clubs, personnes, licences, imports FFE) est en pause : son code est gardé tel
+quel, sans suppression ni refonte, et toute nouvelle slice de ce domaine passe d'abord au crible
+YAGNI. Cette pause ne vient pas d'un refus de la FFE.
+
 ## Slices existantes
 
 | Slice | Package | Statut | Dépend de |
@@ -29,7 +52,7 @@ Seule la prochaine slice est détaillée ; les autres le seront quand on les dé
 | Update a person | `updateperson` | cas d'usage seulement | Record a person |
 | Register a prospect | `registerprospect` | cas d'usage seulement | Create a club |
 | Register a license | `registerlicense` | cas d'usage seulement | Create a club |
-| Register a new member | `registermember` | prochaine (cas d'usage) | Create a club |
+| Register a new member | `registermember` | cas d'usage seulement | Create a club |
 | Register a partnership | `registerpartnership` | cas d'usage seulement | Create a club |
 | Recognize an external player | `isexternalplayer` | cas d'usage seulement | Register a license |
 | Find the towns of a postcode | `townsofpostcode` | livrée | — |
@@ -107,7 +130,8 @@ geste rare). Les slices sur les joueurs commencent avec *Register a new member*.
   - le joueur est retrouvé par son identité, jamais par son nom ;
   - un renouvellement se fait dans le même club ; une licence prise dans un autre club est une
     mutation, pas un renouvellement.
-- **Couches** : acceptation et cas d'usage faits ; persistance, REST, contrat, écran à venir.
+- **Couches** : acceptation et cas d'usage faits ; persistance, REST, contrat et écran en pause
+  avec la gestion de club.
 - **Questions ouvertes** : la frontière de transaction qui enregistrera les deux agrégats
   ensemble ; la mutation n'a pas encore d'opération propre.
 
@@ -174,6 +198,9 @@ geste rare). Les slices sur les joueurs commencent avec *Register a new member*.
     sont suggérés ; si la recherche échoue, rien n'est suggéré, sans message.
 
 ## Thèmes, à découper le moment venu
+
+Les thèmes de la gestion de club (Craft Calendar, joueurs et relations avec les clubs, droits et
+autorisations, compétitions) sont en pause, comme la gestion de club.
 
 - **Craft Calendar** : bounded context de calendrier générique, indépendant des échecs et
   réutilisable par d'autres applications. Première utilisation prévue : les horaires d'ouverture

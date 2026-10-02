@@ -16,6 +16,10 @@ ouvertes ; il n'est pas un avis juridique. Il sera relu avant la mise en product
 
 Ce choix dépend du mode de distribution de l'application et sera fait avant la mise en production.
 
+Depuis le pivot vers Chess Decision (voir `docs/slices.md`), la gestion de club est en pause : les
+traitements 1 et 2 restent décrits tant que leur code existe. Chess Decision ajoutera son propre
+traitement dès qu'une slice stockera des données d'un joueur, par exemple ses analyses.
+
 ## Traitement 1 — Annuaire des clubs
 
 | Rubrique | Contenu |
@@ -41,7 +45,7 @@ celle de la salle de jeu ?
 | Finalité | Suivre les personnes en relation avec un club : prospects, membres licenciés, partenaires. |
 | Slices | *Record a person*, *Update a person*, *Register a prospect*, *Register a license*, *Register a partnership*, *Recognize an external player* |
 | Personnes concernées | Prospects, membres, partenaires ; probablement des mineurs. |
-| Données | Prénom, nom, adresse électronique (facultative), identifiant FIDE, classement Elo et classement précédent, statut dans le club (prospect, membre, partenaire), licence FFE par saison (type A ou B). L'identifiant FFE rejoint la personne dans la branche `feat/register-member`. |
+| Données | Prénom, nom, adresse électronique (facultative), identifiant FIDE, classement Elo et classement précédent, statut dans le club (prospect, membre, partenaire), identifiant FFE personnel, licence FFE par saison (type A ou B). |
 | Stockage | Aucun pour l'instant : les cas d'usage n'existent qu'avec des fakes en mémoire. |
 | Destinataires | À décider avec le bounded context des droits et autorisations. |
 | Base légale | À décider. Hypothèse : exécution du contrat d'adhésion pour un membre ; intérêt légitime ou consentement pour un prospect. |
