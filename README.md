@@ -3,6 +3,14 @@
 Chess Manager is a learning project built progressively with Domain-Driven Design,
 Test-Driven Development and Clean / Hexagonal Architecture principles.
 
+## Product direction: Chess Decision
+
+Since 2 October 2026, Chess Manager is first a personal chess-improvement tool. Its core,
+Chess Decision, confronts the reasoning a player submits about a position (themes, analysis,
+candidate moves, plan) with the concrete resources of that position, and gives pedagogical
+feedback that separates verified facts, interpretations and uncertainties. Club Management
+below is on hold: its code is kept as it is. See `docs/slices.md` for the backlog.
+
 ## Current bounded context: Club Management
 
 The model separates three aggregate roots:
