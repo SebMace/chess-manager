@@ -116,6 +116,12 @@ geste rare). Les slices sur les joueurs commencent avec *Register a new member*.
 - Évolutions possibles de *Define the opening hours of a club*, à passer au crible YAGNI : refuser
   un club non géré par l'application ou inconnu ; décider si une session peut franchir minuit ;
   présenter les sessions du lundi au dimanche ; afficher le nom du club sur l'écran des horaires.
+- Retrait envisagé du siège social de *Create a club*, à décider plus tard : il est saisi et
+  stocké mais aucun cas d'usage ne le lit ; il sert seulement de raccourci pour la salle de jeu,
+  et il figure déjà sur le site de la FFE. C'est souvent le domicile d'un dirigeant : ne pas le
+  collecter respecte la minimisation des données du RGPD (voir `docs/registre-des-traitements.md`).
+  Il reviendra quand un cas d'usage le demandera, par exemple les reçus fiscaux du back-office du
+  club.
 - Reporté : saisons, vacances scolaires, abonnement depuis un agenda externe.
 - La prochaine slice reste à choisir.
 
