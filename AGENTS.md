@@ -388,6 +388,14 @@ invariants refine the model rather than turning earlier sketches into dogma.
 - Reference other aggregates by identity when object graphs would create unnecessary coupling.
 - Put invariants in the domain model, not only in controllers, forms, or database constraints.
 - Keep constructors or factories from creating invalid aggregates.
+- Keep the domain model rich, never anemic: an aggregate has no setter. Its state changes only
+  through operations named after what happens in the business, which enforce their rules. A
+  method that merely assigns a field under a business-sounding name is still a setter.
+- Before adding a piece of data to an aggregate, ask which business event produces it and model
+  that event. For example, a person receives an FFE identifier when taking a first A or B license;
+  a person who is created already holding that data is built by a named factory stating the
+  business fact, never created empty and filled afterwards.
+- Do not copy an existing anemic method because it is already in the code; point it out instead.
 - Do not create an aggregate, repository, or factory solely because a DDD catalog contains one.
 
 `Game` is a strong aggregate-root candidate when it must validate a move, update the position,
@@ -508,6 +516,12 @@ incrementally under test.
 - Keep framework configuration explicit when it clarifies infrastructure assembly.
 - Avoid generic `Utils`, `Manager`, or anemic `Service` classes. Name types after domain concepts
   or use cases.
+- Give every method an intention-revealing name that a club administrator could read. Never
+  overload a method name with different signatures, such as several `execute` methods on one use
+  case: name each operation after its business intention instead.
+- Justify every new constructor, method, or parameter by what it brings. Before adding one to a
+  class that already has overloads or several constructors, propose a cleanup under green tests
+  rather than piling on another.
 - Prefer explicit exceptions or result types that preserve domain meaning. Do not swallow errors.
 - Avoid returning `null` when the established API can represent absence safely; follow the existing
   project convention consistently.

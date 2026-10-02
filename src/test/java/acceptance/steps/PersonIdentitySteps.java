@@ -7,7 +7,6 @@ import clubmanagement.domain.club.vo.ClubId;
 import clubmanagement.domain.club.vo.Season;
 import clubmanagement.domain.exceptions.FideIdAlreadyAssignedException;
 import clubmanagement.domain.member.vo.FfeId;
-import clubmanagement.domain.member.vo.FfeLicense;
 import clubmanagement.domain.member.vo.FfeLicenseType;
 import clubmanagement.domain.person.Person;
 import clubmanagement.domain.person.vo.PersonId;
@@ -53,9 +52,9 @@ public class PersonIdentitySteps {
     public void recordPerson(String first, String last) {
         id = record.execute(FIRST_ID, first, last);
         if (licensed) {
-            new RegisterLicense(relationships, new Season(2026, 2027)).execute(id,
+            new RegisterLicense(people, relationships, new Season(2026, 2027)).registerFirstLicenseOf(id,
                     new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000002")),
-                    new FfeLicense(new FfeId("A12345"), FfeLicenseType.A));
+                    new FfeId("A12345"), FfeLicenseType.A);
         }
     }
 

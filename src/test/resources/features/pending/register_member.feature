@@ -7,6 +7,13 @@ Feature: Register a licensed member of a club
   I want to register licensed people affiliated with my club as members
   So that membership reflects their license and seasonal affiliation
 
+  @acceptance
+  Scenario: An administrator registers a licensed player as a member of a club
+    Given an administrator has created the club "U.S. Orléans.Echecs"
+    When an administrator registers Camille Martin, whose FFE identifier is "K58213", as a member of "U.S. Orléans.Echecs" for the 2026-2027 season with an A license
+    Then Camille Martin is a member of "U.S. Orléans.Echecs" for the 2026-2027 season with an A license
+    And the FFE identifier of Camille Martin is "K58213"
+
   Scenario Outline: Register a member with an FFE license
     Given Orléans is a club managed by the application
     And Camille has an FFE identifier and a license of type <type>

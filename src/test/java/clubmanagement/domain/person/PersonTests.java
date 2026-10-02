@@ -2,12 +2,14 @@ package clubmanagement.domain.person;
 
 import clubmanagement.domain.exceptions.FideIdAlreadyAssignedException;
 import clubmanagement.domain.member.vo.EloRating;
+import clubmanagement.domain.member.vo.FfeId;
 import clubmanagement.domain.member.vo.FideId;
 import clubmanagement.domain.person.vo.PersonId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -102,4 +104,13 @@ class PersonTests {
         assertNotEquals(person1, person2);
     }
 
+    @Test
+    void a_licensed_player_keeps_the_ffe_identifier_of_their_first_license_for_good() {
+        Person camille = Person.licensedPlayer(new PersonId(UUID.fromString("00000000-0000-0000-0000-000000000001")),
+                "Camille", "Martin", new FfeId("K58213"));
+
+        assertThrows(IllegalStateException.class, () -> camille.takesFirstLicense(new FfeId("B54321")));
+
+        assertEquals(Optional.of(new FfeId("K58213")), camille.ffeId());
+    }
 }

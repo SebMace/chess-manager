@@ -3,8 +3,6 @@ package clubmanagement.domain.club;
 import static clubmanagement.domain.club.RelationshipStatus.*;
 import clubmanagement.domain.person.vo.PersonId;
 import clubmanagement.domain.club.vo.Season;
-import clubmanagement.domain.member.vo.FfeId;
-import clubmanagement.domain.member.vo.FfeLicense;
 import clubmanagement.domain.member.vo.FfeLicenseType;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import clubmanagement.domain.club.vo.ClubId;
@@ -70,7 +68,7 @@ class ClubRelationshipTests {
         ClubId clubId = new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000002"));
         ClubRelationship prospect = new ClubRelationship(personId, clubId);
         Season season = new Season(2026, 2027);
-        FfeLicense license = new FfeLicense(new FfeId("A12345"), FfeLicenseType.A);
+        FfeLicenseType license = FfeLicenseType.A;
 
         ClubRelationship member = prospect.registerLicense(license, season);
 
@@ -99,7 +97,7 @@ class ClubRelationshipTests {
                 new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000002")));
 
         assertThrows(IllegalArgumentException.class,
-                () -> prospect.registerLicense(new FfeLicense(new FfeId("A12345"), FfeLicenseType.A), null));
+                () -> prospect.registerLicense(FfeLicenseType.A, null));
         assertEquals(PROSPECT, prospect.status());
     }
     @Test
@@ -111,8 +109,8 @@ class ClubRelationshipTests {
                 new ClubId(UUID.fromString("00000000-0000-0000-0000-000000000002")));
         Season firstSeason = new Season(2026, 2027);
         Season nextSeason = new Season(2027, 2028);
-        FfeLicense firstLicense = new FfeLicense(new FfeId("A12345"), FfeLicenseType.A);
-        FfeLicense nextLicense = new FfeLicense(new FfeId("A12345"), FfeLicenseType.B);
+        FfeLicenseType firstLicense = FfeLicenseType.A;
+        FfeLicenseType nextLicense = FfeLicenseType.B;
 
         // When
         ClubRelationship member = prospect.registerLicense(firstLicense, firstSeason);

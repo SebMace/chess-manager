@@ -128,10 +128,52 @@ them), and subscribing to the calendar of a club from an external agenda.
 The use cases receive the current `Season` explicitly. Calendar boundaries have not
 been specified, so no calculation from today's date is implemented. The recorded
 relationship status describes its last transition; current seasonal affiliation is
-queried from the licenses for the requested season. Automatic status changes at season
-expiry, partnership termination, and whether a member may also be a partner of the
-same club are outside this slice. What an external player may access once logged in
-belongs to a future authorization context, not to Club Management.
+queried from the licenses for the requested season. Partnership termination and whether
+a member may also be a partner of the same club are outside this slice. What an external
+player may access once logged in belongs to a future authorization context, not to Club
+Management.
+
+### FFE identity and license renewal
+
+These rules were stated by the club; only the first one is being implemented, by
+*Register a member*. The others wait for their own slice.
+
+- A person known as licensed by the FFE necessarily has a personal and stable FFE
+  identifier, and is a member, for the season of their license, of the club in which they
+  were registered. The FFE identifier comes with the first A or B license and never changes
+  afterwards; a person who has never been licensed has none.
+- A season starts at the start of the school year ("rentrée scolaire"), which has no fixed day.
+- A license can be taken at any time during the season, as a renewal or as a new
+  registration. Nothing may block it: the renewal dates below only trigger reminders and
+  status changes, never a refusal.
+- On 15 October, every member of the previous season who has not yet renewed their license
+  with the club is reminded by email. A member who has already licensed with another club is
+  not reminded: they become a partner of the club they left if they agree.
+- At the end of October, the members who have still not renewed are reminded again.
+- At the renewal deadline, a date the club chooses arbitrarily at the beginning of November
+  (by then nearly every player has renewed), a member who has not answered is looked for in
+  the other clubs, managed by the application or not:
+  - licensed with another club: they become a partner of the club they left if they agree;
+  - licensed nowhere: they become a prospect of the club again.
+- A prospect or a partner who takes a license later in the season becomes a member again.
+
+Modeling direction, to be confirmed by examples:
+
+- Becoming a prospect again is a domain event of Club Management, a completed business fact
+  such as `MembershipLapsed`, produced when the relationship changes from member to prospect.
+- The passage of time is not a Club Management event. The reminder dates and the renewal
+  deadline are dates of the season, which Craft Calendar will hold without knowing what a
+  license is; it will tell that a date has been reached, in its published language. Through
+  its anticorruption layer, Club Management turns that into its own decisions: find the
+  members who have not renewed, remind them, let their membership lapse.
+- Sending the email is not a domain event but a reaction to one, carried out by an outbound
+  adapter (the future Notifications theme).
+- The application learns that a player has licensed with a club it does not manage only when
+  the player says so: without the FFE's written authorization, its data cannot be reused.
+- A partnership with the club a player left needs the player's agreement and the approval of
+  the president of that club. That approval is granted by default: the president has to
+  object for the player not to become a partner. `change_club.feature`, which says a request
+  alone is not enough, is to be rewritten when its slice starts.
 
 ## Application boundary and persistence
 
@@ -325,11 +367,16 @@ Personal equality depends on `PersonId`, not names. A person can exist without a
 license or FIDE identifier. Replacing an assigned FIDE identifier is rejected;
 non-positive FIDE IDs and negative ratings are rejected as before.
 
-`FfeLicense` remains an immutable pair of `FfeId` and category A or B. Both are
-required. Blank FFE IDs are rejected and supplied values are preserved without an
-invented federation-specific format. Invalid license requests preserve saved state.
-A valid license can replace the pair recorded for the same season, as in the previous
-model; restrictions on changing an FFE identifier have not been specified.
+The FFE identifier belongs to the person, not to a license: a person receives it with
+their first A or B license (`Person.licensedPlayer` for a player unknown to the
+application, `takesFirstLicense` for a prospect) and keeps it for good; a person never
+licensed has none. A club relationship records only the license type for each season,
+and only a licensed player can be a member. Blank FFE IDs are rejected and supplied values
+are preserved without an invented federation-specific format. Invalid license requests
+preserve saved state. A valid license type can replace the one recorded for the same season.
+
+Taking the license of a new season in the same club is a renewal (`renewLicenseOf`);
+taking it in another club is a transfer ("mutation"), which is not a renewal.
 
 The existing value objects remain in `clubmanagement/domain/member/vo` to limit package movement.
 The former `Member` entity and `MemberId` have been replaced by `Person` and `PersonId`;

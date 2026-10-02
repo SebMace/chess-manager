@@ -79,6 +79,14 @@ public class CreateClubSteps {
                 new FfeClubId(club.get("FFE identifier")), commune(club.get("commune")), registeredOffice(club), playingVenue(club)));
     }
 
+    /** The scenario does not care about the club's information: it gets that of a valid club of Orléans, in the Loiret. */
+    @Given("an administrator has created the club {string}")
+    public void clubCreatedWhoseDetailsDoNotMatter(String name) {
+        PostalAddress registeredOffice = new PostalAddress("12 rue des Échecs", "45000", "Orléans");
+        createdClubs.add(name, createClub.execute(name, COMMITTEES.get("Loiret"), new FfeClubId("G45001"),
+                COMMUNES.get("Orléans"), registeredOffice, registeredOffice));
+    }
+
     @When("an administrator looks for the communes of a club of the departmental committee {string}")
     public void lookForCommunes(String committee) {
         offeredCommunes = new CommunesOfCommittee(communes).execute(committees.get(committee));

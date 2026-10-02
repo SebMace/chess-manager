@@ -14,7 +14,6 @@ import clubmanagement.domain.club.vo.PostalAddress;
 import clubmanagement.domain.commune.CommuneCode;
 import clubmanagement.domain.club.vo.Season;
 import clubmanagement.domain.member.vo.FfeId;
-import clubmanagement.domain.member.vo.FfeLicense;
 import clubmanagement.domain.member.vo.FfeLicenseType;
 import clubmanagement.domain.person.Person;
 import clubmanagement.domain.person.vo.PersonId;
@@ -80,18 +79,18 @@ public class ClubManagementDriver {
 
     public void registerLicense(String club, String type, Set<String> requestedPartners) {
         ensurePerson();
-        FfeLicense license = type == null ? null : new FfeLicense(new FfeId("A12345"), FfeLicenseType.valueOf(type));
-        new RegisterLicense(relationships, season).execute(personId, clubId(club), license,
+        new RegisterLicense(people, relationships, season).registerFirstLicenseOfKeepingPartnerships(personId, clubId(club),
+                new FfeId("A12345"), type == null ? null : FfeLicenseType.valueOf(type),
                 requestedPartners.stream().map(this::clubId).collect(Collectors.toSet()));
     }
 
     public void registerLicenseDetails(String club, String ffeId, String type, Season currentSeason) {
         ensurePerson();
-        new RegisterLicense(relationships, currentSeason).execute(personId, clubId(club), ffeId,
-                type == null ? null : FfeLicenseType.valueOf(type));
+        new RegisterLicense(people, relationships, currentSeason).registerFirstLicenseOf(personId, clubId(club),
+                new FfeId(ffeId), type == null ? null : FfeLicenseType.valueOf(type));
     }
 
-    public Optional<FfeLicense> license(String club) {
+    public Optional<FfeLicenseType> license(String club) {
         return relationships.find(personId, clubId(club)).flatMap(r -> r.license(season));
     }
 

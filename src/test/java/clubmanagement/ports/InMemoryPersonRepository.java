@@ -17,7 +17,9 @@ public class InMemoryPersonRepository implements PersonRepository {
     public void save(Person person) { people.put(person.id(), snapshot(person)); }
 
     private Person snapshot(Person person) {
-        Person copy = new Person(person.id(), person.firstName(), person.lastName(), person.email().orElse(null));
+        Person copy = person.ffeId()
+                .map(ffeId -> Person.licensedPlayer(person.id(), person.firstName(), person.lastName(), ffeId))
+                .orElseGet(() -> new Person(person.id(), person.firstName(), person.lastName(), person.email().orElse(null)));
         copy.giveEloRating(person.eloRating());
         try {
             if (person.fideId().isPresent()) copy.registerFideId(person.fideId().orElseThrow());
