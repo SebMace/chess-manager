@@ -436,7 +436,31 @@ Confirm the actual invariant before cementing the API.
 
 ## 10. Chess Manager domain direction
 
-Chess Manager is intended to grow around capabilities such as:
+### 10.1 Priority: Chess Decision
+
+Since 2026-10-02, Chess Manager is first a personal chess-improvement tool. Its core is
+**Chess Decision**: the player submits a position, optional themes, their analysis, candidate
+moves, and plan; the tool confronts that reasoning with the concrete resources of the position
+and gives pedagogical feedback that separates verified facts, interpretations, and uncertainties.
+
+- Propose Chess Decision slices first; the first one is still to be chosen in `docs/slices.md`.
+- Treat themes as hypotheses or learning goals, never as truths. Silman's imbalances may inspire
+  the feedback but are never a mandatory grid; never invent Silman content.
+- Keep four responsibilities distinct: the domain (positions, proposals, themes, feedback), the
+  engine (tactical verification, evaluations, lines), the LLM (wording explanations from the
+  available elements), and an MCP server (exposing capabilities to an AI client, never the
+  reasoning engine itself).
+- Build no infrastructure, MCP included, before a first useful usage has been identified.
+- Whether Chess Decision is a distinct bounded context remains a proposal until the user
+  validates it.
+
+Club management (clubs, people, licenses, FFE imports) is on hold. Keep its code as it is: do not
+delete it or redesign it. Challenge any new club-management work with the YAGNI checkpoint
+(§4.1). The pause does not mean that the FFE refused a partnership.
+
+### 10.2 Broader roadmap
+
+Beyond Chess Decision, Chess Manager may grow around capabilities such as:
 
 - recording, importing, replaying, and analyzing games;
 - managing players, identities, ratings, and clubs;
@@ -455,6 +479,8 @@ Potential domain areas include Games, Players & Clubs, Tournaments, Training, an
 Begin with a modular monolith and explicit internal module boundaries. Do not automatically turn
 every area into a bounded context or microservice. Extract a distinct bounded context only when
 language, invariants, lifecycle, data ownership, or change cadence genuinely diverge.
+
+### 10.3 Chess rules and formats
 
 For chess rules and formats:
 
