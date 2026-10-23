@@ -1,6 +1,7 @@
 package infrastructure;
 
 import competition.createcompetition.CreateCompetition;
+import competition.createcompetition.rest.CreateCompetitionController;
 import competition.domain.CompetitionId;
 import competition.domain.Season;
 import competition.persistence.JdbcCompetitionRepository;
@@ -25,5 +26,10 @@ class CompetitionConfiguration {
     @Bean
     CreateCompetition createCompetition(CompetitionRepository competitions) {
         return new CreateCompetition(competitions, CURRENT_SEASON, () -> new CompetitionId(UUID.randomUUID()));
+    }
+
+    @Bean
+    CreateCompetitionController createCompetitionController(CreateCompetition createCompetition) {
+        return new CreateCompetitionController(createCompetition);
     }
 }

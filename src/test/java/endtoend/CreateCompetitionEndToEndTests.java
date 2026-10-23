@@ -6,7 +6,6 @@ import competition.domain.League;
 import competition.domain.Season;
 import competition.ports.CompetitionRepository;
 import infrastructure.ChessManagerApplication;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,7 +26,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 /** HTTP request → CreateCompetition → JDBC → PostgreSQL. */
-@Disabled("Outer loop of the REST slice: enabled when POST /api/competitions creates a competition")
 @SpringBootTest(classes = ChessManagerApplication.class, webEnvironment = RANDOM_PORT)
 @Testcontainers
 class CreateCompetitionEndToEndTests {
