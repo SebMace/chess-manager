@@ -444,14 +444,23 @@ Confirm the actual invariant before cementing the API.
 
 ## 10. Chess Manager domain direction
 
-### 10.1 Priority: Chess Decision
+### 10.1 Priority: club life and competitions
 
-Since 2026-10-02, Chess Manager is first a personal chess-improvement tool. Its core is
-**Chess Decision**: the player submits a position, optional themes, their analysis, candidate
-moves, and plan; the tool confronts that reasoning with the concrete resources of the position
-and gives pedagogical feedback that separates verified facts, interpretations, and uncertainties.
+Since 2026-10-23, Chess Manager is first a tool for the life of a chess club (ADR 0028). Its two
+domains are club management (clubs, people, licenses, opening hours, FFE imports) and team
+competitions, starting with the Nationale 4 of the Loiret.
 
-- Propose Chess Decision slices first; the first one is still to be chosen in `docs/slices.md`.
+- Propose slices from these two domains; the next one is chosen in `docs/slices.md`.
+- Challenge each new slice with the YAGNI checkpoint (§4.1).
+- Whether Competition is a distinct bounded context remains a proposal until the user validates
+  it (ADR 0027).
+
+**Chess Decision**, a personal chess-improvement tool in which the player submits a position,
+themes, an analysis, candidate moves, and a plan to be confronted with the concrete resources of
+the position, was the priority from 2026-10-02 to 2026-10-23. It is no longer the flagship
+product: propose no Chess Decision slice unless the user decides to resume it. If it resumes,
+these principles hold:
+
 - Treat themes as hypotheses or learning goals, never as truths. Silman's imbalances may inspire
   the feedback but are never a mandatory grid; never invent Silman content.
 - Keep four responsibilities distinct: the domain (positions, proposals, themes, feedback), the
@@ -462,13 +471,9 @@ and gives pedagogical feedback that separates verified facts, interpretations, a
 - Whether Chess Decision is a distinct bounded context remains a proposal until the user
   validates it.
 
-Club management (clubs, people, licenses, FFE imports) is no longer on hold since 2026-10-23: it
-resumes with registering the players linked to a club. Challenge each new club-management slice
-with the YAGNI checkpoint (§4.1).
-
 ### 10.2 Broader roadmap
 
-Beyond Chess Decision, Chess Manager may grow around capabilities such as:
+Beyond the current priority, Chess Manager may grow around capabilities such as:
 
 - recording, importing, replaying, and analyzing games;
 - managing players, identities, ratings, and clubs;

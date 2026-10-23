@@ -34,9 +34,9 @@ utile ; faire de Chess Decision un bounded context distinct reste à valider.
 
 ## Conséquences
 
-- Le README, `docs/slices.md` et le registre des traitements disent la nouvelle priorité.
-  `AGENTS.md` (§10.1 et §10.2) énonce encore l'ancienne : ce fichier ne change que sur demande
-  explicite d'évoluer le playbook.
+- Le README, `docs/slices.md`, le registre des traitements et `AGENTS.md` (§10.1 et §10.2) disent
+  la nouvelle priorité. `AGENTS.md` ne change que sur demande explicite d'évoluer le playbook, ce
+  que l'auteur a fait.
 - Le registre des traitements n'attend de traitement de Chess Decision que s'il reprend.
 - Une branche non fusionnée, `feat/confront-candidate-moves`, prépare la première slice de Chess
   Decision et son ADR 0026. Elle repose sur la priorité remplacée ici : son sort reste à décider.
