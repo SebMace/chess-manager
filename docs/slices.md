@@ -35,9 +35,11 @@ interprétations et les incertitudes.
 - Faire de Chess Decision un bounded context distinct reste une proposition, à valider.
 - La première slice de Chess Decision reste à choisir.
 
-La gestion de club (clubs, personnes, licences, imports FFE) est en pause : son code est gardé tel
-quel, sans suppression ni refonte, et toute nouvelle slice de ce domaine passe d'abord au crible
-YAGNI. Cette pause ne vient pas d'un refus de la FFE.
+La gestion de club (clubs, personnes, licences, imports FFE) n'est plus en pause depuis le
+23 octobre 2026. Elle reprend avec l'enregistrement des joueurs liés à un club : *Register a new
+member* et *Consult the members of a club* ont été menées jusqu'à l'écran, avant de présenter
+l'application au président et au secrétaire d'un club. Chaque nouvelle slice de ce domaine passe
+d'abord au crible YAGNI.
 
 ## Slices existantes
 
@@ -52,7 +54,8 @@ YAGNI. Cette pause ne vient pas d'un refus de la FFE.
 | Update a person | `updateperson` | cas d'usage seulement | Record a person |
 | Register a prospect | `registerprospect` | cas d'usage seulement | Create a club |
 | Register a license | `registerlicense` | cas d'usage seulement | Create a club |
-| Register a new member | `registermember` | cas d'usage seulement | Create a club |
+| Register a new member | `registermember` | livrée | Create a club |
+| Consult the members of a club | `membersofclub` | livrée | Register a new member |
 | Register a partnership | `registerpartnership` | cas d'usage seulement | Create a club |
 | Recognize an external player | `isexternalplayer` | cas d'usage seulement | Register a license |
 | Find the towns of a postcode | `townsofpostcode` | livrée | — |
@@ -80,6 +83,89 @@ postcodes of a town*, *Find the towns of a commune*), sans nouvelle capacité :
 - une localité unique ne remplace plus une localité que l'administrateur a saisie pendant la
   recherche ;
 - les recherches en cours sont abandonnées quand l'adresse ou le formulaire ne sont plus affichés.
+
+### Register a new member et Consult the members of a club
+
+Une seule page d'écran, `/clubs/:id/members`, porte les deux slices : la liste des membres du club
+et le formulaire d'inscription. Les exemples utilisent des joueurs fictifs.
+
+*Register a new member*
+
+- **Intention** : l'administrateur inscrit comme membre d'un club un joueur licencié que
+  l'application ne connaît pas encore, avec son prénom, son nom, son identifiant FFE et le type
+  de sa licence pour la saison. Par exemple Camille Martin, K58213, licence A, U.S. Orléans.Echecs,
+  2026-2027.
+- **Invariant** : une personne connue comme licenciée FFE possède nécessairement un identifiant
+  FFE personnel et stable, et elle est membre, pour la saison de sa licence, du club dans lequel
+  elle a été inscrite.
+- **Décisions** :
+  - l'identifiant FFE appartient à la personne, pas à la licence : il vient avec la première
+    licence A ou B et ne change plus ; `FfeLicense` a été supprimée, la relation au club ne garde
+    que le type de licence par saison ;
+  - le domaine crée les deux agrégats cohérents (`Person.licensedPlayer`, puis
+    `ClubRelationship.membershipOf`) ; le cas d'usage `RegisterNewMember` les enregistre ;
+  - le joueur est retrouvé par son identité, jamais par son nom ;
+  - un renouvellement se fait dans le même club ; une licence prise dans un autre club est une
+    mutation, pas un renouvellement ;
+  - la personne et sa relation s'enregistrent ensemble, ou pas du tout : le cas d'usage s'exécute
+    dans une transaction posée par `infrastructure` (`TransactionalRegisterNewMember`), pour qu'il
+    reste sans Spring ;
+  - PostgreSQL stocke la personne (`person`, avec un identifiant FFE unique) et la relation
+    (`club_relationship` et `club_relationship_license`, migrations V10 et V11) ; une relation est
+    relue en rejouant ses licences et son statut par les opérations du domaine, sans constructeur
+    taillé pour la base ;
+  - la saison courante est une constante, 2026-2027, dans `ClubConfiguration` : la rentrée n'a pas
+    de jour fixe, on ne la calcule pas à partir de la date ;
+  - la réponse du back-end n'a pas de `Location` : aucune route ne la servirait ;
+  - le classement Elo du joueur est facultatif : un joueur non classé peut être inscrit, ce qui n'est
+    pas la même chose qu'un joueur classé à zéro. Le domaine le construit par une fabrique nommée,
+    `Person.ratedLicensedPlayer`, plutôt que par un setter ; un Elo négatif est refusé (400) ;
+  - `person.elo` est une colonne facultative (migration V12).
+- **Couches** : acceptation, cas d'usage, persistance, REST, contrat et écran.
+
+*Consult the members of a club*
+
+- **Intention** : l'administrateur voit les membres d'un club pour la saison courante, avec leur
+  nom, leur prénom, leur Elo, leur identifiant FFE et leur licence, triés par nom puis par prénom.
+  Un joueur non classé affiche « NC ». Un joueur titré porte son titre FIDE en badge à côté de son nom.
+- **Décisions** :
+  - une requête dédiée, derrière le port de lecture `ClubMembers`, joint la personne et sa relation
+    avec le club : aucun agrégat ne porte cette liste ;
+  - un joueur dont la licence ne date que d'une saison passée n'est pas listé ;
+  - ni recherche, ni pagination, ni filtre tant qu'aucun besoin réel n'est constaté.
+- **Couches** : cas d'usage, persistance, REST, contrat et écran ; la lecture n'a pas de scénario
+  d'acceptation, les tests de bout en bout la couvrent.
+
+*Questions ouvertes*, constatées en livrant ces deux slices :
+
+- **un identifiant FFE déjà enregistré** : refuser, ou rattacher la personne existante à un autre
+  club (une mutation) ? Aujourd'hui la contrainte d'unicité fait échouer l'inscription : réponse 500,
+  message générique à l'écran ;
+- **un club inconnu** donne la même réponse 500, par la clé étrangère ; la transaction annule bien
+  l'enregistrement de la personne ;
+- **un prénom ou un nom vide** n'est refusé que par le navigateur : `Person` ne le valide pas ;
+- **courriel et identifiant FIDE** : `JdbcPersonRepository` ne les stocke pas et une `Person` qui les
+  porte les perd en silence. Refuser explicitement, ou ajouter les colonnes quand un cas d'usage les
+  écrira ? Le classement Elo, lui, est stocké depuis la migration V12 ;
+- **titre FIDE** : livré, en mention facultative affichée en badge à côté du nom, sans colonne
+  dans le tableau des membres. Valeurs CM, MF, MI et GMI (`person.fide_title`, migration V13) ; un
+  titre inconnu est refusé (400). Les équivalents féminins (GMF, MIF, MFF, CMF) ne sont pas modélisés ;
+- **niveaux d'arbitre** : pas construits. Les titres d'arbitre de la FFE changent depuis la saison
+  2026-2027 (réforme de la DNA : les anciens titres sont valables jusqu'au 31 août 2026). Les
+  sources lisibles annoncent AFJ, AFM, AFC et AFO, l'ancien AFC devenant AFM (qui arbitre les
+  interclubs), mais la liste officielle est dans des PDF que je n'ai pas pu lire. Les titres AF1 à
+  AF4 que j'avais relevés dans un premier temps sont périmés. À confirmer avec le document « Parcours
+  arbitre » de la DNA avant de modéliser ;
+- **niveaux d'animateur** : pas construits, la terminologie n'est pas fixée. L'Institut National de
+  Formation de la FFE liste le DAFFE parmi ses formations, une présentation de la FFE parle de
+  brevets fédéraux BF1, BF2 et BF3, et les anciens diplômes sont DIFFE, DAFFE 1, DAFFE 2 et DEFFE.
+  À choisir par le club ;
+- **`save` fait un `INSERT`** : enregistrer deux fois la même personne ou la même relation échoue
+  sur PostgreSQL, alors que le fake en mémoire remplace ;
+- **`ClubRelationshipRepository`** : `findByPerson` et `delete` lèvent une
+  `UnsupportedOperationException` sur PostgreSQL, aucun cas d'usage branché ne s'en sert. Le port
+  est plus large que ce que ces slices utilisent ;
+- la mutation n'a pas encore d'opération propre.
 
 ### Leçon YAGNI : l'aide à la saisie des adresses
 
@@ -110,30 +196,8 @@ plus de durcissement ni de cas limite, et ses questions ouvertes attendent.
 ## Slices à venir
 
 *Move the registered office of a club* est écartée (YAGNI : un déménagement de siège est un
-geste rare). Les slices sur les joueurs commencent avec *Register a new member*.
-
-### Register a new member
-
-- **Intention** : l'administrateur inscrit comme membre d'un club un joueur licencié que
-  l'application ne connaît pas encore, avec son prénom, son nom, son identifiant FFE et le type
-  de sa licence pour la saison. Par exemple Camille Martin, K58213, licence A, U.S. Orléans.Echecs,
-  2026-2027.
-- **Invariant** : une personne connue comme licenciée FFE possède nécessairement un identifiant
-  FFE personnel et stable, et elle est membre, pour la saison de sa licence, du club dans lequel
-  elle a été inscrite.
-- **Décisions** :
-  - l'identifiant FFE appartient à la personne, pas à la licence : il vient avec la première
-    licence A ou B et ne change plus ; `FfeLicense` a été supprimée, la relation au club ne garde
-    que le type de licence par saison ;
-  - le domaine crée les deux agrégats cohérents (`Person.licensedPlayer`, puis
-    `ClubRelationship.membershipOf`) ; le cas d'usage `RegisterNewMember` les enregistre ;
-  - le joueur est retrouvé par son identité, jamais par son nom ;
-  - un renouvellement se fait dans le même club ; une licence prise dans un autre club est une
-    mutation, pas un renouvellement.
-- **Couches** : acceptation et cas d'usage faits ; persistance, REST, contrat et écran en pause
-  avec la gestion de club.
-- **Questions ouvertes** : la frontière de transaction qui enregistrera les deux agrégats
-  ensemble ; la mutation n'a pas encore d'opération propre.
+geste rare). *Register a new member* et *Consult the members of a club* sont livrées : voir plus
+haut.
 
 - Évolutions prévues de *Create a club* : revenir à la liste après la création, pré-remplir le
   comité à partir du département consulté.
@@ -200,7 +264,8 @@ geste rare). Les slices sur les joueurs commencent avec *Register a new member*.
 ## Thèmes, à découper le moment venu
 
 Les thèmes de la gestion de club (Craft Calendar, joueurs et relations avec les clubs, droits et
-autorisations, compétitions) sont en pause, comme la gestion de club.
+autorisations, compétitions) restent indivis : on ne découpe un thème que lorsqu'un cas d'usage est
+demandé.
 
 - **Craft Calendar** : bounded context de calendrier générique, indépendant des échecs et
   réutilisable par d'autres applications. Première utilisation prévue : les horaires d'ouverture
