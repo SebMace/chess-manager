@@ -17,6 +17,8 @@ import clubmanagement.domain.member.vo.FfeId;
 import clubmanagement.domain.member.vo.FfeLicenseType;
 import clubmanagement.domain.member.vo.FideTitle;
 import clubmanagement.registermember.RegisterNewMember;
+import competition.createcompetition.CreateCompetition;
+import competition.domain.League;
 import infrastructure.ChessManagerApplication;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestTemplate;
@@ -46,10 +48,13 @@ class FrontEndContractTests {
 
     private final CreateClub createClub;
     private final RegisterNewMember registerNewMember;
+    private final CreateCompetition createCompetition;
 
-    FrontEndContractTests(@Autowired CreateClub createClub, @Autowired RegisterNewMember registerNewMember) {
+    FrontEndContractTests(@Autowired CreateClub createClub, @Autowired RegisterNewMember registerNewMember,
+                          @Autowired CreateCompetition createCompetition) {
         this.createClub = createClub;
         this.registerNewMember = registerNewMember;
+        this.createCompetition = createCompetition;
     }
 
     @BeforeEach
@@ -90,6 +95,11 @@ class FrontEndContractTests {
     @State("the club G45302 is managed by the application")
     Map<String, Object> theClubG45302IsManagedByTheApplication() {
         return Map.of("clubId", aClubOfTheCommittee45("Échecs de Châlette", "G45302").clubId().toString());
+    }
+
+    @State("the competition Nationale 4 of the Centre-Val de Loire league is created for the current season")
+    void theCompetitionNationale4OfTheCentreValDeLoireLeagueIsCreatedForTheCurrentSeason() {
+        createCompetition.createCompetition("Nationale 4", new League("Centre-Val de Loire"), 6);
     }
 
     /** The states share one database: each creates its club under an FFE identifier of its own. */
