@@ -1,6 +1,8 @@
 package clubmanagement.ports;
 
 
+import clubmanagement.domain.member.vo.FfeId;
+import clubmanagement.domain.person.Person;
 import clubmanagement.domain.person.vo.PersonId;
 import clubmanagement.domain.club.vo.ClubId;
 import clubmanagement.domain.club.ClubRelationship;
@@ -11,7 +13,21 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class InMemoryClubRelationshipRepositoryTests {
+class InMemoryClubRelationshipRepositoryTests extends ClubRelationshipRepositoryContract {
+    private final InMemoryClubRelationshipRepository inMemoryRelationships = new InMemoryClubRelationshipRepository();
+    private long created;
+
+    @Override
+    protected ClubRelationshipRepository relationships() { return inMemoryRelationships; }
+
+    @Override
+    protected ClubId aClub() { return new ClubId(new UUID(0, ++created)); }
+
+    @Override
+    protected Person aLicensedPlayer() {
+        return Person.licensedPlayer(new PersonId(new UUID(0, ++created)), "Camille", "Martin",
+                new FfeId("K%05d".formatted(created)));
+    }
 
     @Test
     void should_find_a_saved_prospect_relationship() {

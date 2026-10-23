@@ -48,6 +48,7 @@ public final class ClubRelationship {
     public RelationshipStatus status() {
         return status;
     }
+    public Map<Season, FfeLicenseType> licenses() { return licenses; }
 
     public ClubRelationship registerLicense(FfeLicenseType licenseType, Season season) {
         if (licenseType == null) throw new IllegalArgumentException("licenseType cannot be null");
