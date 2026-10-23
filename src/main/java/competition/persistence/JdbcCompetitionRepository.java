@@ -8,6 +8,7 @@ import competition.domain.Season;
 import competition.domain.Team;
 import competition.ports.CompetitionRepository;
 import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.transaction.support.TransactionOperations;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -22,9 +23,11 @@ public class JdbcCompetitionRepository implements CompetitionRepository {
             SELECT id, name, season_begin_year, season_end_year, boards, organizing_league_name
             FROM competition""";
     private final JdbcClient jdbc;
+    private final TransactionOperations transactions;
 
-    public JdbcCompetitionRepository(JdbcClient jdbc) {
+    public JdbcCompetitionRepository(JdbcClient jdbc, TransactionOperations transactions) {
         this.jdbc = jdbc;
+        this.transactions = transactions;
     }
 
     @Override
@@ -48,29 +51,32 @@ public class JdbcCompetitionRepository implements CompetitionRepository {
                 .toList();
     }
 
+    /** The competition and its teams are saved in one transaction: a competition is never kept with only some of its teams. */
     @Override
     public void save(Competition competition) {
-        jdbc.sql("""
-                        INSERT INTO competition (id, name, season_begin_year, season_end_year, boards, organizing_league_name)
-                        VALUES (:id, :name, :seasonBeginYear, :seasonEndYear, :boards, :organizingLeagueName)
-                        ON CONFLICT (id) DO NOTHING""")
-                .param("id", competition.id().competitionId())
-                .param("name", competition.name())
-                .param("seasonBeginYear", competition.season().yearBegin())
-                .param("seasonEndYear", competition.season().yearEnd())
-                .param("boards", competition.boards())
-                .param("organizingLeagueName", competition.organizingLeague().name())
-                .update();
-        jdbc.sql("DELETE FROM competition_team WHERE competition_id = :competition")
-                .param("competition", competition.id().competitionId())
-                .update();
-        competition.teams().forEach(team -> jdbc.sql("""
-                        INSERT INTO competition_team (competition_id, club_id, team_number)
-                        VALUES (:competition, :club, :number)""")
-                .param("competition", competition.id().competitionId())
-                .param("club", team.club().clubId())
-                .param("number", team.number())
-                .update());
+        transactions.executeWithoutResult(transaction -> {
+            jdbc.sql("""
+                            INSERT INTO competition (id, name, season_begin_year, season_end_year, boards, organizing_league_name)
+                            VALUES (:id, :name, :seasonBeginYear, :seasonEndYear, :boards, :organizingLeagueName)
+                            ON CONFLICT (id) DO NOTHING""")
+                    .param("id", competition.id().competitionId())
+                    .param("name", competition.name())
+                    .param("seasonBeginYear", competition.season().yearBegin())
+                    .param("seasonEndYear", competition.season().yearEnd())
+                    .param("boards", competition.boards())
+                    .param("organizingLeagueName", competition.organizingLeague().name())
+                    .update();
+            jdbc.sql("DELETE FROM competition_team WHERE competition_id = :competition")
+                    .param("competition", competition.id().competitionId())
+                    .update();
+            competition.teams().forEach(team -> jdbc.sql("""
+                            INSERT INTO competition_team (competition_id, club_id, team_number)
+                            VALUES (:competition, :club, :number)""")
+                    .param("competition", competition.id().competitionId())
+                    .param("club", team.club().clubId())
+                    .param("number", team.number())
+                    .update());
+        });
     }
 
     private List<Team> teamsOf(CompetitionId competitionId) {

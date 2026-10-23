@@ -11,6 +11,7 @@ import competition.ports.CompetitionRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.transaction.support.TransactionOperations;
 
 import java.util.UUID;
 
@@ -21,8 +22,8 @@ class CompetitionConfiguration {
             ClubConfiguration.CURRENT_SEASON.yearEnd());
 
     @Bean
-    CompetitionRepository competitionRepository(JdbcClient jdbc) {
-        return new JdbcCompetitionRepository(jdbc);
+    CompetitionRepository competitionRepository(JdbcClient jdbc, TransactionOperations transactions) {
+        return new JdbcCompetitionRepository(jdbc, transactions);
     }
 
     @Bean
