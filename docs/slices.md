@@ -355,7 +355,7 @@ l'écriture d'un commentaire et d'un récit : seul leur affichage a un écran.
 | Find the league of a committee | `clubmanagement.leagueofcommittee` | à venir | — |
 | Create a competition | `competition.createcompetition` | livrée | — |
 | Consult the competitions of the season | `competition.competitionsofseason` | livrée | Create a competition |
-| Engage a team in a competition | `competition.engageteam` | en cours | Create a competition |
+| Engage a team in a competition | `competition.engageteam` | livrée | Create a competition |
 | Schedule a match | `competition.schedulematch` | à venir | Engage a team in a competition |
 | Consult the calendar of a competition | `competition.calendarofcompetition` | à venir | Schedule a match |
 | Record the results of a match | `competition.recordmatchresults` | à venir | Schedule a match, Register a new member |
@@ -527,16 +527,24 @@ Hypothèses retenues, sauf avis contraire :
   Cavaliers de la Loire » dans la compétition « Nationale 4 », le club a l'équipe 1 engagée dans
   cette compétition. Un second scénario : quand il engage une seconde équipe du même club, le club
   a les équipes 1 et 2.
-- **État** : en cours. Livrés : le scénario d'acceptation (dans la porte de build), le domaine
-  (`Competition.engageTeamOf`, numérotation par club) et le cas d'usage `EngageTeam`, sur le dépôt
-  en mémoire. Restent la persistance, dont l'adaptateur JDBC devra mettre à jour une compétition
-  existante (son `save` ne sait qu'insérer), et le jeu d'essais.
+- **État** : livrée, sans REST ni écran (23 octobre 2026). Le scénario d'acceptation (dans la porte
+  de build), le domaine (`Competition.engageTeamOf`, numérotation par club, `reconstitute` pour relire
+  une compétition avec ses équipes), le cas d'usage `EngageTeam` et la persistance : migration `V16`
+  (table `competition_team`, clé primaire sur la compétition, le club et le numéro, aucune clé
+  étrangère vers les tables de club). Le `save` de l'adaptateur JDBC insère la compétition si elle
+  n'existe pas, remplace ses équipes par celles de l'agrégat, le tout dans une transaction de
+  l'adaptateur (ADR 0006) ; `inSeason` relit les équipes de la saison en une seule requête. Le jeu
+  d'essais crée la Nationale 4 et y engage l'équipe 1 des huit clubs de démonstration.
 - **Couches** : acceptation, cas d'usage, domaine (`Competition` et ses équipes), persistance (une
   table des équipes engagées, avec sa migration Flyway à valider) et jeu d'essais de développement.
   Ni REST, ni contrat, ni écran.
 - **Questions ouvertes** : engager deux fois la même équipe est-il une erreur ? Une équipe se
   retire-t-elle (forfait général) ? Le numéro est-il propre à la compétition, ou au club pour toute
   la saison ? Les Ligues sont-elles exactement les régions de l'INSEE, pour le contrôle à venir ?
+  Une compétition inconnue donne aujourd'hui un `NoSuchElementException` brut : un refus métier
+  viendra avec le premier appelant qui en a besoin. L'ordre dans lequel les équipes ont été engagées
+  ne se conserve pas à la relecture (la table ne porte pas de rang) : la règle métier est le numéro
+  par club.
 
 ### Les slices suivantes
 
