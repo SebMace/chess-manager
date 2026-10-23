@@ -1,6 +1,5 @@
 package competition.domain;
 
-/** Skeleton: each remaining accessor is driven by a unit test of CreateCompetition. */
 public class Competition {
     private final CompetitionId id;
     private final String name;
