@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Competitions, NewCompetition } from '../ports/competitions';
+import { Competitions, NewCompetition, SeasonCompetitions } from '../ports/competitions';
 
 @Injectable()
 export class HttpCompetitions implements Competitions {
@@ -13,5 +13,9 @@ export class HttpCompetitions implements Competitions {
       organizingLeague: competition.organizingLeague,
       boards: competition.boards,
     });
+  }
+
+  ofCurrentSeason(): Observable<SeasonCompetitions> {
+    return this.http.get<SeasonCompetitions>('/api/competitions');
   }
 }
