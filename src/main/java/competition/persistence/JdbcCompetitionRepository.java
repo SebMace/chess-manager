@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.simple.JdbcClient;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -27,6 +28,11 @@ public class JdbcCompetitionRepository implements CompetitionRepository {
                 .param("id", competitionId.competitionId())
                 .query(JdbcCompetitionRepository::competition)
                 .optional();
+    }
+
+    @Override
+    public List<Competition> inSeason(Season season) {
+        throw new UnsupportedOperationException("not implemented yet");
     }
 
     @Override
