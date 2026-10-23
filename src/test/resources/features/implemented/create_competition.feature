@@ -11,3 +11,10 @@ Feature: Create a competition
     Then the administrator is told that the competition "Nationale 4" has been created for the season 2026-2027
     And the competition "Nationale 4" is organized by the league "Centre-Val de Loire"
     And the competition "Nationale 4" is played on 6 boards
+
+  @to_implement
+  Scenario: A competition needs at least one board
+    Given the current season is 2026-2027
+    When an administrator creates the competition "Nationale 4" organized by the league "Centre-Val de Loire", played on 0 boards
+    Then the administrator is told that a competition needs at least one board
+    And no competition has been created
