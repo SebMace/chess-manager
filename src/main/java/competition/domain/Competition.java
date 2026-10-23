@@ -27,12 +27,16 @@ public class Competition {
     public int boards() { return boards; }
 
     public Team engageTeamOf(ClubId club) {
-        Team team = new Team(club, (int) teams.stream().filter(engaged -> engaged.club().equals(club)).count() + 1);
+        Team team = new Team(club, numberOfTeamsEngagedBy(club) + 1);
         teams.add(team);
         return team;
     }
 
     public List<Team> teams() {
         return List.copyOf(teams);
+    }
+
+    private int numberOfTeamsEngagedBy(ClubId club) {
+        return (int) teams.stream().filter(team -> team.club().equals(club)).count();
     }
 }
