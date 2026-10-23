@@ -16,9 +16,10 @@ ouvertes ; il n'est pas un avis juridique. Il sera relu avant la mise en product
 
 Ce choix dépend du mode de distribution de l'application et sera fait avant la mise en production.
 
-Depuis le pivot vers Chess Decision (voir `docs/slices.md`), la gestion de club est en pause : les
-traitements 1 et 2 restent décrits tant que leur code existe. Chess Decision ajoutera son propre
-traitement dès qu'une slice stockera des données d'un joueur, par exemple ses analyses.
+La gestion de club a repris le 23 octobre 2026 (voir `docs/slices.md`) avec l'enregistrement des
+membres d'un club : le traitement 2 stocke désormais des données, pour ces membres seulement.
+Chess Decision ajoutera son propre traitement dès qu'une slice stockera des données d'un joueur,
+par exemple ses analyses.
 
 ## Traitement 1 — Annuaire des clubs
 
@@ -43,14 +44,20 @@ celle de la salle de jeu ?
 | Rubrique | Contenu |
 |---|---|
 | Finalité | Suivre les personnes en relation avec un club : prospects, membres licenciés, partenaires. |
-| Slices | *Record a person*, *Update a person*, *Register a prospect*, *Register a license*, *Register a partnership*, *Recognize an external player* |
+| Slices | *Register a new member*, *Consult the members of a club* ; *Record a person*, *Update a person*, *Register a prospect*, *Register a license*, *Register a partnership*, *Recognize an external player* (ces six cas d'usage n'existent qu'avec des fakes en mémoire) |
 | Personnes concernées | Prospects, membres, partenaires ; probablement des mineurs. |
 | Données | Prénom, nom, adresse électronique (facultative), identifiant FIDE, classement Elo et classement précédent, statut dans le club (prospect, membre, partenaire), identifiant FFE personnel, licence FFE par saison (type A ou B). |
-| Stockage | Aucun pour l'instant : les cas d'usage n'existent qu'avec des fakes en mémoire. |
-| Destinataires | À décider avec le bounded context des droits et autorisations. |
+| Stockage | PostgreSQL : tables `person`, `club_relationship` et `club_relationship_license`. Seules y sont écrites les données d'un membre inscrit par *Register a new member* : prénom, nom, identifiant FFE personnel, classement Elo (facultatif), titre FIDE (facultatif), club, type de licence par saison. Courriel et identifiant FIDE ne sont pas stockés. Les autres cas d'usage n'existent qu'avec des fakes en mémoire. |
+| Destinataires | Toute personne qui peut joindre l'API : la liste des membres d'un club (prénom, nom, Elo, titre FIDE, identifiant FFE, licence) n'est protégée par aucune authentification. À décider avec le bounded context des droits et autorisations. |
 | Base légale | À décider. Hypothèse : exécution du contrat d'adhésion pour un membre ; intérêt légitime ou consentement pour un prospect. |
 | Durée de conservation | À décider, en particulier pour un prospect qui ne prend jamais de licence et pour un membre qui quitte le club. |
 | Transferts hors UE | Aucun. |
+
+**Point de vigilance.** Les membres d'un club sont probablement, pour une partie, des mineurs, et
+leur liste est consultable sans authentification. Tant que les droits et autorisations n'existent
+pas, la démonstration et le profil `dev` n'utilisent que des joueurs fictifs, et le profil `dev`
+vide ces tables à chaque démarrage. Aucune donnée réelle ne doit y être saisie avant les décisions
+des questions 1, 3, 4 et 5 ci-dessous.
 
 ## Données qui ne sont pas des traitements de données personnelles
 

@@ -25,6 +25,18 @@ import clubmanagement.townsofcommune.rest.TownsOfCommuneController;
 import clubmanagement.townsofpostcode.TownsOfPostcode;
 import clubmanagement.townsofpostcode.rest.TownsOfPostcodeController;
 import clubmanagement.domain.club.vo.ClubId;
+import clubmanagement.domain.club.vo.Season;
+import clubmanagement.domain.person.vo.PersonId;
+import clubmanagement.membersofclub.MembersOfClub;
+import clubmanagement.membersofclub.rest.MembersOfClubController;
+import clubmanagement.persistence.JdbcClubMembers;
+import clubmanagement.persistence.JdbcClubRelationshipRepository;
+import clubmanagement.ports.ClubMembers;
+import clubmanagement.persistence.JdbcPersonRepository;
+import clubmanagement.ports.ClubRelationshipRepository;
+import clubmanagement.ports.PersonRepository;
+import clubmanagement.registermember.RegisterNewMember;
+import clubmanagement.registermember.rest.RegisterNewMemberController;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -34,6 +46,9 @@ import java.util.UUID;
 
 @Configuration
 class ClubConfiguration {
+    /** The season starts at the start of the school year, which has no fixed day: it is not computed from the date. */
+    private static final Season CURRENT_SEASON = new Season(2026, 2027);
+
     @Bean
     ClubRepository clubRepository(JdbcClient jdbc) {
         return new JdbcClubRepository(jdbc);
@@ -52,6 +67,43 @@ class ClubConfiguration {
     @Bean
     CreateClubController createClubController(CreateClub createClub) {
         return new CreateClubController(createClub);
+    }
+
+    @Bean
+    PersonRepository personRepository(JdbcClient jdbc) {
+        return new JdbcPersonRepository(jdbc);
+    }
+
+    @Bean
+    ClubRelationshipRepository clubRelationshipRepository(JdbcClient jdbc) {
+        return new JdbcClubRelationshipRepository(jdbc);
+    }
+
+    @Bean
+    RegisterNewMember registerNewMember(PersonRepository people, ClubRelationshipRepository relationships,
+                                        TransactionOperations transactions) {
+        return new TransactionalRegisterNewMember(people, relationships, CURRENT_SEASON,
+                () -> new PersonId(UUID.randomUUID()), transactions);
+    }
+
+    @Bean
+    RegisterNewMemberController registerNewMemberController(RegisterNewMember registerNewMember) {
+        return new RegisterNewMemberController(registerNewMember);
+    }
+
+    @Bean
+    ClubMembers clubMembers(JdbcClient jdbc) {
+        return new JdbcClubMembers(jdbc);
+    }
+
+    @Bean
+    MembersOfClub membersOfClub(ClubMembers clubMembers) {
+        return new MembersOfClub(clubMembers, CURRENT_SEASON);
+    }
+
+    @Bean
+    MembersOfClubController membersOfClubController(MembersOfClub membersOfClub) {
+        return new MembersOfClubController(membersOfClub);
     }
 
     @Bean

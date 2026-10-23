@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { ClubsOfCommittee } from './club-management/clubs-of-committee/clubs-of-committee';
 import { CreateClub } from './club-management/create-club/create-club';
 import { DefineOpeningHours } from './club-management/define-opening-hours/define-opening-hours';
+import { MembersOfClub } from './club-management/members-of-club/members-of-club';
 
 export const routes: Routes = [
   { path: '', component: ClubsOfCommittee, title: 'Clubs — Chess Manager' },
@@ -11,4 +12,5 @@ export const routes: Routes = [
     component: DefineOpeningHours,
     title: "Horaires d'ouverture — Chess Manager",
   },
+  { path: 'clubs/:id/members', component: MembersOfClub, title: 'Membres du club — Chess Manager' },
 ];

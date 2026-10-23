@@ -30,6 +30,7 @@ import { ClubOfCommittee, Clubs } from '../ports/clubs';
                   <th scope="col">Commune</th>
                   <th scope="col">Identifiant FFE</th>
                   <th scope="col">Horaires d'ouverture</th>
+                  <th scope="col">Membres</th>
                 </tr>
               </thead>
               <tbody>
@@ -43,6 +44,13 @@ import { ClubOfCommittee, Clubs } from '../ports/clubs';
                         [routerLink]="['/clubs', club.id, 'opening-hours']"
                         attr.aria-label="Horaires d'ouverture de {{ club.name }}"
                         >Horaires</a
+                      >
+                    </td>
+                    <td>
+                      <a
+                        [routerLink]="['/clubs', club.id, 'members']"
+                        attr.aria-label="Membres de {{ club.name }}"
+                        >Membres</a
                       >
                     </td>
                   </tr>

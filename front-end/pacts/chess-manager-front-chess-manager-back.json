@@ -110,6 +110,71 @@
       "type": "Synchronous/HTTP"
     },
     {
+      "description": "a request for the members of a club",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "the club G45301 has the member Camille Martin, a FIDE master rated 2310"
+        }
+      ],
+      "request": {
+        "generators": {
+          "path": {
+            "expression": "/api/clubs/${clubId}/members",
+            "type": "ProviderState"
+          }
+        },
+        "matchingRules": {
+          "path": {
+            "combine": "AND",
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          }
+        },
+        "method": "GET",
+        "path": "/api/clubs/3d9a4e1c-6b2f-4f7a-8c15-0e7b9a2d4f68/members"
+      },
+      "response": {
+        "body": {
+          "content": [
+            {
+              "elo": 2310,
+              "ffeId": "K58213",
+              "fideTitle": "MF",
+              "firstName": "Camille",
+              "lastName": "Martin",
+              "licenseType": "A"
+            }
+          ],
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
       "description": "the creation of a club",
       "pending": false,
       "request": {
@@ -247,6 +312,56 @@
       },
       "response": {
         "status": 204
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "the registration of a new member of a club",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "the club G45302 is managed by the application"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "elo": 1790,
+            "ffeId": "K61477",
+            "fideTitle": null,
+            "firstName": "Alex",
+            "lastName": "Durand",
+            "licenseType": "B"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "generators": {
+          "path": {
+            "expression": "/api/clubs/${clubId}/members",
+            "type": "ProviderState"
+          }
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "path": {
+            "combine": "AND",
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          }
+        },
+        "method": "POST",
+        "path": "/api/clubs/3d9a4e1c-6b2f-4f7a-8c15-0e7b9a2d4f68/members"
+      },
+      "response": {
+        "status": 201
       },
       "type": "Synchronous/HTTP"
     }

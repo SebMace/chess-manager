@@ -44,7 +44,8 @@ public class RegisterMemberSteps {
         RegisterNewMember registerNewMember = new RegisterNewMember(people, relationships, new Season(yearBegin, yearEnd),
                 () -> REGISTERED_PLAYER_ID);
         registeredPlayer = registerNewMember.registerNewMember(createdClubs.idOf(clubName).orElseThrow(),
-                name.firstName(), name.lastName(), new FfeId(ffeIdentifier), FfeLicenseType.valueOf(licenseType));
+                name.firstName(), name.lastName(), new FfeId(ffeIdentifier), FfeLicenseType.valueOf(licenseType),
+                Optional.empty(), Optional.empty());
     }
 
     @Then("{player} is a member of {string} for the {int}-{int} season with a/an {word} license")

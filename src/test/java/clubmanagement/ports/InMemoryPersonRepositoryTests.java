@@ -7,7 +7,12 @@ import org.junit.jupiter.api.Test;
 import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 
-class InMemoryPersonRepositoryTests {
+class InMemoryPersonRepositoryTests extends PersonRepositoryContract {
+    private final InMemoryPersonRepository inMemoryPeople = new InMemoryPersonRepository();
+
+    @Override
+    protected PersonRepository people() { return inMemoryPeople; }
+
     @Test
     void should_only_persist_changes_when_explicitly_saved() {
         var repository = new InMemoryPersonRepository();

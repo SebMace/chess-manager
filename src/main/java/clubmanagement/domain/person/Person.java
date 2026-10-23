@@ -3,6 +3,7 @@ package clubmanagement.domain.person;
 import clubmanagement.domain.exceptions.FideIdAlreadyAssignedException;
 import clubmanagement.domain.member.vo.EloRating;
 import clubmanagement.domain.member.vo.FfeId;
+import clubmanagement.domain.member.vo.FideTitle;
 import clubmanagement.domain.member.vo.FideId;
 import clubmanagement.domain.person.vo.PersonId;
 
@@ -21,6 +22,8 @@ public class Person {
 
     private EloRating eloRating;
     private EloRating eloRatingLastRecorded;
+    /** A title held for life; absent for most players. Not the FIDE identifier, which is {@code fideId}. */
+    private FideTitle fideTitle;
 
 
     public Person(PersonId personId,
@@ -46,6 +49,17 @@ public class Person {
     public static Person licensedPlayer(PersonId personId, String firstName, String lastName, FfeId ffeId) {
         return new Person(personId, firstName, lastName, null, ffeId);
     }
+
+    /** A licensed player registered with what the FFE says about them: their rating and their FIDE title, if any. */
+    public static Person registeredLicensedPlayer(PersonId personId, String firstName, String lastName, FfeId ffeId,
+                                                  Optional<EloRating> eloRating, Optional<FideTitle> fideTitle) {
+        Person player = licensedPlayer(personId, firstName, lastName, ffeId);
+        player.eloRating = eloRating.orElse(null);
+        player.fideTitle = fideTitle.orElse(null);
+        return player;
+    }
+
+    public Optional<FideTitle> fideTitle() { return Optional.ofNullable(fideTitle); }
 
     public Optional<FfeId> ffeId() { return Optional.ofNullable(ffeId); }
 

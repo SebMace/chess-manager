@@ -4,6 +4,7 @@ import clubmanagement.domain.exceptions.FideIdAlreadyAssignedException;
 import clubmanagement.domain.member.vo.EloRating;
 import clubmanagement.domain.member.vo.FfeId;
 import clubmanagement.domain.member.vo.FideId;
+import clubmanagement.domain.member.vo.FideTitle;
 import clubmanagement.domain.person.vo.PersonId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -112,5 +113,26 @@ class PersonTests {
         assertThrows(IllegalStateException.class, () -> camille.takesFirstLicense(new FfeId("B54321")));
 
         assertEquals(Optional.of(new FfeId("K58213")), camille.ffeId());
+    }
+
+    @Test
+    void a_registered_licensed_player_has_their_ffe_identifier_their_rating_and_their_fide_title() {
+        Person camille = Person.registeredLicensedPlayer(
+                new PersonId(UUID.fromString("00000000-0000-0000-0000-000000000001")), "Camille", "Martin",
+                new FfeId("K58213"), Optional.of(new EloRating(2310)), Optional.of(FideTitle.MF));
+
+        assertEquals(Optional.of(new FfeId("K58213")), camille.ffeId());
+        assertEquals(new EloRating(2310), camille.eloRating());
+        assertEquals(Optional.of(FideTitle.MF), camille.fideTitle());
+    }
+
+    @Test
+    void a_registered_licensed_player_may_have_neither_a_rating_nor_a_fide_title() {
+        Person camille = Person.registeredLicensedPlayer(
+                new PersonId(UUID.fromString("00000000-0000-0000-0000-000000000001")), "Camille", "Martin",
+                new FfeId("K58213"), Optional.empty(), Optional.empty());
+
+        assertNull(camille.eloRating());
+        assertEquals(Optional.empty(), camille.fideTitle());
     }
 }

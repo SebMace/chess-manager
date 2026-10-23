@@ -12,6 +12,11 @@ import clubmanagement.domain.club.vo.CommitteeCode;
 import clubmanagement.domain.club.vo.FfeClubId;
 import clubmanagement.domain.club.vo.PostalAddress;
 import clubmanagement.domain.commune.CommuneCode;
+import clubmanagement.domain.member.vo.EloRating;
+import clubmanagement.domain.member.vo.FfeId;
+import clubmanagement.domain.member.vo.FfeLicenseType;
+import clubmanagement.domain.member.vo.FideTitle;
+import clubmanagement.registermember.RegisterNewMember;
 import infrastructure.ChessManagerApplication;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestTemplate;
@@ -25,6 +30,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
 import java.util.Map;
+import java.util.Optional;
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
@@ -39,9 +45,11 @@ class FrontEndContractTests {
     static final PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:18");
 
     private final CreateClub createClub;
+    private final RegisterNewMember registerNewMember;
 
-    FrontEndContractTests(@Autowired CreateClub createClub) {
+    FrontEndContractTests(@Autowired CreateClub createClub, @Autowired RegisterNewMember registerNewMember) {
         this.createClub = createClub;
+        this.registerNewMember = registerNewMember;
     }
 
     @BeforeEach
@@ -69,6 +77,19 @@ class FrontEndContractTests {
     @State("the club G45300 is managed by the application")
     Map<String, Object> theClubG45300IsManagedByTheApplication() {
         return Map.of("clubId", aClubOfTheCommittee45("Montargis Échecs", "G45300").clubId().toString());
+    }
+
+    @State("the club G45301 has the member Camille Martin, a FIDE master rated 2310")
+    Map<String, Object> theClubG45301HasTheMemberCamilleMartinAFideMasterRated2310() {
+        ClubId club = aClubOfTheCommittee45("Cercle d'Amilly", "G45301");
+        registerNewMember.registerNewMember(club, "Camille", "Martin", new FfeId("K58213"), FfeLicenseType.A,
+                Optional.of(new EloRating(2310)), Optional.of(FideTitle.MF));
+        return Map.of("clubId", club.clubId().toString());
+    }
+
+    @State("the club G45302 is managed by the application")
+    Map<String, Object> theClubG45302IsManagedByTheApplication() {
+        return Map.of("clubId", aClubOfTheCommittee45("Échecs de Châlette", "G45302").clubId().toString());
     }
 
     /** The states share one database: each creates its club under an FFE identifier of its own. */

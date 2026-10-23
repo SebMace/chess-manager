@@ -42,7 +42,15 @@ describe('ClubsOfCommittee', () => {
       { id: 'club-1', name: 'U.S. Orléans.Echecs', commune: 'Orléans', ffeClubId: 'G45001' },
     ]);
 
-    expect(shownClubs(page)).toEqual([['U.S. Orléans.Echecs', 'Orléans', 'G45001', 'Horaires']]);
+    expect(shownClubs(page)).toEqual([['U.S. Orléans.Echecs', 'Orléans', 'G45001', 'Horaires', 'Membres']]);
+  });
+
+  it('leads the administrator to the members of each club', async () => {
+    await consultClubsOfCommittee('45', [
+      { id: 'club-1', name: 'U.S. Orléans.Echecs', commune: 'Orléans', ffeClubId: 'G45001' },
+    ]);
+
+    expect(linkNamed(page, 'Membres de U.S. Orléans.Echecs').getAttribute('href')).toBe('/clubs/club-1/members');
   });
 
   it('leads the administrator to the opening hours of each club', async () => {
