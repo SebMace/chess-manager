@@ -32,6 +32,18 @@ class CompetitionsOfSeasonTests {
         assertEquals(CURRENT_SEASON, seen.competitions().get(0).season());
     }
 
+    @Test
+    void should_show_the_competitions_in_the_order_of_their_names() {
+        create("Régionale 1", CENTRE_VAL_DE_LOIRE, CURRENT_SEASON);
+        create("Nationale 4", CENTRE_VAL_DE_LOIRE, CURRENT_SEASON);
+        create("Départementale 2", CENTRE_VAL_DE_LOIRE, CURRENT_SEASON);
+
+        SeasonCompetitions seen = competitionsOfSeason.competitionsOfCurrentSeason();
+
+        assertEquals(List.of("Départementale 2", "Nationale 4", "Régionale 1"),
+                seen.competitions().stream().map(Competition::name).toList());
+    }
+
     private void create(String name, League league, Season season) {
         competitions.save(new Competition(new CompetitionId(new UUID(0, ++created)), name, league, season, 6));
     }

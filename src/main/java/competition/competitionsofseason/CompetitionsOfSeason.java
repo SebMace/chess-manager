@@ -1,7 +1,11 @@
 package competition.competitionsofseason;
 
+import competition.domain.Competition;
 import competition.domain.Season;
 import competition.ports.CompetitionRepository;
+
+import java.util.Comparator;
+import java.util.List;
 
 public class CompetitionsOfSeason {
     private final CompetitionRepository competitions;
@@ -13,6 +17,9 @@ public class CompetitionsOfSeason {
     }
 
     public SeasonCompetitions competitionsOfCurrentSeason() {
-        return new SeasonCompetitions(currentSeason, competitions.inSeason(currentSeason));
+        List<Competition> ofSeason = competitions.inSeason(currentSeason).stream()
+                .sorted(Comparator.comparing(Competition::name))
+                .toList();
+        return new SeasonCompetitions(currentSeason, ofSeason);
     }
 }
