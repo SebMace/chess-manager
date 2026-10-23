@@ -3,6 +3,7 @@ import { ClubsOfCommittee } from './club-management/clubs-of-committee/clubs-of-
 import { CreateClub } from './club-management/create-club/create-club';
 import { DefineOpeningHours } from './club-management/define-opening-hours/define-opening-hours';
 import { MembersOfClub } from './club-management/members-of-club/members-of-club';
+import { CreateCompetition } from './competition/create-competition/create-competition';
 
 export const routes: Routes = [
   { path: '', component: ClubsOfCommittee, title: 'Clubs — Chess Manager' },
@@ -13,4 +14,5 @@ export const routes: Routes = [
     title: "Horaires d'ouverture — Chess Manager",
   },
   { path: 'clubs/:id/members', component: MembersOfClub, title: 'Membres du club — Chess Manager' },
+  { path: 'competitions/new', component: CreateCompetition, title: 'Créer une compétition — Chess Manager' },
 ];
