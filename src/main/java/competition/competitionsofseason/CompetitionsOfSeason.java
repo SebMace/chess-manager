@@ -3,12 +3,16 @@ package competition.competitionsofseason;
 import competition.domain.Season;
 import competition.ports.CompetitionRepository;
 
-/** Compile-only skeleton: its behavior is driven by CompetitionsOfSeasonTests. */
 public class CompetitionsOfSeason {
+    private final CompetitionRepository competitions;
+    private final Season currentSeason;
+
     public CompetitionsOfSeason(CompetitionRepository competitions, Season currentSeason) {
+        this.competitions = competitions;
+        this.currentSeason = currentSeason;
     }
 
     public SeasonCompetitions competitionsOfCurrentSeason() {
-        throw new UnsupportedOperationException("not implemented yet");
+        return new SeasonCompetitions(currentSeason, competitions.inSeason(currentSeason));
     }
 }
