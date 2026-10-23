@@ -355,7 +355,7 @@ l'écriture d'un commentaire et d'un récit : seul leur affichage a un écran.
 | Find the league of a committee | `clubmanagement.leagueofcommittee` | à venir | — |
 | Create a competition | `competition.createcompetition` | livrée | — |
 | Consult the competitions of the season | `competition.competitionsofseason` | livrée | Create a competition |
-| Engage a team in a competition | `competition.engageteam` | prochaine de ce contexte | Create a competition |
+| Engage a team in a competition | `competition.engageteam` | en cours | Create a competition |
 | Schedule a match | `competition.schedulematch` | à venir | Engage a team in a competition |
 | Consult the calendar of a competition | `competition.calendarofcompetition` | à venir | Schedule a match |
 | Record the results of a match | `competition.recordmatchresults` | à venir | Schedule a match, Register a new member |
@@ -527,6 +527,10 @@ Hypothèses retenues, sauf avis contraire :
   Cavaliers de la Loire » dans la compétition « Nationale 4 », le club a l'équipe 1 engagée dans
   cette compétition. Un second scénario : quand il engage une seconde équipe du même club, le club
   a les équipes 1 et 2.
+- **État** : en cours. Livrés : le scénario d'acceptation (dans la porte de build), le domaine
+  (`Competition.engageTeamOf`, numérotation par club) et le cas d'usage `EngageTeam`, sur le dépôt
+  en mémoire. Restent la persistance, dont l'adaptateur JDBC devra mettre à jour une compétition
+  existante (son `save` ne sait qu'insérer), et le jeu d'essais.
 - **Couches** : acceptation, cas d'usage, domaine (`Competition` et ses équipes), persistance (une
   table des équipes engagées, avec sa migration Flyway à valider) et jeu d'essais de développement.
   Ni REST, ni contrat, ni écran.
