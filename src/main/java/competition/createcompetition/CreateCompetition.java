@@ -21,7 +21,7 @@ public class CreateCompetition {
 
     public CompetitionId createCompetition(String name, League league, int boards) {
         CompetitionId id = newCompetitionId.get();
-        competitions.save(new Competition(id, name, currentSeason, boards).organizedBy(league));
+        competitions.save(new Competition(id, name, league, currentSeason, boards));
         return id;
     }
 }

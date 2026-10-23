@@ -47,8 +47,8 @@ public class JdbcCompetitionRepository implements CompetitionRepository {
         return new Competition(
                 new CompetitionId(row.getObject("id", UUID.class)),
                 row.getString("name"),
+                new League(row.getString("organizing_league_name")),
                 new Season(row.getInt("season_begin_year"), row.getInt("season_end_year")),
-                row.getInt("boards"))
-                .organizedBy(new League(row.getString("organizing_league_name")));
+                row.getInt("boards"));
     }
 }
