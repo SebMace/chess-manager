@@ -53,6 +53,18 @@ describe('CreateCompetition', () => {
     expect(notice(page)).toBe('La compétition Nationale 4 a été créée.');
   });
 
+  it('asks for the name of the competition and sends nothing without it', async () => {
+    fill(fieldLabelled(page, 'Ligue organisatrice'), 'Centre-Val de Loire');
+    fill(fieldLabelled(page, "Nombre d'échiquiers"), '6');
+
+    buttonNamed(page, 'Créer la compétition').click();
+    await fixture.whenStable();
+
+    expect(page.textContent).toContain('Le nom de la compétition est obligatoire.');
+    expect(fieldLabelled(page, 'Nom de la compétition').getAttribute('aria-invalid')).toBe('true');
+    server.expectNone('/api/competitions');
+  });
+
   it('tells the administrator that the competition has been created with its information', async () => {
     fill(fieldLabelled(page, 'Nom de la compétition'), 'Nationale 4');
     fill(fieldLabelled(page, 'Ligue organisatrice'), 'Centre-Val de Loire');

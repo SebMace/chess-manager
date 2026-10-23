@@ -18,7 +18,17 @@ import { Competitions, NewCompetition } from '../ports/competitions';
         <div class="fields">
           <div class="field field--wide">
             <label for="competition-name" class="required">Nom de la compétition</label>
-            <input id="competition-name" #competitionName aria-required="true" placeholder="ex. Nationale 4" />
+            <input
+              id="competition-name"
+              #competitionName
+              aria-required="true"
+              placeholder="ex. Nationale 4"
+              [attr.aria-invalid]="nameMissing() || null"
+              [attr.aria-describedby]="nameMissing() ? 'competition-name-error' : null"
+            />
+            @if (nameMissing()) {
+              <p id="competition-name-error" class="field-error">Le nom de la compétition est obligatoire.</p>
+            }
           </div>
           <div class="field">
             <label for="organizing-league" class="required">Ligue organisatrice</label>
@@ -42,9 +52,12 @@ import { Competitions, NewCompetition } from '../ports/competitions';
 export class CreateCompetition {
   private readonly competitions = inject(Competitions);
   protected readonly created = signal<string | null>(null);
+  protected readonly nameMissing = signal(false);
 
   protected create(event: Event, competition: NewCompetition): void {
     event.preventDefault();
+    this.nameMissing.set(!competition.name.trim());
+    if (this.nameMissing()) return;
     this.competitions.create(competition).subscribe(() => this.created.set(competition.name));
   }
 }
