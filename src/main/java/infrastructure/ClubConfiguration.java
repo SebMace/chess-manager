@@ -47,7 +47,7 @@ import java.util.UUID;
 @Configuration
 class ClubConfiguration {
     /** The season starts at the start of the school year, which has no fixed day: it is not computed from the date. */
-    private static final Season CURRENT_SEASON = new Season(2026, 2027);
+    static final Season CURRENT_SEASON = new Season(2026, 2027);
 
     @Bean
     ClubRepository clubRepository(JdbcClient jdbc) {
