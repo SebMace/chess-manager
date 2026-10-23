@@ -373,6 +373,32 @@ already registered, or an unknown club, is refused by the database, so the answe
 see the open questions in `docs/slices.md`. As everywhere, nothing checks yet that the caller is
 an administrator.
 
+## Competitions
+
+*Create a competition* is the first slice of the proposed Competition context (ADR 0027). So far
+the application can only create a competition: there is no screen and no read endpoint yet.
+
+- A competition has a name, the Ligue that organizes it and a number of boards per team. Its
+  season is the current season of the application (ADR 0025).
+- The number of boards is strictly positive: a request with fewer than one board, or with none, is
+  refused with 400 (`CompetitionNeedsAtLeastOneBoard`).
+- The Ligue is designated by its name for now. Choosing it from a list will come with a slice of
+  club management.
+- A request without a name or without an organizing Ligue is refused with 400. An empty name or
+  Ligue is not refused yet.
+- The `competition` table has no foreign key to the club tables, and the `dev` profile empties it at
+  each start.
+
+```
+POST /api/competitions   {"name": "Nationale 4", "organizingLeague": "Centre-Val de Loire",
+                          "boards": 6}
+                         →  201 Created, Location: /api/competitions/<id>
+```
+
+No endpoint serves that `Location` yet, and the Pact contract with the front-end will state this
+interaction when the screen is built. As everywhere, nothing checks yet that the caller is an
+administrator.
+
 ## Front-end (Angular)
 
 The Angular 22 application in `front-end/` is a separate npm project, not built by Maven.

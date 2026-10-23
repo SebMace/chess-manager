@@ -376,6 +376,9 @@ si les cas d'usage seuls suffisent, alimentés en développement comme les clubs
   organisée par la Ligue du Centre-Val de Loire et jouée sur six échiquiers, il est informé que la
   compétition « Nationale 4 » a été créée pour la saison 2026-2027, organisée par cette Ligue et
   jouée sur six échiquiers. Un second scénario décrit le refus d'une compétition sans échiquier.
+- **État** : acceptation, cas d'usage, persistance et REST livrés (`POST /api/competitions`, avec
+  le vidage de la table au démarrage du profil dev). Restent le contrat Pact, l'écran et les règles
+  ArchUnit du contexte.
 - **Couches** : acceptation, cas d'usage, persistance, REST, contrat et écran. L'écran est voulu
   pour cette première slice, qui pose aussi le squelette du contexte (package, migration, REST,
   contrat, règles ArchUnit) : le geste ne se fait qu'une fois par saison, donc le formulaire reste
