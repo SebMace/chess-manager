@@ -16,30 +16,30 @@ Statuts :
 
 Seule la prochaine slice est détaillée ; les autres le seront quand on les démarrera.
 
-## Priorité : Chess Decision
+## Priorité : la vie du club et les compétitions
 
-Depuis le 2 octobre 2026, Chess Manager devient d'abord un outil personnel de progression aux
-échecs. Son cœur, **Chess Decision** : le joueur soumet une position, éventuellement des thèmes,
-son analyse, ses coups candidats et son plan ; l'outil confronte ce raisonnement aux ressources
-concrètes de la position et lui répond de façon pédagogique, en séparant les faits vérifiés, les
-interprétations et les incertitudes.
+Depuis le 23 octobre 2026, Chess Manager est d'abord un outil pour la vie d'un club (ADR 0028).
+Ses deux domaines sont la gestion de club (clubs, personnes, licences, horaires d'ouverture,
+imports FFE) et les compétitions par équipes, à commencer par la Nationale 4 du Loiret (voir plus
+bas). Chaque nouvelle slice passe d'abord au crible YAGNI.
 
-- Les thèmes sont des hypothèses ou des objectifs d'apprentissage, jamais des vérités. Les
+La gestion de club n'est pas en pause : *Register a new member* et *Consult the members of a
+club* ont été menées jusqu'à l'écran, avant de présenter l'application au président et au
+secrétaire d'un club.
+
+**Chess Decision** n'est plus le produit phare (ADR 0028). Décidé le 2 octobre 2026 (ADR 0020),
+c'était un outil personnel de progression : le joueur soumet une position, éventuellement des
+thèmes, son analyse, ses coups candidats et son plan, et l'outil confronte ce raisonnement aux
+ressources concrètes de la position. Aucun code n'existe et aucune slice n'est planifiée. S'il
+reprend, ses principes restent :
+
+- les thèmes sont des hypothèses ou des objectifs d'apprentissage, jamais des vérités ; les
   déséquilibres de Silman peuvent inspirer, sans devenir une grille obligatoire, et aucun contenu
-  de Silman n'est inventé.
-- Quatre responsabilités restent distinctes : le domaine (positions, propositions, thèmes,
-  retours), le moteur (vérification tactique, évaluations, variantes), le LLM (formuler des
-  explications à partir des éléments disponibles) et un éventuel serveur MCP (exposer ces
-  capacités à un client IA, sans être le moteur du raisonnement).
-- Pas d'infrastructure, MCP compris, avant un premier usage utile identifié.
-- Faire de Chess Decision un bounded context distinct reste une proposition, à valider.
-- La première slice de Chess Decision reste à choisir.
-
-La gestion de club (clubs, personnes, licences, imports FFE) n'est plus en pause depuis le
-23 octobre 2026. Elle reprend avec l'enregistrement des joueurs liés à un club : *Register a new
-member* et *Consult the members of a club* ont été menées jusqu'à l'écran, avant de présenter
-l'application au président et au secrétaire d'un club. Chaque nouvelle slice de ce domaine passe
-d'abord au crible YAGNI.
+  de Silman n'est inventé ;
+- le domaine, le moteur, le LLM et un éventuel serveur MCP restent quatre responsabilités
+  distinctes ;
+- pas d'infrastructure, MCP compris, avant un premier usage utile identifié ;
+- faire de Chess Decision un bounded context distinct reste une proposition, à valider.
 
 ## Slices existantes
 
@@ -260,6 +260,111 @@ haut.
     (mais SAINTES, la ville, reste en toutes lettres) ;
   - à l'écran, un code postal unique remplit le champ seulement s'il est vide ; plusieurs codes
     sont suggérés ; si la recherche échoue, rien n'est suggéré, sans message.
+
+## Compétition : la Nationale 4 du Loiret
+
+Depuis le 23 octobre 2026, le thème *Compétitions* est découpé pour un premier besoin : un
+bounded context `competition` à part (ADR 0027, proposé), des slices nommées d'après leur cas
+d'usage, chacune passée au crible YAGNI.
+
+**Le besoin.** Les clubs créés dans l'application engagent chacun une équipe dans le championnat
+interclubs de Nationale 4 du Loiret : huit équipes, sept rondes, six échiquiers. Un calendrier
+fixé en début de saison donne les rencontres de chaque ronde. Avant la ronde, le capitaine compose
+son équipe et peut imprimer la feuille de match ; après la ronde, il saisit les résultats.
+
+**Règles retenues**, décrites avec nos mots (ADR 0018) :
+
+- six échiquiers : indication du porteur du projet pour le Loiret, sans règlement local publié.
+  Les règlements d'autres ligues parlent de huit joueurs : le nombre d'échiquiers est donc une
+  donnée de la compétition ;
+- l'équipe première nommée dans le calendrier, celle qui reçoit, a les blancs aux échiquiers
+  impairs et les noirs aux échiquiers pairs ;
+- seuls les licenciés A peuvent jouer ;
+- règle des 103 points : quand deux joueurs de la composition ont des Elo qui diffèrent de plus de
+  103 points, le mieux classé joue devant l'autre. Le seuil est strict (103 passe, 104 est
+  refusé) et la règle vaut pour toutes les paires, pas seulement pour les échiquiers voisins. Le
+  manquement coûte un forfait administratif au mieux classé.
+
+Source : le règlement fédéral du Championnat de France des clubs, dans sa version du 3 juillet
+2009, la seule que nous ayons pu lire. La version en vigueur (A02) reste à lire, et les ligues y
+ajoutent leurs adaptations.
+
+**Contrôle YAGNI.** Le site de la FFE permet déjà de préparer une feuille de match et de la
+poster au directeur de groupe, et le règlement de 2009 exige l'usage d'un document officiel pour
+la composition. Ce que le site ne fait pas, c'est contrôler la composition avec les membres, les
+licences et les Elo que l'application connaît déjà : c'est la valeur de *Compose a team for a
+match*, et la raison de la construire en premier. *Print the match sheet* et *Record the results
+of a match* attendent que le besoin se confirme (double saisie des résultats, feuille qui ne
+remplace pas le document officiel).
+
+*Create a competition*, *Engage a team in a competition* et *Schedule a match* sont des gestes
+d'une fois par saison, faits par un administrateur : à se demander s'ils justifient un écran, ou
+si les cas d'usage seuls suffisent, alimentés en développement comme les clubs de démonstration
+(voir la leçon YAGNI plus haut).
+
+| Slice | Package | Statut | Dépend de |
+|---|---|---|---|
+| Create a competition | `competition.createcompetition` | prochaine de ce contexte | — |
+| Engage a team in a competition | `competition.engageteam` | à venir | Create a competition, Create a club |
+| Schedule a match | `competition.schedulematch` | à venir | Engage a team in a competition |
+| Compose a team for a match | `competition.composeteam` | à venir | Schedule a match, Register a new member |
+| Print the match sheet | `competition.printmatchsheet` | à venir | Compose a team for a match |
+| Record the results of a match | `competition.recordmatchresults` | à venir | Compose a team for a match |
+
+### Create a competition
+
+- **Intention** : l'administrateur crée la compétition d'une saison, avec son nom, sa saison et le
+  nombre d'échiquiers de ses équipes. Par exemple « Nationale 4 Loiret », 2026-2027, six
+  échiquiers.
+- **Décisions proposées** :
+  - le nombre d'échiquiers est un entier strictement positif, refusé sinon ;
+  - le nombre de rondes ne se déclare pas : il découle du calendrier (YAGNI) ;
+  - le contexte a sa propre saison plutôt que d'emprunter celle de `clubmanagement` : une slice ne
+    possède pas le modèle d'un autre contexte (ADR 0027).
+- **Premier test**, en langage métier : quand l'administrateur crée la compétition « Nationale 4
+  Loiret » pour la saison 2026-2027, jouée sur six échiquiers, il est informé que la compétition
+  « Nationale 4 Loiret » a été créée. Le refus d'une compétition sans échiquier vient ensuite.
+- **Couches** : acceptation, cas d'usage, persistance, REST, contrat et écran, sauf décision
+  contraire sur l'écran (voir le contrôle YAGNI).
+- **Questions ouvertes** : deux compétitions de même nom la même saison ? Le nombre d'équipes
+  (huit) se déclare-t-il d'emblée ?
+
+### Les slices suivantes
+
+Détaillées quand on les démarrera ; ce qui suit garde les questions déjà constatées.
+
+- *Engage a team in a competition* : un club engage son équipe, par exemple DEMO01. Une seule
+  équipe par club et par compétition. L'existence du club est vérifiée par le port, pas par une clé
+  étrangère. Questions : un club que l'application ne gère pas peut-il engager une équipe ? L'équipe
+  a-t-elle un nom propre ou prend-elle celui du club ?
+- *Schedule a match* : l'administrateur fixe une rencontre (ronde, date, équipe qui reçoit, équipe
+  visiteuse). Deux équipes engagées et distinctes ; une équipe ne joue qu'une rencontre par ronde.
+  Questions : saisir à la main les 28 rencontres (huit équipes, sept rondes, quatre rencontres par
+  ronde), ou générer le calendrier, ce qui n'est pas demandé ? L'heure de début compte-t-elle, pour
+  le délai de remise des compositions ?
+- *Compose a team for a match*, le cœur : le capitaine place des joueurs de son club aux
+  échiquiers de son équipe. Trois cycles : le cas nominal (membres du club, un seul échiquier par
+  joueur, couleurs dérivées), puis la licence A seule (les données de développement ont deux
+  licenciés B par club), puis la règle des 103 points (103 accepté, 104 refusé, paire non voisine).
+  À trancher : une composition contraire aux règles est-elle refusée (recommandé) ou seulement
+  signalée ? Une équipe incomplète est-elle permise (le règlement de 2009 interdit les trous entre
+  échiquiers) ? La composition fige-t-elle l'Elo et la licence au moment où elle est faite ?
+  Jusqu'à quand se modifie-t-elle ? Règles à confirmer dans le texte en vigueur : Elo FFE ou FIDE
+  quand les deux existent, joueur non classé, licencié B qui prend une licence A en cours de saison
+  (la ligue d'Île-de-France exige la licence A au plus tard à la remise des compositions), limite
+  des joueurs mutés, joueur déjà aligné ce jour-là par une autre équipe de son club.
+- *Print the match sheet* : la feuille d'une rencontre, prête à imprimer, avec les échiquiers dans
+  l'ordre, les couleurs, le nom, l'identifiant FFE et l'Elo des joueurs des deux équipes, et la
+  place des résultats et des signatures. Lecture seule, impression par le navigateur. Question :
+  remplace-t-elle le document officiel exigé par le règlement ?
+- *Record the results of a match* : le capitaine saisit le résultat de chaque échiquier, et le
+  score de la rencontre en découle. Questions : qui saisit (le capitaine de l'équipe qui reçoit ?),
+  une saisie se corrige-t-elle, quel est le barème des points de match (celui de 2009 est périmé,
+  à relire dans le texte en vigueur) ?
+
+Hors backlog, tant qu'aucun cas d'usage ne le demande (YAGNI) : le classement, la génération du
+calendrier, les forfaits et pénalités, le capitaine comme concept, les coups des parties et les
+autres divisions.
 
 ## Thèmes, à découper le moment venu
 
