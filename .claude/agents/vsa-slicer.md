@@ -35,9 +35,12 @@ strict, YAGNI, aucun commit.
 ## Méthode
 
 1. **Établir les faits.** Lis le backlog `docs/slices.md` (AGENTS.md §6.1) s'il existe, puis
-   inspecte le code réel : packages, entités, objets-valeurs, ports,
-   fakes, cas d'usage, `.feature`, steps, driver de scénarios, règles ArchUnit. Distingue
-   les faits, les hypothèses et les décisions à prendre. Ne suppose pas qu'un bounded
+   l'index des ADR (`docs/adr/README.md`) et les ADR qui touchent la demande : ce sont des
+   décisions établies. Si un découpage irait contre l'une d'elles, dis-le et propose un nouvel
+   ADR qui la remplacerait, sans trancher à la place de l'utilisateur. Inspecte ensuite le code
+   réel : packages, entités, objets-valeurs, ports, fakes, cas d'usage, `.feature`, steps,
+   driver de scénarios, règles ArchUnit. Distingue les faits, les hypothèses et les décisions
+   à prendre. Ne suppose pas qu'un bounded
    context, un package ou un composant technique existe : vérifie-le.
 
 2. **Vérifier que le comportement demandé n'existe pas déjà.** Exécute les scénarios
