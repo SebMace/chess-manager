@@ -102,6 +102,22 @@ describe('CreateCompetition', () => {
     expect(notice(page)).toBe("La compétition n'a pas pu être créée. Réessayez.");
   });
 
+  it('replaces the failure message by the success message when the administrator tries again', async () => {
+    fill(fieldLabelled(page, 'Nom de la compétition'), 'Nationale 4');
+    fill(fieldLabelled(page, 'Ligue organisatrice'), 'Centre-Val de Loire');
+    fill(fieldLabelled(page, "Nombre d'échiquiers"), '6');
+    buttonNamed(page, 'Créer la compétition').click();
+    server.expectOne({ method: 'POST', url: '/api/competitions' }).flush(null, { status: 500, statusText: 'Server Error' });
+    await fixture.whenStable();
+
+    buttonNamed(page, 'Créer la compétition').click();
+    server.expectOne({ method: 'POST', url: '/api/competitions' }).flush(null, { status: 201, statusText: 'Created' });
+    await fixture.whenStable();
+
+    expect(page.querySelectorAll('[role="status"]').length).toBe(1);
+    expect(notice(page)).toBe('La compétition Nationale 4 a été créée.');
+  });
+
   it('tells the administrator that the competition has been created with its information', async () => {
     fill(fieldLabelled(page, 'Nom de la compétition'), 'Nationale 4');
     fill(fieldLabelled(page, 'Ligue organisatrice'), 'Centre-Val de Loire');
