@@ -30,4 +30,11 @@ class CreateCompetitionTests {
 
         assertEquals("Nationale 4 Centre-Val de Loire", competitions.find(created).orElseThrow().name());
     }
+
+    @Test
+    void should_create_the_competition_for_the_current_season() {
+        CompetitionId created = createCompetition.createCompetition("Nationale 4 Centre-Val de Loire", 6);
+
+        assertEquals(SEASON, competitions.find(created).orElseThrow().season());
+    }
 }

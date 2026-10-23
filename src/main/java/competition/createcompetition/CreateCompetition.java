@@ -9,16 +9,18 @@ import java.util.function.Supplier;
 
 public class CreateCompetition {
     private final CompetitionRepository competitions;
+    private final Season currentSeason;
     private final Supplier<CompetitionId> newCompetitionId;
 
     public CreateCompetition(CompetitionRepository competitions, Season currentSeason, Supplier<CompetitionId> newCompetitionId) {
         this.competitions = competitions;
+        this.currentSeason = currentSeason;
         this.newCompetitionId = newCompetitionId;
     }
 
     public CompetitionId createCompetition(String name, int boards) {
         CompetitionId id = newCompetitionId.get();
-        competitions.save(new Competition(id, name));
+        competitions.save(new Competition(id, name, currentSeason));
         return id;
     }
 }
