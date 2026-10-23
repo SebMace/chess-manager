@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { Competitions, NewCompetition } from '../ports/competitions';
 
-type Problem = 'name' | 'organizingLeague';
+type Problem = 'name' | 'organizingLeague' | 'boards';
 
 @Component({
   selector: 'app-create-competition',
@@ -48,7 +48,19 @@ type Problem = 'name' | 'organizingLeague';
           </div>
           <div class="field">
             <label for="boards" class="required">Nombre d'échiquiers</label>
-            <input id="boards" #boards type="number" min="1" aria-required="true" placeholder="ex. 6" />
+            <input
+              id="boards"
+              #boards
+              type="number"
+              min="1"
+              aria-required="true"
+              placeholder="ex. 6"
+              [attr.aria-invalid]="problems().has('boards') || null"
+              [attr.aria-describedby]="problems().has('boards') ? 'boards-error' : null"
+            />
+            @if (problems().has('boards')) {
+              <p id="boards-error" class="field-error">Le nombre d'échiquiers doit être un entier d'au moins 1.</p>
+            }
           </div>
         </div>
         <div class="actions">
@@ -78,5 +90,6 @@ function problemsOf(competition: NewCompetition): ReadonlySet<Problem> {
   const problems = new Set<Problem>();
   if (!competition.name.trim()) problems.add('name');
   if (!competition.organizingLeague.trim()) problems.add('organizingLeague');
+  if (!Number.isInteger(competition.boards) || competition.boards < 1) problems.add('boards');
   return problems;
 }

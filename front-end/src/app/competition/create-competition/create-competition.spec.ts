@@ -77,6 +77,19 @@ describe('CreateCompetition', () => {
     server.expectNone('/api/competitions');
   });
 
+  it.each(['', '0', '2.5'])('asks for a whole number of boards of at least 1, not %j, and sends nothing', async (boards) => {
+    fill(fieldLabelled(page, 'Nom de la compétition'), 'Nationale 4');
+    fill(fieldLabelled(page, 'Ligue organisatrice'), 'Centre-Val de Loire');
+    fill(fieldLabelled(page, "Nombre d'échiquiers"), boards);
+
+    buttonNamed(page, 'Créer la compétition').click();
+    await fixture.whenStable();
+
+    expect(page.textContent).toContain("Le nombre d'échiquiers doit être un entier d'au moins 1.");
+    expect(fieldLabelled(page, "Nombre d'échiquiers").getAttribute('aria-invalid')).toBe('true');
+    server.expectNone('/api/competitions');
+  });
+
   it('tells the administrator that the competition has been created with its information', async () => {
     fill(fieldLabelled(page, 'Nom de la compétition'), 'Nationale 4');
     fill(fieldLabelled(page, 'Ligue organisatrice'), 'Centre-Val de Loire');
