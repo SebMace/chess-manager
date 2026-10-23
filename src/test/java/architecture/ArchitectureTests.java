@@ -16,6 +16,7 @@ class ArchitectureTests {
     private static final String PERSISTENCE_ADAPTER = "clubmanagement.persistence..";
     private static final String INSEE_ADAPTER = "clubmanagement.insee..";
     private static final String LA_POSTE_ADAPTER = "clubmanagement.laposte..";
+    private static final String COMPETITION_PERSISTENCE_ADAPTER = "competition.persistence..";
 
     private static final JavaClasses CLUB_MANAGEMENT = new ClassFileImporter()
             .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)
@@ -54,6 +55,17 @@ class ArchitectureTests {
                         REST_ADAPTERS, PERSISTENCE_ADAPTER, INSEE_ADAPTER, LA_POSTE_ADAPTER)
                 .because("the hexagon's core must not know about Spring or about the adapters around it")
                 .check(CLUB_MANAGEMENT);
+    }
+
+    @Test
+    void competition_core_should_not_depend_on_frameworks_or_adapters() {
+        noClasses().that().resideInAPackage("competition..")
+                .and().resideOutsideOfPackages(REST_ADAPTERS, COMPETITION_PERSISTENCE_ADAPTER)
+                .should().dependOnClassesThat()
+                .resideInAnyPackage("org.springframework..", "infrastructure..",
+                        REST_ADAPTERS, COMPETITION_PERSISTENCE_ADAPTER)
+                .because("the hexagon's core must not know about Spring or about the adapters around it")
+                .check(COMPETITION);
     }
 
     @Test
