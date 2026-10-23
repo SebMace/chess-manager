@@ -41,8 +41,19 @@ describe('CreateCompetition', () => {
     expect(request.request.body).toEqual({ name: 'Nationale 4', organizingLeague: 'Centre-Val de Loire', boards: 6 });
   });
 
-  // Outer loop of the screen: enabled when the screen sends the competition and tells it has been created.
-  it.skip('tells the administrator that the competition has been created with its information', async () => {
+  it('tells the administrator that the competition has been created', async () => {
+    fill(fieldLabelled(page, 'Nom de la compétition'), 'Nationale 4');
+    fill(fieldLabelled(page, 'Ligue organisatrice'), 'Centre-Val de Loire');
+    fill(fieldLabelled(page, "Nombre d'échiquiers"), '6');
+    buttonNamed(page, 'Créer la compétition').click();
+
+    server.expectOne({ method: 'POST', url: '/api/competitions' }).flush(null, { status: 201, statusText: 'Created' });
+    await fixture.whenStable();
+
+    expect(notice(page)).toBe('La compétition Nationale 4 a été créée.');
+  });
+
+  it('tells the administrator that the competition has been created with its information', async () => {
     fill(fieldLabelled(page, 'Nom de la compétition'), 'Nationale 4');
     fill(fieldLabelled(page, 'Ligue organisatrice'), 'Centre-Val de Loire');
     fill(fieldLabelled(page, "Nombre d'échiquiers"), '6');

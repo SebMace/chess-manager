@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { Competitions, NewCompetition } from '../ports/competitions';
 
 @Component({
@@ -33,14 +33,18 @@ import { Competitions, NewCompetition } from '../ports/competitions';
           <button type="submit">Créer la compétition</button>
         </div>
       </form>
+      @if (created(); as name) {
+        <p role="status" class="notice notice--success">La compétition {{ name }} a été créée.</p>
+      }
     </section>
   `,
 })
 export class CreateCompetition {
   private readonly competitions = inject(Competitions);
+  protected readonly created = signal<string | null>(null);
 
   protected create(event: Event, competition: NewCompetition): void {
     event.preventDefault();
-    this.competitions.create(competition).subscribe();
+    this.competitions.create(competition).subscribe(() => this.created.set(competition.name));
   }
 }
