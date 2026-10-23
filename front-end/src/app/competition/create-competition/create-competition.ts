@@ -12,7 +12,7 @@ import { Competitions, NewCompetition } from '../ports/competitions';
         (submit)="create($event, {
           name: competitionName.value,
           organizingLeague: organizingLeague.value,
-          boards: Number(boards.value),
+          boards: boards.valueAsNumber,
         })"
       >
         <div class="fields">
@@ -38,7 +38,6 @@ import { Competitions, NewCompetition } from '../ports/competitions';
 })
 export class CreateCompetition {
   private readonly competitions = inject(Competitions);
-  protected readonly Number = Number;
 
   protected create(event: Event, competition: NewCompetition): void {
     event.preventDefault();
