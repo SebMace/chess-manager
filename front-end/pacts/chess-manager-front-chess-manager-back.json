@@ -254,6 +254,32 @@
       "type": "Synchronous/HTTP"
     },
     {
+      "description": "the creation of a competition",
+      "pending": false,
+      "request": {
+        "body": {
+          "content": {
+            "boards": 6,
+            "name": "Nationale 4",
+            "organizingLeague": "Centre-Val de Loire"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "method": "POST",
+        "path": "/api/competitions"
+      },
+      "response": {
+        "status": 201
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
       "description": "the definition of the opening hours of a club",
       "pending": false,
       "providerStates": [
