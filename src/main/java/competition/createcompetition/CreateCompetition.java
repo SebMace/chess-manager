@@ -2,6 +2,7 @@ package competition.createcompetition;
 
 import competition.domain.Competition;
 import competition.domain.CompetitionId;
+import competition.domain.League;
 import competition.domain.Season;
 import competition.ports.CompetitionRepository;
 
@@ -18,7 +19,7 @@ public class CreateCompetition {
         this.newCompetitionId = newCompetitionId;
     }
 
-    public CompetitionId createCompetition(String name, int boards) {
+    public CompetitionId createCompetition(String name, League league, int boards) {
         CompetitionId id = newCompetitionId.get();
         competitions.save(new Competition(id, name, currentSeason, boards));
         return id;

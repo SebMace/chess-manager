@@ -17,4 +17,5 @@ public class Competition {
     public String name() { return name; }
     public Season season() { return season; }
     public int boards() { return boards; }
+    public League organizingLeague() { throw new UnsupportedOperationException("not implemented yet"); }
 }

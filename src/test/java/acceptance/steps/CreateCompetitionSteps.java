@@ -3,6 +3,7 @@ package acceptance.steps;
 import competition.createcompetition.CreateCompetition;
 import competition.domain.Competition;
 import competition.domain.CompetitionId;
+import competition.domain.League;
 import competition.domain.Season;
 import competition.ports.InMemoryCompetitionRepository;
 import io.cucumber.java.en.Given;
@@ -24,10 +25,10 @@ public class CreateCompetitionSteps {
         currentSeason = new Season(yearBegin, yearEnd);
     }
 
-    @When("an administrator creates the competition {string} played on {int} boards")
-    public void administratorCreatesTheCompetition(String name, int boards) {
+    @When("an administrator creates the competition {string} organized by the league {string}, played on {int} boards")
+    public void administratorCreatesTheCompetition(String name, String league, int boards) {
         CreateCompetition createCompetition = new CreateCompetition(competitions, currentSeason, () -> NEW_COMPETITION_ID);
-        createdCompetition = createCompetition.createCompetition(name, boards);
+        createdCompetition = createCompetition.createCompetition(name, new League(league), boards);
     }
 
     @Then("the administrator is told that the competition {string} has been created for the season {int}-{int}")
@@ -35,6 +36,13 @@ public class CreateCompetitionSteps {
         Competition competition = competitions.find(createdCompetition).orElseThrow();
         assertEquals(name, competition.name());
         assertEquals(new Season(yearBegin, yearEnd), competition.season());
+    }
+
+    @Then("the competition {string} is organized by the league {string}")
+    public void competitionIsOrganizedByTheLeague(String name, String league) {
+        Competition competition = competitions.find(createdCompetition).orElseThrow();
+        assertEquals(name, competition.name());
+        assertEquals(new League(league), competition.organizingLeague());
     }
 
     @Then("the competition {string} is played on {int} boards")

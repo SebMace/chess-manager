@@ -3,6 +3,7 @@ package competition.persistence;
 import competition.createcompetition.CreateCompetition;
 import competition.domain.Competition;
 import competition.domain.CompetitionId;
+import competition.domain.League;
 import competition.domain.Season;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.BeforeAll;
@@ -39,7 +40,7 @@ class CreateCompetitionPersistenceTests {
         CreateCompetition createCompetition = new CreateCompetition(
                 new JdbcCompetitionRepository(JdbcClient.create(dataSource)), SEASON, () -> id);
 
-        createCompetition.createCompetition("Nationale 4 Centre-Val de Loire", 6);
+        createCompetition.createCompetition("Nationale 4 Centre-Val de Loire", new League("Centre-Val de Loire"), 6);
 
         Competition found = new JdbcCompetitionRepository(JdbcClient.create(dataSource)).find(id).orElseThrow();
         assertEquals("Nationale 4 Centre-Val de Loire", found.name());
