@@ -366,14 +366,16 @@ si les cas d'usage seuls suffisent, alimentés en développement comme les clubs
     Fédération et le comité attendront une compétition qui en a besoin (YAGNI) ;
   - la Ligue est d'abord désignée par son nom. Choisir sa Ligue dans une liste (les régions de
     l'INSEE) viendra avec *Find the league of a committee* ;
-  - le nombre d'échiquiers est un entier strictement positif, refusé sinon ;
+  - le nombre d'échiquiers est un entier strictement positif, refusé sinon. Livré : l'invariant
+    vit dans l'agrégat `Competition`, qui lève `CompetitionNeedsAtLeastOneBoard`, et un second
+    scénario le décrit ;
   - le nombre de rondes ne se déclare pas : il découle du calendrier (YAGNI) ;
   - le contexte a sa propre saison plutôt que d'emprunter celle de `clubmanagement` : une slice ne
     possède pas le modèle d'un autre contexte (ADR 0027).
 - **Premier test**, en langage métier : quand l'administrateur crée la compétition « Nationale 4 »
   organisée par la Ligue du Centre-Val de Loire et jouée sur six échiquiers, il est informé que la
   compétition « Nationale 4 » a été créée pour la saison 2026-2027, organisée par cette Ligue et
-  jouée sur six échiquiers. Le refus d'une compétition sans échiquier vient ensuite.
+  jouée sur six échiquiers. Un second scénario décrit le refus d'une compétition sans échiquier.
 - **Couches** : acceptation, cas d'usage, persistance, REST, contrat et écran. L'écran est voulu
   pour cette première slice, qui pose aussi le squelette du contexte (package, migration, REST,
   contrat, règles ArchUnit) : le geste ne se fait qu'une fois par saison, donc le formulaire reste
