@@ -24,6 +24,12 @@ describe('CreateCompetition', () => {
     await fixture.whenStable();
   });
 
+  it('shows the fields needed to create a competition', () => {
+    expect(page.querySelector('h2')?.textContent).toBe('Créer une compétition');
+    expect(labels(page)).toEqual(['Nom de la compétition', 'Ligue organisatrice', "Nombre d'échiquiers"]);
+    expect(buttonNamed(page, 'Créer la compétition')).toBeTruthy();
+  });
+
   // Outer loop of the screen: enabled when the screen sends the competition and tells it has been created.
   it.skip('tells the administrator that the competition has been created with its information', async () => {
     fill(fieldLabelled(page, 'Nom de la compétition'), 'Nationale 4');
@@ -39,6 +45,10 @@ describe('CreateCompetition', () => {
     expect(notice(page)).toBe('La compétition Nationale 4 a été créée.');
   });
 });
+
+function labels(page: HTMLElement): (string | undefined)[] {
+  return Array.from(page.querySelectorAll('label')).map(label => label.textContent?.trim());
+}
 
 function fill(field: HTMLInputElement, value: string): void {
   field.value = value;
