@@ -65,6 +65,18 @@ describe('CreateCompetition', () => {
     server.expectNone('/api/competitions');
   });
 
+  it('asks for the organizing league and sends nothing without it', async () => {
+    fill(fieldLabelled(page, 'Nom de la compétition'), 'Nationale 4');
+    fill(fieldLabelled(page, "Nombre d'échiquiers"), '6');
+
+    buttonNamed(page, 'Créer la compétition').click();
+    await fixture.whenStable();
+
+    expect(page.textContent).toContain('La ligue organisatrice est obligatoire.');
+    expect(fieldLabelled(page, 'Ligue organisatrice').getAttribute('aria-invalid')).toBe('true');
+    server.expectNone('/api/competitions');
+  });
+
   it('tells the administrator that the competition has been created with its information', async () => {
     fill(fieldLabelled(page, 'Nom de la compétition'), 'Nationale 4');
     fill(fieldLabelled(page, 'Ligue organisatrice'), 'Centre-Val de Loire');

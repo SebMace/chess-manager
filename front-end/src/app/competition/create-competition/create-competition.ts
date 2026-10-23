@@ -32,7 +32,17 @@ import { Competitions, NewCompetition } from '../ports/competitions';
           </div>
           <div class="field">
             <label for="organizing-league" class="required">Ligue organisatrice</label>
-            <input id="organizing-league" #organizingLeague aria-required="true" placeholder="ex. Centre-Val de Loire" />
+            <input
+              id="organizing-league"
+              #organizingLeague
+              aria-required="true"
+              placeholder="ex. Centre-Val de Loire"
+              [attr.aria-invalid]="leagueMissing() || null"
+              [attr.aria-describedby]="leagueMissing() ? 'organizing-league-error' : null"
+            />
+            @if (leagueMissing()) {
+              <p id="organizing-league-error" class="field-error">La ligue organisatrice est obligatoire.</p>
+            }
           </div>
           <div class="field">
             <label for="boards" class="required">Nombre d'échiquiers</label>
@@ -53,11 +63,13 @@ export class CreateCompetition {
   private readonly competitions = inject(Competitions);
   protected readonly created = signal<string | null>(null);
   protected readonly nameMissing = signal(false);
+  protected readonly leagueMissing = signal(false);
 
   protected create(event: Event, competition: NewCompetition): void {
     event.preventDefault();
     this.nameMissing.set(!competition.name.trim());
-    if (this.nameMissing()) return;
+    this.leagueMissing.set(!competition.organizingLeague.trim());
+    if (this.nameMissing() || this.leagueMissing()) return;
     this.competitions.create(competition).subscribe(() => this.created.set(competition.name));
   }
 }
