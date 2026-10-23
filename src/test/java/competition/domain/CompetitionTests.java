@@ -37,4 +37,15 @@ class CompetitionTests {
         assertEquals(new Team(CAVALIERS, 1), team);
         assertEquals(List.of(team), competition.teams());
     }
+
+    @Test
+    void should_number_the_second_team_of_a_club_2() {
+        Competition competition = new Competition(ID, "Nationale 4", LEAGUE, SEASON, 6);
+        Team first = competition.engageTeamOf(CAVALIERS);
+
+        Team second = competition.engageTeamOf(CAVALIERS);
+
+        assertEquals(new Team(CAVALIERS, 2), second);
+        assertEquals(List.of(first, second), competition.teams());
+    }
 }
