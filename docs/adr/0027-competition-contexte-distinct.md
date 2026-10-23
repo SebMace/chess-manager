@@ -14,19 +14,29 @@ créés dans l'application y engagent chacun une équipe ; huit équipes jouent 
 échiquiers. Un calendrier fixe les rencontres en début de saison. Avant chaque ronde, le capitaine
 compose son équipe et peut imprimer la feuille de match ; après la ronde, il saisit les résultats.
 
-Ce que l'on sait :
+Ce que l'on sait, d'après le règlement fédéral du Championnat de France des clubs (A02, saison
+2025-2026) :
 
-- les règles viennent du règlement fédéral du Championnat de France des clubs, que les ligues
-  complètent. Le seul texte officiel lisible date de 2009 (équipes de licenciés A, couleurs fixées
-  par le calendrier, règle des 103 points sur l'ordre des Elo) ; la version en vigueur reste à
-  lire ;
-- les six échiquiers de la Nationale 4 du Loiret nous ont été indiqués par le porteur du projet.
-  Les règlements publiés d'autres ligues parlent de huit joueurs, et aucun règlement local n'a été
-  trouvé : le nombre d'échiquiers dépend de la compétition.
+- la Nationale 4 se joue en groupes de 8 ou 10 équipes, en toutes rondes (sept ou neuf rondes),
+  sous la responsabilité des Ligues, qui peuvent y apporter des modifications mineures ;
+- une équipe compte huit licenciés A, et les Ligues peuvent choisir une Nationale 4 à six
+  échiquiers : le porteur du projet nous a indiqué que c'est le cas du Loiret, mais aucun
+  règlement local n'a été trouvé. Le nombre d'échiquiers dépend donc de la compétition ;
+- l'équipe première nommée dans les appariements a les blancs aux échiquiers impairs ;
+- l'Elo à prendre en compte est le dernier publié, et quand deux membres d'une équipe ont des Elo
+  qui diffèrent de plus de 100 points, le mieux classé joue devant ;
+- un club peut engager plusieurs équipes, même dans un même groupe : elles sont numérotées par
+  force décroissante, et un joueur ne joue que dans une des équipes d'un groupe ;
+- seules les victoires comptent dans le score d'une partie (une nulle n'est pas comptée) ; un
+  match gagné vaut 3 points, un match nul 2, un match perdu 1 ;
+- le club responsable de la rencontre saisit le procès-verbal sur le site fédéral.
 
-Ce que l'on ignore : l'Elo à retenir quand la FFE et la FIDE en publient deux, le traitement d'un
-joueur non classé, le barème des points de match, qui saisit les résultats, et si le Loiret limite
-les joueurs mutés.
+Le texte A02 de 2026-2027 n'a pas été lu, seulement la liste, non exhaustive, de ses
+modifications.
+
+Ce que l'on ignore : si la Ligue du Centre-Val de Loire adapte ces règles, le traitement d'un
+joueur non classé, que le A02 ne traite pas, et qui saisit les résultats dans l'application,
+puisque le procès-verbal officiel se saisit sur le site fédéral.
 
 Le langage, les invariants et le rythme divergent de ceux de la gestion de club :
 
@@ -44,13 +54,15 @@ Nous créons un bounded context `competition`, package de premier niveau à côt
 clubs. Sa première compétition est la Nationale 4 du Loiret.
 
 - **Modèle, hypothèses à éprouver par les exemples** : une `Competition` porte sa saison, son
-  nombre d'échiquiers et ses équipes engagées, une seule par club. Un `Match` (une rencontre) porte
-  sa ronde, l'équipe qui reçoit, l'équipe visiteuse, leurs compositions et leurs résultats. Les
-  agrégats se référencent par identifiant. Deux capitaines écrivent des rencontres différentes sans
-  se gêner, ce qu'un agrégat unique n'autoriserait pas.
-- **Règles dans le domaine** : licence A seule, ordre des Elo (règle des 103 points) et couleurs
-  par échiquier sont portés par le domaine de Compétition, qui refuse avec un message métier. Elles
-  ne vivent jamais dans une requête, un contrôleur ou un adaptateur.
+  nombre d'échiquiers et ses équipes engagées. Une équipe est identifiée par son club et son
+  numéro, qui range les équipes du club par force décroissante ; un club peut en engager plusieurs,
+  même dans un groupe. Un `Match` (une rencontre) porte sa ronde, l'équipe qui reçoit, l'équipe
+  visiteuse, leurs compositions et leurs résultats. Les agrégats se référencent par identifiant.
+  Deux capitaines écrivent des rencontres différentes sans se gêner, ce qu'un agrégat unique
+  n'autoriserait pas.
+- **Règles dans le domaine** : licence A seule, ordre des Elo (écart de plus de 100 points) et
+  couleurs par échiquier sont portés par le domaine de Compétition, qui refuse avec un message
+  métier. Elles ne vivent jamais dans une requête, un contrôleur ou un adaptateur.
 - **Relation avec Club Management** : Compétition est en aval. Son port donne, pour un club et une
   saison, les joueurs qui peuvent être alignés : nom, prénom, identifiant FFE, type de licence, Elo
   facultatif. Un adaptateur anticorruption traduit ce que fournit `ClubMembers`. Seul cet
@@ -81,8 +93,11 @@ clubs. Sa première compétition est la Nationale 4 du Loiret.
   demandera aucun changement de code.
 - Les compositions stockées contiennent des noms, des identifiants FFE et des Elo : la slice qui
   les stocke ajoute un traitement à `docs/registre-des-traitements.md`.
-- Les règles reposent sur un texte de 2009 et sur l'indication du porteur du projet. Chacune reçoit
-  un exemple avant d'être codée, et les questions ouvertes sont tenues dans `docs/slices.md`.
+- Les règles reposent sur le A02 de la saison 2025-2026 et sur l'indication du porteur du projet.
+  Chacune reçoit un exemple avant d'être codée, et les questions ouvertes sont tenues dans
+  `docs/slices.md`.
+- Le seuil d'écart d'Elo a changé avec les saisons (103 points dans le texte de 2009, 100 en
+  2025-2026) : il s'écrit à un seul endroit du domaine.
 - Le bounded context des parties (transcription des coups) n'est pas créé : une rencontre ne
   connaît que le résultat de chaque échiquier.
 
