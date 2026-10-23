@@ -44,6 +44,18 @@ class CompetitionsOfSeasonTests {
                 seen.competitions().stream().map(Competition::name).toList());
     }
 
+    @Test
+    void should_order_the_names_ignoring_accents_and_capitals() {
+        create("Nationale 4", CENTRE_VAL_DE_LOIRE, CURRENT_SEASON);
+        create("Élite 1", CENTRE_VAL_DE_LOIRE, CURRENT_SEASON);
+        create("départementale 2", CENTRE_VAL_DE_LOIRE, CURRENT_SEASON);
+
+        SeasonCompetitions seen = competitionsOfSeason.competitionsOfCurrentSeason();
+
+        assertEquals(List.of("départementale 2", "Élite 1", "Nationale 4"),
+                seen.competitions().stream().map(Competition::name).toList());
+    }
+
     private void create(String name, League league, Season season) {
         competitions.save(new Competition(new CompetitionId(new UUID(0, ++created)), name, league, season, 6));
     }
