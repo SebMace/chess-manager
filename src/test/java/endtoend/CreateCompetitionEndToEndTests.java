@@ -61,6 +61,14 @@ class CreateCompetitionEndToEndTests {
         assertEquals(400, response.statusCode());
     }
 
+    @Test
+    void a_competition_cannot_be_created_without_its_name() throws Exception {
+        HttpResponse<Void> response = post("""
+                {"organizingLeague": "Centre-Val de Loire", "boards": 6}""");
+
+        assertEquals(400, response.statusCode());
+    }
+
     private CompetitionId createCompetition(String json) throws Exception {
         HttpResponse<Void> response = post(json);
 
