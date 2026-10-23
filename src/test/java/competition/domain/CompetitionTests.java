@@ -31,7 +31,7 @@ class CompetitionTests {
 
     @Test
     void should_number_the_first_team_of_a_club_1() {
-        Competition competition = new Competition(ID, "Nationale 4", LEAGUE, SEASON, 6);
+        Competition competition = nationale4();
 
         Team team = competition.engageTeamOf(CAVALIERS);
 
@@ -41,7 +41,7 @@ class CompetitionTests {
 
     @Test
     void should_number_the_second_team_of_a_club_2() {
-        Competition competition = new Competition(ID, "Nationale 4", LEAGUE, SEASON, 6);
+        Competition competition = nationale4();
         Team first = competition.engageTeamOf(CAVALIERS);
 
         Team second = competition.engageTeamOf(CAVALIERS);
@@ -52,12 +52,16 @@ class CompetitionTests {
 
     @Test
     void should_number_the_teams_of_each_club_from_1() {
-        Competition competition = new Competition(ID, "Nationale 4", LEAGUE, SEASON, 6);
+        Competition competition = nationale4();
         competition.engageTeamOf(CAVALIERS);
         competition.engageTeamOf(CAVALIERS);
 
         Team firstOfPithiviers = competition.engageTeamOf(PITHIVIERS);
 
         assertEquals(new Team(PITHIVIERS, 1), firstOfPithiviers);
+    }
+
+    private static Competition nationale4() {
+        return new Competition(ID, "Nationale 4", LEAGUE, SEASON, 6);
     }
 }
