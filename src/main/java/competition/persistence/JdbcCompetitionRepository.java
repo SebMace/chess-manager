@@ -2,6 +2,7 @@ package competition.persistence;
 
 import competition.domain.Competition;
 import competition.domain.CompetitionId;
+import competition.domain.League;
 import competition.domain.Season;
 import competition.ports.CompetitionRepository;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -20,7 +21,9 @@ public class JdbcCompetitionRepository implements CompetitionRepository {
 
     @Override
     public Optional<Competition> find(CompetitionId competitionId) {
-        return jdbc.sql("SELECT id, name, season_begin_year, season_end_year, boards FROM competition WHERE id = :id")
+        return jdbc.sql("""
+                        SELECT id, name, season_begin_year, season_end_year, boards, organizing_league_name
+                        FROM competition WHERE id = :id""")
                 .param("id", competitionId.competitionId())
                 .query(JdbcCompetitionRepository::competition)
                 .optional();
@@ -29,13 +32,14 @@ public class JdbcCompetitionRepository implements CompetitionRepository {
     @Override
     public void save(Competition competition) {
         jdbc.sql("""
-                        INSERT INTO competition (id, name, season_begin_year, season_end_year, boards)
-                        VALUES (:id, :name, :seasonBeginYear, :seasonEndYear, :boards)""")
+                        INSERT INTO competition (id, name, season_begin_year, season_end_year, boards, organizing_league_name)
+                        VALUES (:id, :name, :seasonBeginYear, :seasonEndYear, :boards, :organizingLeagueName)""")
                 .param("id", competition.id().competitionId())
                 .param("name", competition.name())
                 .param("seasonBeginYear", competition.season().yearBegin())
                 .param("seasonEndYear", competition.season().yearEnd())
                 .param("boards", competition.boards())
+                .param("organizingLeagueName", competition.organizingLeague().name())
                 .update();
     }
 
@@ -44,6 +48,7 @@ public class JdbcCompetitionRepository implements CompetitionRepository {
                 new CompetitionId(row.getObject("id", UUID.class)),
                 row.getString("name"),
                 new Season(row.getInt("season_begin_year"), row.getInt("season_end_year")),
-                row.getInt("boards"));
+                row.getInt("boards"))
+                .organizedBy(new League(row.getString("organizing_league_name")));
     }
 }

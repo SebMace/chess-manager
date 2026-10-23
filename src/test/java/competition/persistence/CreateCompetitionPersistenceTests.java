@@ -45,6 +45,7 @@ class CreateCompetitionPersistenceTests {
         Competition found = new JdbcCompetitionRepository(JdbcClient.create(dataSource)).find(id).orElseThrow();
         assertEquals("Nationale 4 Centre-Val de Loire", found.name());
         assertEquals(SEASON, found.season());
+        assertEquals(new League("Centre-Val de Loire"), found.organizingLeague());
         assertEquals(6, found.boards());
     }
 }
