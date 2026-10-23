@@ -76,4 +76,13 @@ class ArchitectureTests {
                 .because("a slice relies only on the shared domain and ports, never on another slice")
                 .check(CLUB_MANAGEMENT);
     }
+
+    @Test
+    void competition_slices_should_not_depend_on_each_other() {
+        slices().matching("competition.(*)..")
+                .should().notDependOnEachOther()
+                .ignoreDependency(alwaysTrue(), resideInAnyPackage("competition.domain..", "competition.ports.."))
+                .because("a slice relies only on the shared domain and ports, never on another slice")
+                .check(COMPETITION);
+    }
 }
