@@ -23,7 +23,7 @@ public class CreateCompetitionController {
 
     @PostMapping("/competitions")
     public ResponseEntity<Void> create(@RequestBody CreateCompetitionRequest request) {
-        if (request.name() == null) return ResponseEntity.badRequest().build();
+        if (request.name() == null || request.organizingLeague() == null) return ResponseEntity.badRequest().build();
         CompetitionId id = createCompetition.createCompetition(request.name(), new League(request.organizingLeague()),
                 request.boards());
         URI location = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{id}")
