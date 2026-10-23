@@ -1,0 +1,26 @@
+package competition.createcompetition;
+
+import competition.domain.CompetitionId;
+import competition.domain.Season;
+import competition.ports.InMemoryCompetitionRepository;
+import org.junit.jupiter.api.Test;
+
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+class CreateCompetitionTests {
+    private static final Season SEASON = new Season(2026, 2027);
+    private final CompetitionId newId = new CompetitionId(new UUID(0, 1));
+    private final InMemoryCompetitionRepository competitions = new InMemoryCompetitionRepository();
+    private final CreateCompetition createCompetition = new CreateCompetition(competitions, SEASON, () -> newId);
+
+    @Test
+    void should_save_the_new_competition_under_the_new_identifier() {
+        CompetitionId created = createCompetition.createCompetition("Nationale 4 Centre-Val de Loire", 6);
+
+        assertEquals(newId, created);
+        assertTrue(competitions.find(created).isPresent());
+    }
+}
