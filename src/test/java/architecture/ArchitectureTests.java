@@ -21,6 +21,10 @@ class ArchitectureTests {
             .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)
             .importPackages("clubmanagement");
 
+    private static final JavaClasses COMPETITION = new ClassFileImporter()
+            .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)
+            .importPackages("competition");
+
     @Test
     void domain_should_not_depend_on_slices_ports_or_infrastructure() {
         noClasses().that().resideInAPackage("clubmanagement.domain..")
@@ -29,6 +33,16 @@ class ArchitectureTests {
                                 .and(resideOutsideOfPackage("clubmanagement.domain..")))
                 .because("the domain must remain independent of the slices, their ports and the infrastructure")
                 .check(CLUB_MANAGEMENT);
+    }
+
+    @Test
+    void competition_domain_should_not_depend_on_slices_ports_or_infrastructure() {
+        noClasses().that().resideInAPackage("competition.domain..")
+                .should().dependOnClassesThat(
+                        resideInAnyPackage("competition..", "infrastructure..")
+                                .and(resideOutsideOfPackage("competition.domain..")))
+                .because("the domain must remain independent of the slices, their ports and the infrastructure")
+                .check(COMPETITION);
     }
 
     @Test
