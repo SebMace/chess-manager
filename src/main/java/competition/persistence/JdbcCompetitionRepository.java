@@ -12,8 +12,10 @@ import org.springframework.jdbc.core.simple.JdbcClient;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class JdbcCompetitionRepository implements CompetitionRepository {
     private static final String SELECT_COMPETITIONS = """
@@ -36,12 +38,13 @@ public class JdbcCompetitionRepository implements CompetitionRepository {
 
     @Override
     public List<Competition> inSeason(Season season) {
+        Map<CompetitionId, List<Team>> teams = teamsInSeason(season);
         return jdbc.sql(SELECT_COMPETITIONS + " WHERE season_begin_year = :beginYear AND season_end_year = :endYear")
                 .param("beginYear", season.yearBegin())
                 .param("endYear", season.yearEnd())
                 .query(JdbcCompetitionRepository::row)
                 .list().stream()
-                .map(row -> row.competition(List.of()))
+                .map(row -> row.competition(teams.getOrDefault(row.id(), List.of())))
                 .toList();
     }
 
@@ -78,6 +81,22 @@ public class JdbcCompetitionRepository implements CompetitionRepository {
                 .query((row, rowNumber) -> new Team(new ClubId(row.getObject("club_id", UUID.class)),
                         row.getInt("team_number")))
                 .list();
+    }
+
+    /** The teams of every competition of the season in one query, rather than one query per competition. */
+    private Map<CompetitionId, List<Team>> teamsInSeason(Season season) {
+        return jdbc.sql("""
+                        SELECT team.competition_id, team.club_id, team.team_number
+                        FROM competition_team team JOIN competition ON competition.id = team.competition_id
+                        WHERE competition.season_begin_year = :beginYear AND competition.season_end_year = :endYear
+                        ORDER BY team.club_id, team.team_number""")
+                .param("beginYear", season.yearBegin())
+                .param("endYear", season.yearEnd())
+                .query((row, rowNumber) -> Map.entry(new CompetitionId(row.getObject("competition_id", UUID.class)),
+                        new Team(new ClubId(row.getObject("club_id", UUID.class)), row.getInt("team_number"))))
+                .list().stream()
+                .collect(Collectors.groupingBy(Map.Entry::getKey,
+                        Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
     }
 
     /** What the competition table holds; the teams live in a table of their own. */
