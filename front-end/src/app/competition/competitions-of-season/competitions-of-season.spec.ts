@@ -37,6 +37,15 @@ describe('CompetitionsOfSeason', () => {
     expect(shownCompetitions(page)).toEqual([['Nationale 4', 'Centre-Val de Loire', '6']]);
   });
 
+  it('shows the competitions in the order the back-end gives them, without sorting them again', async () => {
+    await openCompetitions([
+      { name: 'Régionale 1', organizingLeague: 'Centre-Val de Loire', boards: 4 },
+      NATIONALE_4,
+    ]);
+
+    expect(shownCompetitions(page).map((row) => row[0])).toEqual(['Régionale 1', 'Nationale 4']);
+  });
+
   it('tells the administrator that the season has no competition yet, and still names the season', async () => {
     await openCompetitions([]);
 
