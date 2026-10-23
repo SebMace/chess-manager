@@ -46,4 +46,11 @@ class CreateCompetitionTests {
 
         assertEquals(8, competitions.find(created).orElseThrow().boards());
     }
+
+    @Test
+    void should_organize_the_competition_by_the_given_league() {
+        CompetitionId created = createCompetition.createCompetition("Nationale 4 Centre-Val de Loire", LEAGUE, 6);
+
+        assertEquals(LEAGUE, competitions.find(created).orElseThrow().organizingLeague());
+    }
 }
