@@ -15,6 +15,7 @@ class CompetitionTests {
     private static final League LEAGUE = new League("Centre-Val de Loire");
     private static final Season SEASON = new Season(2026, 2027);
     private static final ClubId CAVALIERS = new ClubId(new UUID(1, 1));
+    private static final ClubId PITHIVIERS = new ClubId(new UUID(1, 5));
 
     @ParameterizedTest
     @ValueSource(ints = {0, -1})
@@ -47,5 +48,16 @@ class CompetitionTests {
 
         assertEquals(new Team(CAVALIERS, 2), second);
         assertEquals(List.of(first, second), competition.teams());
+    }
+
+    @Test
+    void should_number_the_teams_of_each_club_from_1() {
+        Competition competition = new Competition(ID, "Nationale 4", LEAGUE, SEASON, 6);
+        competition.engageTeamOf(CAVALIERS);
+        competition.engageTeamOf(CAVALIERS);
+
+        Team firstOfPithiviers = competition.engageTeamOf(PITHIVIERS);
+
+        assertEquals(new Team(PITHIVIERS, 1), firstOfPithiviers);
     }
 }

@@ -27,7 +27,7 @@ public class Competition {
     public int boards() { return boards; }
 
     public Team engageTeamOf(ClubId club) {
-        Team team = new Team(club, teams.size() + 1);
+        Team team = new Team(club, (int) teams.stream().filter(engaged -> engaged.club().equals(club)).count() + 1);
         teams.add(team);
         return team;
     }
