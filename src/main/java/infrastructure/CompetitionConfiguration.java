@@ -1,5 +1,7 @@
 package infrastructure;
 
+import competition.competitionsofseason.CompetitionsOfSeason;
+import competition.competitionsofseason.rest.CompetitionsOfSeasonController;
 import competition.createcompetition.CreateCompetition;
 import competition.createcompetition.rest.CreateCompetitionController;
 import competition.domain.CompetitionId;
@@ -31,5 +33,15 @@ class CompetitionConfiguration {
     @Bean
     CreateCompetitionController createCompetitionController(CreateCompetition createCompetition) {
         return new CreateCompetitionController(createCompetition);
+    }
+
+    @Bean
+    CompetitionsOfSeason competitionsOfSeason(CompetitionRepository competitions) {
+        return new CompetitionsOfSeason(competitions, CURRENT_SEASON);
+    }
+
+    @Bean
+    CompetitionsOfSeasonController competitionsOfSeasonController(CompetitionsOfSeason competitionsOfSeason) {
+        return new CompetitionsOfSeasonController(competitionsOfSeason);
     }
 }
