@@ -347,8 +347,8 @@ si les cas d'usage seuls suffisent, alimentés en développement comme les clubs
 |---|---|---|---|
 | Find the league of a committee | `clubmanagement.leagueofcommittee` | à venir | — |
 | Create a competition | `competition.createcompetition` | livrée | — |
-| Consult the competitions of the season | `competition.competitionsofseason` | prochaine de ce contexte | Create a competition |
-| Engage a team in a competition | `competition.engageteam` | à venir | Create a competition, Create a club, Find the league of a committee |
+| Consult the competitions of the season | `competition.competitionsofseason` | livrée | Create a competition |
+| Engage a team in a competition | `competition.engageteam` | prochaine de ce contexte | Create a competition, Create a club, Find the league of a committee |
 | Schedule a match | `competition.schedulematch` | à venir | Engage a team in a competition |
 | Compose a team for a match | `competition.composeteam` | à venir | Schedule a match, Register a new member |
 | Print the match sheet | `competition.printmatchsheet` | à venir | Compose a team for a match |
@@ -408,16 +408,25 @@ jouées, le classement.
     compétition n'existe : la réponse porte la saison et la liste ;
   - seules les compétitions de la saison courante sont listées ; celles d'une autre saison existent
     dans la base, sans écran pour l'instant ;
-  - la liste est triée par nom, puis par Ligue ; ni recherche, ni pagination, ni filtre (YAGNI,
+  - la liste est triée par nom, puis par Ligue, sans tenir compte des accents ni des majuscules
+    (comme les clubs d'un comité) : « Élite 1 » vient entre « départementale 2 » et « Nationale 4 ».
+    Le cas d'usage trie, l'écran garde l'ordre reçu. Ni recherche, ni pagination, ni filtre (YAGNI,
     comme pour les membres d'un club) ;
   - la lecture passe par le port `CompetitionRepository` (une requête par saison) : la liste ne
     joint aucun autre agrégat, ce que vise l'ADR 0024 pour un port de lecture ;
+  - la réponse ne porte pas d'identifiant de compétition : aucun écran n'en a besoin, les slices
+    qui ouvrent une compétition l'ajouteront ;
   - la liste s'enrichira des équipes engagées et des rondes jouées au fil des slices suivantes.
 - **Premiers tests**, en langage métier : quand l'administrateur consulte les compétitions de la
   saison 2026-2027 après la création de « Nationale 4 », organisée par la Ligue du Centre-Val de
   Loire et jouée sur six échiquiers, il voit la saison 2026-2027 et cette compétition. Une
   compétition d'une autre saison n'est pas listée. Sans compétition, il est informé qu'il n'y en a
   aucune pour la saison.
+- **État** : livrée. Trois scénarios d'acceptation, cas d'usage (saison affichée, tri par nom puis
+  Ligue), requête par saison dans le port et son adaptateur JDBC, REST (`GET /api/competitions`),
+  contrat Pact (l'interaction énoncée par le front-end, l'état fournisseur « la compétition
+  Nationale 4 de la Ligue du Centre-Val de Loire est créée pour la saison courante ») et écran
+  (`/competitions`, lien « Compétitions »).
 - **Couches** : acceptation, cas d'usage, persistance (requête par saison), REST
   (`GET /api/competitions`), contrat Pact et écran (`/competitions`, lien « Compétitions »).
 - **Questions ouvertes** : l'écran de création mène-t-il à la liste une fois la compétition créée ?
