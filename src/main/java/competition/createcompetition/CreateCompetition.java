@@ -20,7 +20,7 @@ public class CreateCompetition {
 
     public CompetitionId createCompetition(String name, int boards) {
         CompetitionId id = newCompetitionId.get();
-        competitions.save(new Competition(id, name, currentSeason));
+        competitions.save(new Competition(id, name, currentSeason, boards));
         return id;
     }
 }
