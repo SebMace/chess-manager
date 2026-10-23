@@ -1,6 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
 import { Competitions, NewCompetition } from '../ports/competitions';
 
+type Problem = 'name' | 'organizingLeague';
+
 @Component({
   selector: 'app-create-competition',
   styleUrl: './create-competition.css',
@@ -23,10 +25,10 @@ import { Competitions, NewCompetition } from '../ports/competitions';
               #competitionName
               aria-required="true"
               placeholder="ex. Nationale 4"
-              [attr.aria-invalid]="nameMissing() || null"
-              [attr.aria-describedby]="nameMissing() ? 'competition-name-error' : null"
+              [attr.aria-invalid]="problems().has('name') || null"
+              [attr.aria-describedby]="problems().has('name') ? 'competition-name-error' : null"
             />
-            @if (nameMissing()) {
+            @if (problems().has('name')) {
               <p id="competition-name-error" class="field-error">Le nom de la compétition est obligatoire.</p>
             }
           </div>
@@ -37,10 +39,10 @@ import { Competitions, NewCompetition } from '../ports/competitions';
               #organizingLeague
               aria-required="true"
               placeholder="ex. Centre-Val de Loire"
-              [attr.aria-invalid]="leagueMissing() || null"
-              [attr.aria-describedby]="leagueMissing() ? 'organizing-league-error' : null"
+              [attr.aria-invalid]="problems().has('organizingLeague') || null"
+              [attr.aria-describedby]="problems().has('organizingLeague') ? 'organizing-league-error' : null"
             />
-            @if (leagueMissing()) {
+            @if (problems().has('organizingLeague')) {
               <p id="organizing-league-error" class="field-error">La ligue organisatrice est obligatoire.</p>
             }
           </div>
@@ -62,14 +64,19 @@ import { Competitions, NewCompetition } from '../ports/competitions';
 export class CreateCompetition {
   private readonly competitions = inject(Competitions);
   protected readonly created = signal<string | null>(null);
-  protected readonly nameMissing = signal(false);
-  protected readonly leagueMissing = signal(false);
+  protected readonly problems = signal<ReadonlySet<Problem>>(new Set());
 
   protected create(event: Event, competition: NewCompetition): void {
     event.preventDefault();
-    this.nameMissing.set(!competition.name.trim());
-    this.leagueMissing.set(!competition.organizingLeague.trim());
-    if (this.nameMissing() || this.leagueMissing()) return;
+    this.problems.set(problemsOf(competition));
+    if (this.problems().size > 0) return;
     this.competitions.create(competition).subscribe(() => this.created.set(competition.name));
   }
+}
+
+function problemsOf(competition: NewCompetition): ReadonlySet<Problem> {
+  const problems = new Set<Problem>();
+  if (!competition.name.trim()) problems.add('name');
+  if (!competition.organizingLeague.trim()) problems.add('organizingLeague');
+  return problems;
 }
