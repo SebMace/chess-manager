@@ -1,11 +1,10 @@
-# The scenario leaves the build gate while the organizing league is added: it returns as @acceptance once it passes.
 @competition
 Feature: Create a competition
   As an administrator of Chess Manager
   I want to create a competition for the season
   So that clubs can later engage their teams in it
 
-  @to_implement
+  @acceptance
   Scenario: A league creates its Nationale 4 competition
     Given the current season is 2026-2027
     When an administrator creates the competition "Nationale 4" organized by the league "Centre-Val de Loire", played on 6 boards
