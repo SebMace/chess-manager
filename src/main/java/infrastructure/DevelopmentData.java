@@ -11,10 +11,15 @@ import clubmanagement.domain.member.vo.FfeId;
 import clubmanagement.domain.member.vo.FfeLicenseType;
 import clubmanagement.domain.member.vo.FideTitle;
 import clubmanagement.registermember.RegisterNewMember;
+import competition.createcompetition.CreateCompetition;
+import competition.domain.CompetitionId;
+import competition.domain.League;
+import competition.engageteam.EngageTeam;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.jdbc.core.simple.JdbcClient;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -25,7 +30,8 @@ import java.util.Random;
  * fictitious: real club names, FFE identifiers and people are FFE or personal data. The identifiers start with
  * DEMO so that they cannot be mistaken for real ones.
  * <p>
- * Eight clubs of ten players each: an interclub competition between them takes seven rounds.
+ * Eight clubs of ten players each: an interclub competition between them takes seven rounds. They all engage a
+ * team in the Nationale 4 of the Centre-Val de Loire league for the current season.
  */
 class DevelopmentData implements ApplicationRunner {
     private static final CommitteeCode LOIRET = new CommitteeCode("45");
@@ -72,11 +78,16 @@ class DevelopmentData implements ApplicationRunner {
     private final JdbcClient jdbc;
     private final CreateClub createClub;
     private final RegisterNewMember registerNewMember;
+    private final CreateCompetition createCompetition;
+    private final EngageTeam engageTeam;
 
-    DevelopmentData(JdbcClient jdbc, CreateClub createClub, RegisterNewMember registerNewMember) {
+    DevelopmentData(JdbcClient jdbc, CreateClub createClub, RegisterNewMember registerNewMember,
+                    CreateCompetition createCompetition, EngageTeam engageTeam) {
         this.jdbc = jdbc;
         this.createClub = createClub;
         this.registerNewMember = registerNewMember;
+        this.createCompetition = createCompetition;
+        this.engageTeam = engageTeam;
     }
 
     @Override
@@ -89,13 +100,23 @@ class DevelopmentData implements ApplicationRunner {
         jdbc.sql("DELETE FROM competition_team").update();
         jdbc.sql("DELETE FROM competition").update();
         Random ratings = new Random(RATING_SEED);
+        List<ClubId> demonstrationClubs = new ArrayList<>();
         for (int club = 0; club < CLUBS.size(); club++) {
             DemonstrationClub demonstration = CLUBS.get(club);
             ClubId id = createClub.execute(demonstration.name(), LOIRET, new FfeClubId(demonstration.ffeClubId()),
                     new CommuneCode(demonstration.commune()), demonstration.registeredOffice(),
                     demonstration.playingVenue());
             registerPlayers(id, club, ratings);
+            demonstrationClubs.add(id);
         }
+        engageInNationale4(demonstrationClubs);
+    }
+
+    /** The Nationale 4 of the season, in which each demonstration club engages its first team. */
+    private void engageInNationale4(List<ClubId> clubs) {
+        CompetitionId nationale4 = createCompetition.createCompetition("Nationale 4",
+                new League("Centre-Val de Loire"), 6);
+        clubs.forEach(club -> engageTeam.engageTeam(nationale4, new competition.domain.ClubId(club.clubId())));
     }
 
     /**
