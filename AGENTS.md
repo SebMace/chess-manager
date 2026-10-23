@@ -24,13 +24,21 @@ Do not modify this file unless the user explicitly asks to evolve the developmen
 Before changing code:
 
 1. Read all applicable instruction files.
-2. Identify the Git root and current working directory.
-3. Inspect `git status` and preserve every pre-existing user change.
-4. Inspect the relevant production code, tests, build files, and documentation.
-5. Discover the actual commands and technology versions from the repository; never invent them.
-6. Distinguish established project facts from hypotheses and recommendations.
-7. State the smallest observable behavior that should change.
-8. Select the smallest test capable of demonstrating that behavior.
+2. Read the index of the architecture decision records (`docs/adr/README.md`), then every ADR that
+   bears on the area, technology, or boundary being changed.
+3. Identify the Git root and current working directory.
+4. Inspect `git status` and preserve every pre-existing user change.
+5. Inspect the relevant production code, tests, build files, and documentation.
+6. Discover the actual commands and technology versions from the repository; never invent them.
+7. Distinguish established project facts from hypotheses and recommendations.
+8. State the smallest observable behavior that should change.
+9. Select the smallest test capable of demonstrating that behavior.
+
+An accepted ADR is an established project fact. Never contradict one silently: when a change would
+go against it, say so and propose a new ADR that supersedes it, for the user to decide. A
+significant architecture decision taken while working (a boundary, an aggregate, a port, a
+technology, a production dependency, a data source, a transaction strategy) is recorded as a new
+ADR from `docs/adr/template.md`, in the same branch as the change that applies it.
 
 Do not begin with a repository-wide redesign. Understand the current slice first.
 
@@ -712,6 +720,7 @@ A change is complete only when:
 - dependency direction is preserved;
 - no unrelated files or behavior changed;
 - documentation is updated when a public contract or workflow changed;
+- every significant architecture decision taken in the change is recorded as an ADR in `docs/adr/`;
 - the front-end/back-end contract is updated and verified on both sides when an interaction
   between them changed;
 - remaining risks, assumptions, and unverified checks are disclosed.
