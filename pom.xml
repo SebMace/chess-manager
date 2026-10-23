@@ -181,11 +181,14 @@
                 <configuration>
                     <targetClasses>
                         <param>clubmanagement.*</param>
+                        <param>competition.*</param>
                     </targetClasses>
                     <excludedClasses>
                         <param>clubmanagement.*.rest.*</param>
                         <param>clubmanagement.persistence.*</param>
                         <param>clubmanagement.insee.*</param>
+                        <param>competition.*.rest.*</param>
+                        <param>competition.persistence.*</param>
                     </excludedClasses>
                     <targetTests>
                         <param>*Tests</param>
@@ -199,6 +202,7 @@
                         <param>contract.*</param>
                         <param>clubmanagement.persistence.*</param>
                         <param>clubmanagement.insee.*</param>
+                        <param>competition.persistence.*</param>
                     </excludedTestClasses>
                     <timestampedReports>false</timestampedReports>
                     <outputFormats>

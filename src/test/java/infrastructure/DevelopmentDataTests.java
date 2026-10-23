@@ -6,6 +6,8 @@ import clubmanagement.domain.club.vo.Session;
 import clubmanagement.ports.ClubCalendar;
 import clubmanagement.ports.ClubRepository;
 import clubmanagement.createclub.CreateClub;
+import competition.createcompetition.CreateCompetition;
+import competition.domain.League;
 import clubmanagement.domain.club.vo.CommitteeCode;
 import clubmanagement.domain.club.vo.FfeClubId;
 import clubmanagement.domain.club.vo.PostalAddress;
@@ -51,6 +53,7 @@ class DevelopmentDataTests {
     private final ClubCalendar clubCalendar;
     private final RegisterNewMember registerNewMember;
     private final MembersOfClub membersOfClub;
+    private final CreateCompetition createCompetition;
 
     /** Eight clubs, so that an interclub competition can be played in seven rounds. */
     private static final int CLUBS = 8;
@@ -59,7 +62,8 @@ class DevelopmentDataTests {
     DevelopmentDataTests(@Autowired ClubRepository clubs, @Autowired CreateClub createClub,
                          @Autowired DevelopmentData developmentData, @Autowired JdbcClient jdbc,
                          @Autowired ClubCalendar clubCalendar, @Autowired RegisterNewMember registerNewMember,
-                         @Autowired MembersOfClub membersOfClub) {
+                         @Autowired MembersOfClub membersOfClub, @Autowired CreateCompetition createCompetition) {
+        this.createCompetition = createCompetition;
         this.clubs = clubs;
         this.createClub = createClub;
         this.developmentData = developmentData;
@@ -196,5 +200,15 @@ class DevelopmentDataTests {
         assertEquals(CLUBS, jdbc.sql("SELECT count(*) FROM club").query(Integer.class).single());
         assertEquals(CLUBS * PLAYERS_PER_CLUB, jdbc.sql("SELECT count(*) FROM person").query(Integer.class).single());
         assertEquals(0, jdbc.sql("SELECT count(*) FROM person WHERE ffe_id = 'K58213'").query(Integer.class).single());
+    }
+
+    @Test
+    void each_start_begins_again_even_when_a_competition_exists() {
+        createCompetition.createCompetition("Nationale 4 ajoutée pendant une démonstration",
+                new League("Centre-Val de Loire"), 6);
+
+        developmentData.run(null);
+
+        assertEquals(0, jdbc.sql("SELECT count(*) FROM competition").query(Integer.class).single());
     }
 }

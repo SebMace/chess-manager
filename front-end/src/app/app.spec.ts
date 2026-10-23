@@ -42,6 +42,16 @@ describe('App', () => {
     expect(labels(page)).toContain('Nom du club');
   });
 
+  it('lets the administrator go and create a competition', async () => {
+    const fixture = await openApplication();
+    const page = fixture.nativeElement as HTMLElement;
+
+    linkNamed(page, 'Créer une compétition').click();
+    await fixture.whenStable();
+
+    expect(labels(page)).toContain('Nom de la compétition');
+  });
+
   it('lets the administrator come back to the clubs of their committee', async () => {
     const fixture = await openApplication();
     const page = fixture.nativeElement as HTMLElement;

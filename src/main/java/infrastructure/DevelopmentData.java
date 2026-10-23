@@ -86,6 +86,7 @@ class DevelopmentData implements ApplicationRunner {
         jdbc.sql("DELETE FROM person").update();
         jdbc.sql("DELETE FROM club_session").update();
         jdbc.sql("DELETE FROM club").update();
+        jdbc.sql("DELETE FROM competition").update();
         Random ratings = new Random(RATING_SEED);
         for (int club = 0; club < CLUBS.size(); club++) {
             DemonstrationClub demonstration = CLUBS.get(club);

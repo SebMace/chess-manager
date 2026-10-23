@@ -373,6 +373,34 @@ already registered, or an unknown club, is refused by the database, so the answe
 see the open questions in `docs/slices.md`. As everywhere, nothing checks yet that the caller is
 an administrator.
 
+## Competitions
+
+*Create a competition* is the first slice of the proposed Competition context (ADR 0027). So far
+the application can only create a competition, through a screen of the front-end: there is no read
+endpoint yet.
+
+- A competition has a name, the Ligue that organizes it and a number of boards per team. Its
+  season is the current season of the application (ADR 0025).
+- The number of boards is strictly positive: a request with fewer than one board, or with none, is
+  refused with 400 (`CompetitionNeedsAtLeastOneBoard`).
+- The Ligue is designated by its name for now. Choosing it from a list will come with a slice of
+  club management.
+- A request without a name or without an organizing Ligue is refused with 400. An empty name or
+  Ligue is not refused yet.
+- The `competition` table has no foreign key to the club tables, and the `dev` profile empties it at
+  each start.
+
+```
+POST /api/competitions   {"name": "Nationale 4", "organizingLeague": "Centre-Val de Loire",
+                          "boards": 6}
+                         →  201 Created, Location: /api/competitions/<id>
+```
+
+No endpoint serves that `Location` yet. The Pact contract records this interaction, stated by
+`front-end/src/app/competition/http/http-competitions.spec.ts`: the front-end relies on the 201
+only, and treats any other answer as a failure. As everywhere, nothing checks yet that the caller
+is an administrator.
+
 ## Front-end (Angular)
 
 The Angular 22 application in `front-end/` is a separate npm project, not built by Maven.
@@ -384,7 +412,11 @@ list leads to its opening hours: the administrator sees the sessions already def
 removes sessions, and saves them all at once. Each club of the list also leads to its members: one
 screen shows the members of the club, with their Elo, and registers a licensed player with their
 first name, last name, FFE identifier, license type and, optionally, Elo, then tells the
-administrator that they are now a member and shows them in the list. It needs Node.js 22.22, 24.15 or 26 and npm.
+administrator that they are now a member and shows them in the list. Another link, "Créer une
+compétition", leads to the screen that creates a competition from its name, its organizing Ligue and
+its number of boards, at `/competitions/new`: it asks for a missing name or Ligue and for a whole
+number of boards of at least 1, then tells the administrator whether the competition has been
+created. It needs Node.js 22.22, 24.15 or 26 and npm.
 
 | File | Role |
 |---|---|
@@ -401,11 +433,15 @@ administrator that they are now a member and shows them in the list. It needs No
 | `src/app/club-management/ports/communes.ts` | `Communes` port: the communes of a departmental committee. |
 | `src/app/club-management/http/http-clubs.ts` | `HttpClubs` adapter: implements `Clubs` over the REST API. |
 | `src/app/club-management/http/http-communes.ts` | `HttpCommunes` adapter: implements `Communes` over the REST API. |
-| `src/app/app.routes.ts` | The clubs of a committee at `/`, the creation of a club at `/clubs/new`, the opening hours of a club at `/clubs/<id>/opening-hours`, the members of a club at `/clubs/<id>/members`. |
-| `src/app/app.config.ts` | Provides the router and wires `Clubs`, `Communes`, `Members` and `OpeningHours` to their HTTP adapters. |
+| `src/app/competition/create-competition/create-competition.ts` | `CreateCompetition` component: the form and the creation outcome. |
+| `src/app/competition/ports/competitions.ts` | `Competitions` port: what the competition screens need, with no HTTP detail. |
+| `src/app/competition/http/http-competitions.ts` | `HttpCompetitions` adapter: implements `Competitions` over the REST API. |
+| `src/app/app.routes.ts` | The clubs of a committee at `/`, the creation of a club at `/clubs/new`, the opening hours of a club at `/clubs/<id>/opening-hours`, the members of a club at `/clubs/<id>/members`, the creation of a competition at `/competitions/new`. |
+| `src/app/app.config.ts` | Provides the router and wires `Clubs`, `Communes`, `Competitions`, `Members` and `OpeningHours` to their HTTP adapters. |
 
 As in the back-end, each slice has its own folder named after its use case (`create-club`);
-the ports and their HTTP adapters are shared by the slices of Club Management.
+the ports and their HTTP adapters are shared by the slices of a bounded context (`club-management`,
+`competition`).
 
 The front-end holds no business rule; they stay in the back-end.
 
@@ -436,7 +472,7 @@ npm run build
 The front-end and the back-end are checked against a shared contract with
 [Pact](https://docs.pact.io/) (consumer-driven: the front-end states what it uses).
 
-- **Consumer side**: the specs of the HTTP adapters (`front-end/src/app/club-management/http/*.spec.ts`)
+- **Consumer side**: the specs of the HTTP adapters (`front-end/src/app/*/http/*.spec.ts`)
   run the real adapter against the Pact mock server and record each interaction in
   `front-end/pacts/chess-manager-front-chess-manager-back.json`. This file is committed.
   These specs share `front-end/src/testing/front-end-contract.ts`, so that they all write to
