@@ -78,6 +78,23 @@ class ArchitectureTests {
     }
 
     @Test
+    void competition_should_not_depend_on_clubmanagement() {
+        noClasses().that().resideInAPackage("competition..")
+                .should().dependOnClassesThat().resideInAPackage("clubmanagement..")
+                .because("contexts share their JVM, never their model: until an anticorruption adapter exists, "
+                        + "competition ignores clubmanagement (ADR 0027)")
+                .check(COMPETITION);
+    }
+
+    @Test
+    void clubmanagement_should_not_depend_on_competition() {
+        noClasses().that().resideInAPackage("clubmanagement..")
+                .should().dependOnClassesThat().resideInAPackage("competition..")
+                .because("clubmanagement is upstream of competition and never depends on it (ADR 0027)")
+                .check(CLUB_MANAGEMENT);
+    }
+
+    @Test
     void competition_slices_should_not_depend_on_each_other() {
         slices().matching("competition.(*)..")
                 .should().notDependOnEachOther()
