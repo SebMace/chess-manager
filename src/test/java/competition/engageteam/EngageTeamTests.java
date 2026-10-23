@@ -10,6 +10,8 @@ import competition.ports.InMemoryCompetitionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -17,7 +19,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class EngageTeamTests {
     private static final CompetitionId NATIONALE_4 = new CompetitionId(new UUID(0, 1));
     private static final ClubId CAVALIERS = new ClubId(new UUID(1, 1));
-    private final InMemoryCompetitionRepository competitions = new InMemoryCompetitionRepository();
+    /** The teams of the competition each time it is saved: the fake keeps one instance, which would hide a missing save. */
+    private final List<List<Team>> teamsAtEachSave = new ArrayList<>();
+    private final InMemoryCompetitionRepository competitions = new InMemoryCompetitionRepository() {
+        @Override
+        public void save(Competition competition) {
+            super.save(competition);
+            teamsAtEachSave.add(competition.teams());
+        }
+    };
     private final EngageTeam engageTeam = new EngageTeam(competitions);
 
     @BeforeEach
@@ -31,5 +41,12 @@ class EngageTeamTests {
         Team team = engageTeam.engageTeam(NATIONALE_4, CAVALIERS);
 
         assertEquals(new Team(CAVALIERS, 1), team);
+    }
+
+    @Test
+    void should_save_the_competition_with_the_engaged_team() {
+        engageTeam.engageTeam(NATIONALE_4, CAVALIERS);
+
+        assertEquals(List.of(new Team(CAVALIERS, 1)), teamsAtEachSave.getLast());
     }
 }
