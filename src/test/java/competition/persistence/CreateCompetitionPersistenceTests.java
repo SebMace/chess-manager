@@ -6,7 +6,6 @@ import competition.domain.CompetitionId;
 import competition.domain.Season;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
@@ -20,7 +19,6 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /** A competition created by an administrator is still there when it is read again from PostgreSQL. */
-@Disabled("Outer loop of the persistence slice: enabled when JdbcCompetitionRepository is implemented")
 @Testcontainers
 class CreateCompetitionPersistenceTests {
     @Container
