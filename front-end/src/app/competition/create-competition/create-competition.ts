@@ -3,6 +3,11 @@ import { Competitions, NewCompetition } from '../ports/competitions';
 
 type Problem = 'name' | 'organizingLeague' | 'boards';
 
+type CreationOutcome =
+  | { kind: 'none' }
+  | { kind: 'created'; competition: string }
+  | { kind: 'failed' };
+
 @Component({
   selector: 'app-create-competition',
   styleUrl: './create-competition.css',
@@ -67,22 +72,28 @@ type Problem = 'name' | 'organizingLeague' | 'boards';
           <button type="submit">Créer la compétition</button>
         </div>
       </form>
-      @if (created(); as name) {
-        <p role="status" class="notice notice--success">La compétition {{ name }} a été créée.</p>
+      @let result = outcome();
+      @if (result.kind === 'created') {
+        <p role="status" class="notice notice--success">La compétition {{ result.competition }} a été créée.</p>
+      } @else if (result.kind === 'failed') {
+        <p role="status" class="notice notice--failure">La compétition n'a pas pu être créée. Réessayez.</p>
       }
     </section>
   `,
 })
 export class CreateCompetition {
   private readonly competitions = inject(Competitions);
-  protected readonly created = signal<string | null>(null);
+  protected readonly outcome = signal<CreationOutcome>({ kind: 'none' });
   protected readonly problems = signal<ReadonlySet<Problem>>(new Set());
 
   protected create(event: Event, competition: NewCompetition): void {
     event.preventDefault();
     this.problems.set(problemsOf(competition));
     if (this.problems().size > 0) return;
-    this.competitions.create(competition).subscribe(() => this.created.set(competition.name));
+    this.competitions.create(competition).subscribe({
+      next: () => this.outcome.set({ kind: 'created', competition: competition.name }),
+      error: () => this.outcome.set({ kind: 'failed' }),
+    });
   }
 }
 
