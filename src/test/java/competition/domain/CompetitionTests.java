@@ -61,6 +61,17 @@ class CompetitionTests {
         assertEquals(new Team(PITHIVIERS, 1), firstOfPithiviers);
     }
 
+    @Test
+    void should_keep_numbering_after_the_teams_a_reconstituted_competition_already_has() {
+        Competition competition = Competition.reconstitute(ID, "Nationale 4", LEAGUE, SEASON, 6,
+                List.of(new Team(CAVALIERS, 1), new Team(CAVALIERS, 2), new Team(PITHIVIERS, 1)));
+
+        Team next = competition.engageTeamOf(CAVALIERS);
+
+        assertEquals(new Team(CAVALIERS, 3), next);
+        assertEquals(4, competition.teams().size());
+    }
+
     private static Competition nationale4() {
         return new Competition(ID, "Nationale 4", LEAGUE, SEASON, 6);
     }

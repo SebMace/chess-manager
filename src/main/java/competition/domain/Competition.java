@@ -12,12 +12,24 @@ public class Competition {
     private final List<Team> teams = new ArrayList<>();
 
     public Competition(CompetitionId id, String name, League organizingLeague, Season season, int boards) {
+        this(id, name, organizingLeague, season, boards, List.of());
+    }
+
+    private Competition(CompetitionId id, String name, League organizingLeague, Season season, int boards,
+                        List<Team> teams) {
         if (boards < 1) throw new CompetitionNeedsAtLeastOneBoard(boards);
         this.id = id;
         this.name = name;
         this.organizingLeague = organizingLeague;
         this.season = season;
         this.boards = boards;
+        this.teams.addAll(teams);
+    }
+
+    /** A competition as it stood when it was saved, with the teams already engaged: no new engagement happens. */
+    public static Competition reconstitute(CompetitionId id, String name, League organizingLeague, Season season,
+                                           int boards, List<Team> teams) {
+        return new Competition(id, name, organizingLeague, season, boards, teams);
     }
 
     public CompetitionId id() { return id; }
