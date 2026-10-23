@@ -8,6 +8,7 @@ public class Competition {
     private final int boards;
 
     public Competition(CompetitionId id, String name, League organizingLeague, Season season, int boards) {
+        if (boards < 1) throw new CompetitionNeedsAtLeastOneBoard(boards);
         this.id = id;
         this.name = name;
         this.organizingLeague = organizingLeague;
