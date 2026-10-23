@@ -81,6 +81,25 @@ public abstract class CompetitionRepositoryContract {
     }
 
     @Test
+    void should_save_again_a_competition_that_engaged_another_team() {
+        CompetitionRepository competitions = competitions();
+        CompetitionId id = new CompetitionId(new UUID(0, 8));
+        ClubId cavaliers = new ClubId(new UUID(1, 1));
+        Competition competition = new Competition(id, "Nationale 4", new League("Centre-Val de Loire"),
+                new Season(2026, 2027), 6);
+        competition.engageTeamOf(cavaliers);
+        competitions.save(competition);
+        Competition saved = competitions.find(id).orElseThrow();
+        saved.engageTeamOf(cavaliers);
+
+        competitions.save(saved);
+
+        List<Team> teams = competitions.find(id).orElseThrow().teams();
+        assertEquals(Set.of(new Team(cavaliers, 1), new Team(cavaliers, 2)), Set.copyOf(teams));
+        assertEquals(2, teams.size());
+    }
+
+    @Test
     void should_find_the_league_that_organizes_a_saved_competition() {
         CompetitionRepository competitions = competitions();
         CompetitionId id = new CompetitionId(new UUID(0, 3));

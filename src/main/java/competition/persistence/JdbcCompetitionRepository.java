@@ -49,13 +49,17 @@ public class JdbcCompetitionRepository implements CompetitionRepository {
     public void save(Competition competition) {
         jdbc.sql("""
                         INSERT INTO competition (id, name, season_begin_year, season_end_year, boards, organizing_league_name)
-                        VALUES (:id, :name, :seasonBeginYear, :seasonEndYear, :boards, :organizingLeagueName)""")
+                        VALUES (:id, :name, :seasonBeginYear, :seasonEndYear, :boards, :organizingLeagueName)
+                        ON CONFLICT (id) DO NOTHING""")
                 .param("id", competition.id().competitionId())
                 .param("name", competition.name())
                 .param("seasonBeginYear", competition.season().yearBegin())
                 .param("seasonEndYear", competition.season().yearEnd())
                 .param("boards", competition.boards())
                 .param("organizingLeagueName", competition.organizingLeague().name())
+                .update();
+        jdbc.sql("DELETE FROM competition_team WHERE competition_id = :competition")
+                .param("competition", competition.id().competitionId())
                 .update();
         competition.teams().forEach(team -> jdbc.sql("""
                         INSERT INTO competition_team (competition_id, club_id, team_number)
