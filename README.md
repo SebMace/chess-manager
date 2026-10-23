@@ -8,8 +8,9 @@ Test-Driven Development and Clean / Hexagonal Architecture principles.
 Since 2 October 2026, Chess Manager is first a personal chess-improvement tool. Its core,
 Chess Decision, confronts the reasoning a player submits about a position (themes, analysis,
 candidate moves, plan) with the concrete resources of that position, and gives pedagogical
-feedback that separates verified facts, interpretations and uncertainties. Club Management
-below is on hold: its code is kept as it is. See `docs/slices.md` for the backlog.
+feedback that separates verified facts, interpretations and uncertainties. Club Management,
+described below, is no longer on hold since 23 October 2026: it resumes with the registration of
+the players linked to a club. See `docs/slices.md` for the backlog.
 
 ## Current bounded context: Club Management
 
@@ -200,8 +201,18 @@ club it refers to.
 The use cases depend on three ports: `PersonRepository`, `ClubRelationshipRepository`
 and `ClubRepository`. The relationship repository can find a pair, list a person's
 relationships, save and remove a relationship; the club repository finds and saves
-clubs. These are core-owned application ports. `ClubRepository` has a PostgreSQL
-implementation (see below); the other ports are implemented only by in-memory test fakes.
+clubs. These are core-owned application ports. All three have a PostgreSQL implementation (see
+below), and the two newest, `PersonRepository` and `ClubRelationshipRepository`, run the same
+contract tests as their in-memory fakes (`PersonRepositoryContract` and
+`ClubRelationshipRepositoryContract`). For these two, only what registering a member needs is
+implemented for PostgreSQL:
+
+- `JdbcPersonRepository` stores the names, the FFE identifier, the rating and the FIDE title of a
+  person; email and FIDE identifier are not stored yet, and a `Person` that carries them loses them
+  silently;
+- `JdbcClubRelationshipRepository` saves and finds a relationship; `findByPerson` and `delete` throw
+  `UnsupportedOperationException`, because no use case wired to PostgreSQL calls them;
+- `save` is a plain `INSERT`: unlike the fakes, saving the same person or relationship twice fails.
 
 `ClubCalendar` holds the opening hours of a club, as a set of sessions. Its in-memory fake and
 its PostgreSQL implementation, `JdbcClubCalendar`, run the same tests (`ClubCalendarContract`),
@@ -215,6 +226,22 @@ because the use case must not depend on Spring.
 identity; the application must save that state. The fake keys records by the two IDs.
 Application tests use the same repository for setup, action and assertions and reread
 persisted state. Removing `save()` was checked to make the membership test fail.
+
+`JdbcClubRelationshipRepository` reads a relationship back by replaying its stored licenses and
+status through the domain's own operations (`registerLicense`, `registerPartnership`), so that the
+domain needs no constructor shaped for the database. That holds for the states the domain can
+reach today; a new status or transition will have to be replayed too.
+
+`RegisterNewMember` saves the person and then their relationship with the club: the two saves
+succeed or fail together. The transaction is not in the use case, which must not depend on Spring,
+nor in an adapter, since two adapters are involved: `infrastructure.TransactionalRegisterNewMember`
+runs the use case in one transaction. `TransactionalRegisterNewMemberTests` forces a failure after
+the first save and checks that no trace of the person remains.
+
+`ClubMembers` is a read-only port: the members of a club for a season, as `ClubMember` read
+records (names, FFE identifier, license type). It is a port of its own because the list joins a
+person and their relationship with the club, which no aggregate holds. `JdbcClubMembers`
+implements it with one query, sorted by last name then first name.
 
 ## Walking skeleton: create a club over HTTP
 
@@ -255,14 +282,18 @@ and Flyway migrates the schema; the application listens on port 8080. The creden
 development-only dependency and is skipped during tests, which use Testcontainers.
 
 `mvn spring-boot:run` activates the `dev` profile: at each start, `DevelopmentData` empties
-the tables and creates a minimal set of **fictitious** clubs of the Loiret committee (45)
-through the use cases — `DEMO01`, `DEMO02` and `DEMO03`. Anything created during a session
-is therefore lost at the next start. Real club names and FFE identifiers are FFE data and
-must not be committed. No other profile creates or deletes data.
+the tables and creates **fictitious** clubs of the Loiret committee (45) through the use cases —
+eight clubs, `DEMO01` to `DEMO08`, each with ten fictitious players (FFE identifiers `DEMOJ101` to
+`DEMOJ810`), so that an interclub competition between them takes seven rounds. The players are
+rated from 1300 to 2400, many of them around 1800, with the same ratings at every start. The
+strongest hold a FIDE title, from the FIDE rating floor of each (CM 2200, MF 2300, MI 2400). Anything created
+during a session, players included, is therefore lost at the next start. Real club names, FFE
+identifiers and people are personal or FFE data and must not be committed. No other profile
+creates or deletes data.
 
 ```sh
 curl -i -X POST localhost:8080/api/clubs -H 'Content-Type: application/json' -d '{
-  "name": "Échiquier de Montargis", "committeeCode": "45", "ffeClubId": "DEMO04", "communeCode": "45208",
+  "name": "Échiquier de Montargis", "committeeCode": "45", "ffeClubId": "DEMO09", "communeCode": "45208",
   "registeredOffice": {"street": "1 rue du Marché", "postcode": "45200", "town": "Montargis"},
   "playingVenue": {"street": "1 rue du Marché", "postcode": "45200", "town": "Montargis"}}'
 ```
@@ -285,6 +316,38 @@ GET /api/clubs/<id>/opening-hours   →  200 [{"day": "FRIDAY", "from": "20:00",
 PUT /api/clubs/<id>/opening-hours   →  204 (a missing venue means the playing venue of the club)
 ```
 
+## Members of a club
+
+A member is a licensed player registered with a club for the current season.
+
+- Registering a new member creates the person, with their personal FFE identifier (unique), and
+  their membership of the club, with the type of their license, A or B. The FFE identifier comes
+  with the first license and never changes.
+- The FFE rating (Elo) of the player is optional: an unrated player is not a player rated zero. The
+  members table shows it in an Elo column, and NC for an unrated player. A negative rating is refused.
+- A FIDE title (CM, MF, MI or GMI) is an optional mention: the table shows it as a badge next to the
+  name of the player, not as a column. Women's titles are not modelled.
+- The members of a club are the players whose license for the current season is with that club,
+  sorted by last name then first name. A player whose license dates only from a previous season is
+  not listed.
+- The current season is a constant, 2026-2027, in `ClubConfiguration`: the season starts at the
+  start of the school year, which has no fixed day, so it is not computed from the date.
+
+```
+POST /api/clubs/<id>/members   {"firstName": "Camille", "lastName": "Martin", "ffeId": "K58213",
+                                "licenseType": "A", "elo": 2310, "fideTitle": "MF"}
+                                →  201 (no Location header)
+GET  /api/clubs/<id>/members   →  200 [{"firstName": "Camille", "lastName": "Martin",
+                                        "ffeId": "K58213", "licenseType": "A", "elo": 2310,
+                                        "fideTitle": "MF"}, …]
+```
+
+`elo` is null for a player who is not rated, and `fideTitle` for a player without a title. A blank FFE
+identifier, an unknown license type, a negative rating or an unknown title is refused with 400. An FFE identifier that is
+already registered, or an unknown club, is refused by the database, so the answer is 500 today:
+see the open questions in `docs/slices.md`. As everywhere, nothing checks yet that the caller is
+an administrator.
+
 ## Front-end (Angular)
 
 The Angular 22 application in `front-end/` is a separate npm project, not built by Maven.
@@ -293,7 +356,10 @@ administrator types the number of their department and is shown each club with i
 and its FFE identifier, sorted by name. A link leads to the French screen where the
 administrator creates a club and is told whether the club has been created. Each club of the
 list leads to its opening hours: the administrator sees the sessions already defined, adds or
-removes sessions, and saves them all at once. It needs Node.js 22.22, 24.15 or 26 and npm.
+removes sessions, and saves them all at once. Each club of the list also leads to its members: one
+screen shows the members of the club, with their Elo, and registers a licensed player with their
+first name, last name, FFE identifier, license type and, optionally, Elo, then tells the
+administrator that they are now a member and shows them in the list. It needs Node.js 22.22, 24.15 or 26 and npm.
 
 | File | Role |
 |---|---|
@@ -301,14 +367,17 @@ removes sessions, and saves them all at once. It needs Node.js 22.22, 24.15 or 2
 | `src/app/club-management/create-club/create-club.ts` | `CreateClub` component: the form and the creation outcome. |
 | `src/app/club-management/create-club/commune-search.ts` | The communes matching what the administrator types. |
 | `src/app/club-management/define-opening-hours/define-opening-hours.ts` | `DefineOpeningHours` component: the sessions of a club, with their activity and their venue. |
+| `src/app/club-management/members-of-club/members-of-club.ts` | `MembersOfClub` component: the members of a club and the form that registers a licensed player. |
+| `src/app/club-management/ports/members.ts` | `Members` port: the members of a club and the registration of a new one. |
+| `src/app/club-management/http/http-members.ts` | `HttpMembers` adapter: implements `Members` over the REST API. |
 | `src/app/club-management/ports/opening-hours.ts` | `OpeningHours` port: read and define the opening hours of a club. |
 | `src/app/club-management/http/http-opening-hours.ts` | `HttpOpeningHours` adapter: implements `OpeningHours` over the REST API. |
 | `src/app/club-management/ports/clubs.ts` | `Clubs` port: what the club screens need, with no HTTP detail. |
 | `src/app/club-management/ports/communes.ts` | `Communes` port: the communes of a departmental committee. |
 | `src/app/club-management/http/http-clubs.ts` | `HttpClubs` adapter: implements `Clubs` over the REST API. |
 | `src/app/club-management/http/http-communes.ts` | `HttpCommunes` adapter: implements `Communes` over the REST API. |
-| `src/app/app.routes.ts` | The clubs of a committee at `/`, the creation of a club at `/clubs/new`, the opening hours of a club at `/clubs/<id>/opening-hours`. |
-| `src/app/app.config.ts` | Provides the router and wires `Clubs`, `Communes` and `OpeningHours` to their HTTP adapters. |
+| `src/app/app.routes.ts` | The clubs of a committee at `/`, the creation of a club at `/clubs/new`, the opening hours of a club at `/clubs/<id>/opening-hours`, the members of a club at `/clubs/<id>/members`. |
+| `src/app/app.config.ts` | Provides the router and wires `Clubs`, `Communes`, `Members` and `OpeningHours` to their HTTP adapters. |
 
 As in the back-end, each slice has its own folder named after its use case (`create-club`);
 the ports and their HTTP adapters are shared by the slices of Club Management.
@@ -398,7 +467,7 @@ A slice is one use case, named after it, with its refusals and its inbound adapt
 ```
 clubmanagement/
   domain/                  shared model: Club, ClubRelationship, Person, value objects
-  ports/                   shared ports: ClubRepository, ClubRelationshipRepository, ClubCalendar, Communes, PersonRepository
+  ports/                   shared ports: ClubRepository, ClubRelationshipRepository, ClubCalendar, ClubMembers (with ClubMember), Communes, PersonRepository
   createclub/              CreateClub, its refusals, rest/CreateClubController
   defineopeninghours/      DefineOpeningHours, rest/DefineOpeningHoursController
   openinghoursofclub/      OpeningHoursOfClub, rest/OpeningHoursOfClubController
@@ -409,10 +478,12 @@ clubmanagement/
   registerlicense/         RegisterLicense
   registerpartnership/     RegisterPartnership
   registerprospect/        RegisterProspect
+  registermember/          RegisterNewMember, rest/RegisterNewMemberController
+  membersofclub/           MembersOfClub, rest/MembersOfClubController
   updateperson/            UpdatePerson
-  persistence/             JdbcClubRepository and JdbcClubCalendar, shared: the clubs and their opening hours
+  persistence/             JdbcClubRepository, JdbcClubCalendar, JdbcPersonRepository, JdbcClubRelationshipRepository and JdbcClubMembers, shared: the clubs, their opening hours, the people, their relationships and the members
   insee/                   InseeCommunes, shared: the INSEE communes reference
-infrastructure/            Spring Boot application, explicit wiring, development data
+infrastructure/            Spring Boot application, explicit wiring, transactions, development data
 ```
 
 The domain model and the ports stay shared: an aggregate has one model, never one per
