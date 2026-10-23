@@ -2,8 +2,10 @@ package competition.createcompetition.rest;
 
 import competition.createcompetition.CreateCompetition;
 import competition.domain.CompetitionId;
+import competition.domain.CompetitionNeedsAtLeastOneBoard;
 import competition.domain.League;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,6 +28,11 @@ public class CreateCompetitionController {
         URI location = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{id}")
                 .buildAndExpand(id.competitionId()).toUri();
         return ResponseEntity.created(location).build();
+    }
+
+    @ExceptionHandler(CompetitionNeedsAtLeastOneBoard.class)
+    public ResponseEntity<Void> refuseCompetitionWithoutBoard() {
+        return ResponseEntity.badRequest().build();
     }
 
     public record CreateCompetitionRequest(String name, String organizingLeague, int boards) {

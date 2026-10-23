@@ -53,6 +53,14 @@ class CreateCompetitionEndToEndTests {
         assertEquals(6, competition.boards());
     }
 
+    @Test
+    void a_competition_cannot_be_created_without_any_board() throws Exception {
+        HttpResponse<Void> response = post("""
+                {"name": "Nationale 4", "organizingLeague": "Centre-Val de Loire", "boards": 0}""");
+
+        assertEquals(400, response.statusCode());
+    }
+
     private CompetitionId createCompetition(String json) throws Exception {
         HttpResponse<Void> response = post(json);
 
