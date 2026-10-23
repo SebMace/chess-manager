@@ -454,9 +454,9 @@ and gives pedagogical feedback that separates verified facts, interpretations, a
 - Whether Chess Decision is a distinct bounded context remains a proposal until the user
   validates it.
 
-Club management (clubs, people, licenses, FFE imports) is on hold. Keep its code as it is: do not
-delete it or redesign it. Challenge any new club-management work with the YAGNI checkpoint
-(§4.1). The pause does not mean that the FFE refused a partnership.
+Club management (clubs, people, licenses, FFE imports) is no longer on hold since 2026-10-23: it
+resumes with registering the players linked to a club. Challenge each new club-management slice
+with the YAGNI checkpoint (§4.1).
 
 ### 10.2 Broader roadmap
 
