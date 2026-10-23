@@ -6,6 +6,7 @@ import competition.createcompetition.CreateCompetition;
 import competition.createcompetition.rest.CreateCompetitionController;
 import competition.domain.CompetitionId;
 import competition.domain.Season;
+import competition.engageteam.EngageTeam;
 import competition.persistence.JdbcCompetitionRepository;
 import competition.ports.CompetitionRepository;
 import org.springframework.context.annotation.Bean;
@@ -29,6 +30,11 @@ class CompetitionConfiguration {
     @Bean
     CreateCompetition createCompetition(CompetitionRepository competitions) {
         return new CreateCompetition(competitions, CURRENT_SEASON, () -> new CompetitionId(UUID.randomUUID()));
+    }
+
+    @Bean
+    EngageTeam engageTeam(CompetitionRepository competitions) {
+        return new EngageTeam(competitions);
     }
 
     @Bean

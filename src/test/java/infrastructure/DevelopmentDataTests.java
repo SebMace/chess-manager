@@ -7,7 +7,9 @@ import clubmanagement.ports.ClubCalendar;
 import clubmanagement.ports.ClubRepository;
 import clubmanagement.createclub.CreateClub;
 import competition.createcompetition.CreateCompetition;
+import competition.domain.CompetitionId;
 import competition.domain.League;
+import competition.engageteam.EngageTeam;
 import clubmanagement.domain.club.vo.CommitteeCode;
 import clubmanagement.domain.club.vo.FfeClubId;
 import clubmanagement.domain.club.vo.PostalAddress;
@@ -33,6 +35,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.NONE;
@@ -54,6 +57,7 @@ class DevelopmentDataTests {
     private final RegisterNewMember registerNewMember;
     private final MembersOfClub membersOfClub;
     private final CreateCompetition createCompetition;
+    private final EngageTeam engageTeam;
 
     /** Eight clubs, so that an interclub competition can be played in seven rounds. */
     private static final int CLUBS = 8;
@@ -62,8 +66,10 @@ class DevelopmentDataTests {
     DevelopmentDataTests(@Autowired ClubRepository clubs, @Autowired CreateClub createClub,
                          @Autowired DevelopmentData developmentData, @Autowired JdbcClient jdbc,
                          @Autowired ClubCalendar clubCalendar, @Autowired RegisterNewMember registerNewMember,
-                         @Autowired MembersOfClub membersOfClub, @Autowired CreateCompetition createCompetition) {
+                         @Autowired MembersOfClub membersOfClub, @Autowired CreateCompetition createCompetition,
+                         @Autowired EngageTeam engageTeam) {
         this.createCompetition = createCompetition;
+        this.engageTeam = engageTeam;
         this.clubs = clubs;
         this.createClub = createClub;
         this.developmentData = developmentData;
@@ -200,6 +206,18 @@ class DevelopmentDataTests {
         assertEquals(CLUBS, jdbc.sql("SELECT count(*) FROM club").query(Integer.class).single());
         assertEquals(CLUBS * PLAYERS_PER_CLUB, jdbc.sql("SELECT count(*) FROM person").query(Integer.class).single());
         assertEquals(0, jdbc.sql("SELECT count(*) FROM person WHERE ffe_id = 'K58213'").query(Integer.class).single());
+    }
+
+    @Test
+    void each_start_begins_again_even_when_a_competition_has_engaged_teams() {
+        CompetitionId competition = createCompetition.createCompetition("Nationale 4 engagée pendant une démonstration",
+                new League("Centre-Val de Loire"), 6);
+        engageTeam.engageTeam(competition, new competition.domain.ClubId(UUID.randomUUID()));
+
+        developmentData.run(null);
+
+        assertEquals(0, jdbc.sql("SELECT count(*) FROM competition_team WHERE competition_id = :competition")
+                .param("competition", competition.competitionId()).query(Integer.class).single());
     }
 
     @Test
