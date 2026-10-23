@@ -14,7 +14,7 @@ public class JdbcCompetitionRepository implements CompetitionRepository {
 
     @Override
     public Optional<Competition> find(CompetitionId competitionId) {
-        throw new UnsupportedOperationException("not implemented yet");
+        return Optional.empty();
     }
 
     @Override
