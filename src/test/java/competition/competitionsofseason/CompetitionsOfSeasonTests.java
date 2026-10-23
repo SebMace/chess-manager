@@ -56,6 +56,18 @@ class CompetitionsOfSeasonTests {
                 seen.competitions().stream().map(Competition::name).toList());
     }
 
+    @Test
+    void should_order_two_competitions_of_the_same_name_by_their_league() {
+        create("Nationale 4", CENTRE_VAL_DE_LOIRE, CURRENT_SEASON);
+        create("Nationale 4", new League("Bretagne"), CURRENT_SEASON);
+        create("Nationale 4", new League("Auvergne-Rhône-Alpes"), CURRENT_SEASON);
+
+        SeasonCompetitions seen = competitionsOfSeason.competitionsOfCurrentSeason();
+
+        assertEquals(List.of("Auvergne-Rhône-Alpes", "Bretagne", "Centre-Val de Loire"),
+                seen.competitions().stream().map(competition -> competition.organizingLeague().name()).toList());
+    }
+
     private void create(String name, League league, Season season) {
         competitions.save(new Competition(new CompetitionId(new UUID(0, ++created)), name, league, season, 6));
     }

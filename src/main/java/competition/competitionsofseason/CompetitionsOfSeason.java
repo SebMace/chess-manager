@@ -11,8 +11,11 @@ import java.util.Locale;
 
 public class CompetitionsOfSeason {
     // The primary strength ignores accents and capitals: "Élite" comes between "départementale" and "Nationale".
-    private static final Comparator<Competition> BY_NAME =
-            Comparator.comparing(Competition::name, frenchIgnoringAccentsAndCapitals());
+    private static final Collator FRENCH_IGNORING_ACCENTS_AND_CAPITALS = frenchIgnoringAccentsAndCapitals();
+    private static final Comparator<Competition> BY_NAME_THEN_LEAGUE =
+            Comparator.comparing(Competition::name, FRENCH_IGNORING_ACCENTS_AND_CAPITALS)
+                    .thenComparing(competition -> competition.organizingLeague().name(),
+                            FRENCH_IGNORING_ACCENTS_AND_CAPITALS);
     private final CompetitionRepository competitions;
     private final Season currentSeason;
 
@@ -23,7 +26,7 @@ public class CompetitionsOfSeason {
 
     public SeasonCompetitions competitionsOfCurrentSeason() {
         List<Competition> ofSeason = competitions.inSeason(currentSeason).stream()
-                .sorted(BY_NAME)
+                .sorted(BY_NAME_THEN_LEAGUE)
                 .toList();
         return new SeasonCompetitions(currentSeason, ofSeason);
     }
