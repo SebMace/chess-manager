@@ -1,10 +1,12 @@
 package competition.domain;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class CompetitionTests {
@@ -17,5 +19,10 @@ class CompetitionTests {
     void should_refuse_a_competition_without_board(int boards) {
         assertThrows(CompetitionNeedsAtLeastOneBoard.class,
                 () -> new Competition(ID, "Nationale 4", LEAGUE, SEASON, boards));
+    }
+
+    @Test
+    void should_accept_a_competition_with_a_single_board() {
+        assertEquals(1, new Competition(ID, "Nationale 4", LEAGUE, SEASON, 1).boards());
     }
 }
