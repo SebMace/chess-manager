@@ -12,7 +12,7 @@ Feature: Create a competition
     And the competition "Nationale 4" is organized by the league "Centre-Val de Loire"
     And the competition "Nationale 4" is played on 6 boards
 
-  @to_implement
+  @acceptance
   Scenario: A competition needs at least one board
     Given the current season is 2026-2027
     When an administrator creates the competition "Nationale 4" organized by the league "Centre-Val de Loire", played on 0 boards
