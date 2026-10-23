@@ -12,6 +12,11 @@ feedback that separates verified facts, interpretations and uncertainties. Club 
 described below, is no longer on hold since 23 October 2026: it resumes with the registration of
 the players linked to a club. See `docs/slices.md` for the backlog.
 
+## Architecture decisions
+
+The architecture decisions, why they were taken and what was rejected, are recorded as ADRs
+(in French) in [`docs/adr`](docs/adr/README.md). This README describes how the code applies them.
+
 ## Current bounded context: Club Management
 
 The model separates three aggregate roots:
