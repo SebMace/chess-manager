@@ -32,7 +32,13 @@ public class JdbcCompetitionRepository implements CompetitionRepository {
 
     @Override
     public List<Competition> inSeason(Season season) {
-        throw new UnsupportedOperationException("not implemented yet");
+        return jdbc.sql("""
+                        SELECT id, name, season_begin_year, season_end_year, boards, organizing_league_name
+                        FROM competition WHERE season_begin_year = :beginYear AND season_end_year = :endYear""")
+                .param("beginYear", season.yearBegin())
+                .param("endYear", season.yearEnd())
+                .query(JdbcCompetitionRepository::competition)
+                .list();
     }
 
     @Override

@@ -14,7 +14,9 @@ public class InMemoryCompetitionRepository implements CompetitionRepository {
 
     public Optional<Competition> find(CompetitionId id) { return Optional.ofNullable(competitions.get(id)); }
 
-    public List<Competition> inSeason(Season season) { throw new UnsupportedOperationException("not implemented yet"); }
+    public List<Competition> inSeason(Season season) {
+        return competitions.values().stream().filter(competition -> competition.season().equals(season)).toList();
+    }
 
     public void save(Competition competition) { competitions.put(competition.id(), competition); }
 }
