@@ -1,6 +1,8 @@
 package competition.ports;
 
+import competition.domain.Competition;
 import competition.domain.CompetitionId;
+import competition.domain.Season;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
@@ -18,5 +20,19 @@ public abstract class CompetitionRepositoryContract {
         CompetitionRepository competitions = competitions();
 
         assertEquals(Optional.empty(), competitions.find(new CompetitionId(new UUID(0, 1))));
+    }
+
+    @Test
+    void should_find_a_competition_that_was_saved_with_its_state() {
+        CompetitionRepository competitions = competitions();
+        CompetitionId id = new CompetitionId(new UUID(0, 2));
+        competitions.save(new Competition(id, "Nationale 4 Île-de-France", new Season(2026, 2027), 8));
+
+        Competition found = competitions.find(id).orElseThrow();
+
+        assertEquals(id, found.id());
+        assertEquals("Nationale 4 Île-de-France", found.name());
+        assertEquals(new Season(2026, 2027), found.season());
+        assertEquals(8, found.boards());
     }
 }
