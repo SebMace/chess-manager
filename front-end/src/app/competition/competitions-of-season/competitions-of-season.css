@@ -44,3 +44,12 @@ tbody th {
 .numeric {
   text-align: right;
 }
+
+.notice {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  border-left: 4px solid var(--walnut);
+  background: var(--backdrop-light);
+  color: var(--ink-soft);
+}

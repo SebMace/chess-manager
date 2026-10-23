@@ -36,6 +36,14 @@ describe('CompetitionsOfSeason', () => {
     expect(page.querySelector('h2')?.textContent).toBe('Compétitions de la saison 2026-2027');
     expect(shownCompetitions(page)).toEqual([['Nationale 4', 'Centre-Val de Loire', '6']]);
   });
+
+  it('tells the administrator that the season has no competition yet, and still names the season', async () => {
+    await openCompetitions([]);
+
+    expect(page.querySelector('h2')?.textContent).toBe('Compétitions de la saison 2026-2027');
+    expect(page.textContent).toContain('Aucune compétition pour la saison 2026-2027.');
+    expect(page.querySelector('table')).toBeNull();
+  });
 });
 
 function shownCompetitions(page: HTMLElement): string[][] {
