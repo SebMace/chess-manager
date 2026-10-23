@@ -5,7 +5,8 @@ Date : 2026-10-02 (consignée le 2026-10-05)
 ## Statut
 
 Acceptée. La pause de la gestion de club est levée par
-[0021](0021-reprise-de-la-gestion-de-club.md).
+[0021](0021-reprise-de-la-gestion-de-club.md), et la priorité donnée à Chess Decision est
+remplacée par [0028](0028-retour-a-la-vie-du-club.md).
 
 ## Contexte
 

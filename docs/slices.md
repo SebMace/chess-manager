@@ -16,30 +16,30 @@ Statuts :
 
 Seule la prochaine slice est détaillée ; les autres le seront quand on les démarrera.
 
-## Priorité : Chess Decision
+## Priorité : la vie du club et les compétitions
 
-Depuis le 2 octobre 2026, Chess Manager devient d'abord un outil personnel de progression aux
-échecs. Son cœur, **Chess Decision** : le joueur soumet une position, éventuellement des thèmes,
-son analyse, ses coups candidats et son plan ; l'outil confronte ce raisonnement aux ressources
-concrètes de la position et lui répond de façon pédagogique, en séparant les faits vérifiés, les
-interprétations et les incertitudes.
+Depuis le 23 octobre 2026, Chess Manager est d'abord un outil pour la vie d'un club (ADR 0028).
+Ses deux domaines sont la gestion de club (clubs, personnes, licences, horaires d'ouverture,
+imports FFE) et les compétitions par équipes, à commencer par la Nationale 4 du Loiret (voir plus
+bas). Chaque nouvelle slice passe d'abord au crible YAGNI.
 
-- Les thèmes sont des hypothèses ou des objectifs d'apprentissage, jamais des vérités. Les
+La gestion de club n'est pas en pause : *Register a new member* et *Consult the members of a
+club* ont été menées jusqu'à l'écran, avant de présenter l'application au président et au
+secrétaire d'un club.
+
+**Chess Decision** n'est plus le produit phare (ADR 0028). Décidé le 2 octobre 2026 (ADR 0020),
+c'était un outil personnel de progression : le joueur soumet une position, éventuellement des
+thèmes, son analyse, ses coups candidats et son plan, et l'outil confronte ce raisonnement aux
+ressources concrètes de la position. Aucun code n'existe et aucune slice n'est planifiée. S'il
+reprend, ses principes restent :
+
+- les thèmes sont des hypothèses ou des objectifs d'apprentissage, jamais des vérités ; les
   déséquilibres de Silman peuvent inspirer, sans devenir une grille obligatoire, et aucun contenu
-  de Silman n'est inventé.
-- Quatre responsabilités restent distinctes : le domaine (positions, propositions, thèmes,
-  retours), le moteur (vérification tactique, évaluations, variantes), le LLM (formuler des
-  explications à partir des éléments disponibles) et un éventuel serveur MCP (exposer ces
-  capacités à un client IA, sans être le moteur du raisonnement).
-- Pas d'infrastructure, MCP compris, avant un premier usage utile identifié.
-- Faire de Chess Decision un bounded context distinct reste une proposition, à valider.
-- La première slice de Chess Decision reste à choisir.
-
-La gestion de club (clubs, personnes, licences, imports FFE) n'est plus en pause depuis le
-23 octobre 2026. Elle reprend avec l'enregistrement des joueurs liés à un club : *Register a new
-member* et *Consult the members of a club* ont été menées jusqu'à l'écran, avant de présenter
-l'application au président et au secrétaire d'un club. Chaque nouvelle slice de ce domaine passe
-d'abord au crible YAGNI.
+  de Silman n'est inventé ;
+- le domaine, le moteur, le LLM et un éventuel serveur MCP restent quatre responsabilités
+  distinctes ;
+- pas d'infrastructure, MCP compris, avant un premier usage utile identifié ;
+- faire de Chess Decision un bounded context distinct reste une proposition, à valider.
 
 ## Slices existantes
 
@@ -260,6 +260,145 @@ haut.
     (mais SAINTES, la ville, reste en toutes lettres) ;
   - à l'écran, un code postal unique remplit le champ seulement s'il est vide ; plusieurs codes
     sont suggérés ; si la recherche échoue, rien n'est suggéré, sans message.
+
+## Compétition : la Nationale 4 du Loiret
+
+Depuis le 23 octobre 2026, le thème *Compétitions* est découpé pour un premier besoin : un
+bounded context `competition` à part (ADR 0027, proposé), des slices nommées d'après leur cas
+d'usage, chacune passée au crible YAGNI.
+
+**Le besoin.** Les clubs créés dans l'application engagent chacun une équipe dans le championnat
+interclubs de Nationale 4 du Loiret : huit équipes, sept rondes, six échiquiers. Un calendrier
+fixé en début de saison donne les rencontres de chaque ronde. Avant la ronde, le capitaine compose
+son équipe et peut imprimer la feuille de match ; après la ronde, il saisit les résultats.
+
+**Règles retenues**, d'après le A02 de la saison 2025-2026 et décrites avec nos mots (ADR 0018) :
+
+- la Nationale 4 se joue en groupes de 8 ou 10 équipes, en toutes rondes (sept ou neuf rondes),
+  sous la responsabilité de la Ligue, qui nomme le directeur de groupe et peut apporter des
+  modifications mineures. Les dates des rondes viennent du calendrier fédéral ; le directeur de
+  groupe conçoit les appariements et fixe les lieux. L'heure de début est 14h15, sauf contrordre ;
+- six échiquiers : le A02 laisse aux Ligues le choix d'une Nationale 4 à six échiquiers (3.7.a,
+  huit par défaut), et le porteur du projet indique que c'est le cas du Loiret, sans règlement
+  local publié. Le nombre d'échiquiers est donc une donnée de la compétition ;
+- l'équipe première nommée dans les appariements, celle qui reçoit, a les blancs aux échiquiers
+  impairs et les noirs aux échiquiers pairs (3.2) ;
+- seuls les licenciés A peuvent jouer, et la licence peut être prise jusqu'à l'heure de début de
+  la rencontre (3.6.d, 3.7.a). Une infraction coûte à l'équipe un forfait administratif et deux
+  points de parties ;
+- écart d'Elo : l'Elo retenu est le dernier publié ; quand deux membres de l'équipe ont des Elo qui
+  diffèrent de plus de 100 points, le mieux classé joue devant l'autre (3.6.e). Le seuil est
+  strict (100 passe, 101 est refusé), la règle vaut pour toutes les paires, pas seulement pour les
+  échiquiers voisins, et le manquement coûte un forfait administratif au mieux classé. Le texte de
+  2009 disait 103 : la valeur de la Ligue du Centre-Val de Loire reste à confirmer ;
+- la composition est une liste ordonnée, sans trou entre les échiquiers, remise au moins 15
+  minutes avant le début ; elle ne se modifie plus ensuite (3.6.a). À partir de 2026-2027, un
+  membre de l'équipe autre que le capitaine pourra la remettre ;
+- un club peut engager plusieurs équipes, même dans un même groupe. Elles sont numérotées par force
+  décroissante, et un joueur ne joue que dans une des équipes d'un groupe (1.2, 3.7.b, 3.7.d) ;
+- une équipe compte au plus trois joueurs mutés par match, deux quand elle est de six (3.7.g) ;
+- un club engagé aligne une équipe à chaque ronde, faute de quoi c'est un forfait (4.3), que nous
+  ne modélisons pas encore ;
+- partie gagnée 1 point, perdue 0, nulle non comptée. Le match va à l'équipe qui a le plus de
+  points de parties, et il est nul à égalité. Match gagné 3 points, nul 2, perdu 1, perdu par
+  forfait sportif 0 ; une exemption ne marque rien (4.1, 4.2). Le classement se fait au total des
+  points de match, puis au résultat entre les équipes à départager (points de match, différentiel,
+  points « pour »), puis aux différentiels de toute la compétition (4.4).
+
+Sources : [le A02 de la saison
+2025-2026](https://www.echecs.asso.fr/Actus/2864/A02_2025_26_Championnat_de_France_des_Clubs.pdf)
+(texte modifié par la CT le 17/05/2025) et [la liste des modifications
+2026-2027](http://echecs.asso.fr/Actus/2864/Suivi_modifications_2026_27.pdf), non exhaustive. Le
+texte A02 de 2026-2027 reste à lire.
+
+**Contrôle YAGNI.** Le site de la FFE permet déjà de préparer une feuille de match et de la
+poster au directeur de groupe. Le A02 exige un document officiel pour la composition (3.6.a), et
+le club responsable de la rencontre saisit le procès-verbal sur le site fédéral avant 22 h
+(3.11.a). Ce que le site ne fait pas, c'est contrôler la composition avec les membres, les
+licences et les Elo que l'application connaît déjà : c'est la valeur de *Compose a team for a
+match*, et la raison de la construire en premier. *Print the match sheet* et *Record the results
+of a match* attendent que le besoin se confirme : la feuille ne remplace pas le document
+officiel, et la saisie des résultats ferait double emploi avec celle du site fédéral.
+
+*Create a competition*, *Engage a team in a competition* et *Schedule a match* sont des gestes
+d'une fois par saison, faits par un administrateur : à se demander s'ils justifient un écran, ou
+si les cas d'usage seuls suffisent, alimentés en développement comme les clubs de démonstration
+(voir la leçon YAGNI plus haut).
+
+| Slice | Package | Statut | Dépend de |
+|---|---|---|---|
+| Create a competition | `competition.createcompetition` | prochaine de ce contexte | — |
+| Engage a team in a competition | `competition.engageteam` | à venir | Create a competition, Create a club |
+| Schedule a match | `competition.schedulematch` | à venir | Engage a team in a competition |
+| Compose a team for a match | `competition.composeteam` | à venir | Schedule a match, Register a new member |
+| Print the match sheet | `competition.printmatchsheet` | à venir | Compose a team for a match |
+| Record the results of a match | `competition.recordmatchresults` | à venir | Compose a team for a match |
+
+### Create a competition
+
+- **Intention** : l'administrateur crée la compétition d'une saison, avec son nom et le nombre
+  d'échiquiers de ses équipes. Par exemple « Nationale 4 Centre-Val de Loire », six échiquiers,
+  pour la saison 2026-2027.
+- **Décisions proposées** :
+  - le formulaire ne demande que le nom et le nombre d'échiquiers : la saison est la saison
+    courante (ADR 0025), et la division et la Ligue vont dans le nom, car une liste à une seule
+    option n'apporterait rien (YAGNI) ;
+  - le nombre d'échiquiers est un entier strictement positif, refusé sinon ;
+  - le nombre de rondes ne se déclare pas : il découle du calendrier (YAGNI) ;
+  - le contexte a sa propre saison plutôt que d'emprunter celle de `clubmanagement` : une slice ne
+    possède pas le modèle d'un autre contexte (ADR 0027).
+- **Premier test**, en langage métier : quand l'administrateur crée la compétition « Nationale 4
+  Centre-Val de Loire », jouée sur six échiquiers, il est informé que la compétition « Nationale 4
+  Centre-Val de Loire » a été créée pour la saison 2026-2027. Le refus d'une compétition sans
+  échiquier vient ensuite.
+- **Couches** : acceptation, cas d'usage, persistance, REST, contrat et écran. L'écran est voulu
+  pour cette première slice, qui pose aussi le squelette du contexte (package, migration, REST,
+  contrat, règles ArchUnit) : le geste ne se fait qu'une fois par saison, donc le formulaire reste
+  minimal.
+- **Questions ouvertes** : deux compétitions de même nom la même saison ? L'effectif du groupe
+  (8 ou 10 équipes) se déclare-t-il à la création, ou se constate-t-il aux engagements ?
+
+### Les slices suivantes
+
+Détaillées quand on les démarrera ; ce qui suit garde les questions déjà constatées.
+
+- *Engage a team in a competition* : un club engage une équipe, par exemple DEMO01. Une équipe est
+  identifiée par son club et son numéro, qui range les équipes du club par force décroissante
+  (3.7.b) : un club peut en engager plusieurs, même dans un groupe, et dans plusieurs compétitions
+  de la saison. L'existence du club est vérifiée par le port, pas par une clé étrangère.
+  Questions : le numéro est-il saisi ou attribué ? Est-il propre à la compétition, ou au club pour
+  toute la saison ? Un club que l'application ne gère pas peut-il engager une équipe ?
+- *Schedule a match* : l'administrateur fixe une rencontre (ronde, date, équipe qui reçoit, équipe
+  visiteuse). Deux équipes engagées et distinctes ; une équipe ne joue qu'une rencontre par ronde.
+  Les dates viennent du calendrier fédéral et les appariements du directeur de groupe. Questions :
+  saisir à la main les 28 rencontres (huit équipes, sept rondes, quatre rencontres par ronde), ou
+  générer le calendrier, ce qui n'est pas demandé ? L'heure de début, 14h15 par défaut,
+  compte-t-elle pour le délai de remise des compositions ?
+- *Compose a team for a match*, le cœur : le capitaine place des joueurs de son club aux
+  échiquiers de son équipe. Trois cycles : le cas nominal (membres du club, un seul échiquier par
+  joueur, sans trou, couleurs dérivées), puis la licence A seule (les données de développement ont
+  deux licenciés B par club), puis l'écart d'Elo (100 accepté, 101 refusé, paire non voisine).
+  À trancher : une composition contraire aux règles est-elle refusée (recommandé) ou seulement
+  signalée ? Une équipe incomplète est-elle permise (le A02 n'interdit que les trous, 3.6.a) ? La
+  composition fige-t-elle l'Elo et la licence au moment où elle est faite ? Jusqu'à quand se
+  modifie-t-elle ? Le A02 ne traite pas le joueur non classé. Les autres règles du A02 sur la
+  composition sont à examiner chacune avec un exemple avant d'être codées (YAGNI) : les mutés
+  (3.7.g, la mutation n'a pas encore d'opération propre dans Club Management), la nationalité
+  (3.7.h), l'Elo supérieur à 2400 (3.7.j), un joueur dans une seule équipe d'un groupe (3.7.d) et
+  le nombre de parties déjà jouées (3.7.e).
+- *Print the match sheet* : la feuille d'une rencontre, prête à imprimer, avec les échiquiers dans
+  l'ordre, les couleurs, le nom, l'identifiant FFE et l'Elo des joueurs des deux équipes, et la
+  place des résultats et des signatures. Lecture seule, impression par le navigateur. Question :
+  elle ne remplace pas le document officiel exigé par le A02 (3.6.a) ; à quoi sert-elle alors ?
+- *Record the results of a match* : le capitaine saisit le résultat de chaque échiquier, et le
+  score de la rencontre en découle selon le barème retenu plus haut. Le procès-verbal officiel est
+  saisi sur le site fédéral par le club responsable de la rencontre, le club recevant sauf décision
+  contraire (2.5, 3.11.a) : cette slice ne se justifie que si elle évite une double saisie ou
+  garde l'historique du club. Question : une saisie se corrige-t-elle ?
+
+Hors backlog, tant qu'aucun cas d'usage ne le demande (YAGNI) : le classement, la génération du
+calendrier, les forfaits et pénalités, le capitaine comme concept, les coups des parties et les
+autres divisions.
 
 ## Thèmes, à découper le moment venu
 

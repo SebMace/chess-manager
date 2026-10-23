@@ -3,14 +3,19 @@
 Chess Manager is a learning project built progressively with Domain-Driven Design,
 Test-Driven Development and Clean / Hexagonal Architecture principles.
 
-## Product direction: Chess Decision
+## Product direction: club life and competitions
 
-Since 2 October 2026, Chess Manager is first a personal chess-improvement tool. Its core,
-Chess Decision, confronts the reasoning a player submits about a position (themes, analysis,
-candidate moves, plan) with the concrete resources of that position, and gives pedagogical
-feedback that separates verified facts, interpretations and uncertainties. Club Management,
-described below, is no longer on hold since 23 October 2026: it resumes with the registration of
-the players linked to a club. See `docs/slices.md` for the backlog.
+Chess Manager is first a tool for the life of a chess club: its members and their licenses, its
+opening hours and, since 23 October 2026, its team competitions. The first competition is the
+Nationale 4 interclub championship of the Loiret: the clubs created in the application each engage
+a team, a calendar fixes the matches of every round, and before a round the captain composes the
+team, prints the match sheet and, afterwards, enters the results. See `docs/slices.md` for the
+backlog.
+
+Chess Decision, a personal chess-improvement tool that confronts the reasoning a player submits
+about a position with the concrete resources of that position, was the product direction from
+2 October 2026. It is no longer the flagship (ADR 0028): no code exists for it yet, and it is not
+scheduled.
 
 ## Architecture decisions
 
@@ -30,6 +35,21 @@ The model separates three aggregate roots:
 `Person` nor `Club` contains a collection of relationships. `PROSPECT`, `MEMBER`
 and `PARTNER` describe relationships, not types of people. There are no separate
 bounded contexts or microservices for these aggregates.
+
+## Proposed bounded context: Competition
+
+Competition handles team competitions between clubs, starting with the Nationale 4 of the Loiret.
+The federal rules (A02, season 2025-2026) let each league choose six boards per team instead of
+eight, so the number of boards is a datum of each competition. Its language (team engaged in a
+competition, match, round, board, team composition, match sheet) differs from that of Club
+Management, which speaks of clubs, people and licenses. It is downstream of Club Management: an
+anticorruption layer translates the members of a club (name, FFE identifier, license, rating)
+into the players a captain may field, and the rules of the competition (only A licenses, a player
+rated more than 100 points above a teammate plays ahead of them, the colors of each board) live in
+its own domain.
+
+**Status.** This is a proposed architectural direction (ADR 0027, awaiting validation), not
+existing code yet.
 
 ## Planned bounded context: Craft Calendar
 

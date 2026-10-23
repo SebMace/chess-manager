@@ -18,8 +18,9 @@ Ce choix dépend du mode de distribution de l'application et sera fait avant la 
 
 La gestion de club a repris le 23 octobre 2026 (voir `docs/slices.md`) avec l'enregistrement des
 membres d'un club : le traitement 2 stocke désormais des données, pour ces membres seulement.
-Chess Decision ajoutera son propre traitement dès qu'une slice stockera des données d'un joueur,
-par exemple ses analyses.
+Le contexte Compétition (ADR 0027, proposé) ajoutera son propre traitement dès qu'une slice
+stockera des compositions d'équipe : prénom, nom, identifiant FFE et Elo des joueurs alignés.
+Chess Decision, qui n'est plus le produit phare (ADR 0028), n'en ajoutera un que s'il reprend.
 
 ## Traitement 1 — Annuaire des clubs
 

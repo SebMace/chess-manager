@@ -34,9 +34,11 @@ passe au statut « Remplacée par NNNN ».
 | [0017](0017-codes-postaux-de-la-poste.md) | Les codes postaux viennent de La Poste | Acceptée |
 | [0018](0018-pas-de-reutilisation-des-donnees-ffe.md) | Aucune donnée FFE réutilisée sans autorisation | Acceptée |
 | [0019](0019-authentification-differee.md) | Authentification différée | Acceptée |
-| [0020](0020-priorite-a-chess-decision.md) | Priorité à Chess Decision | Acceptée, pause levée par 0021 |
+| [0020](0020-priorite-a-chess-decision.md) | Priorité à Chess Decision | Acceptée, pause levée par 0021, priorité remplacée par 0028 |
 | [0021](0021-reprise-de-la-gestion-de-club.md) | Reprise de la gestion de club | Acceptée |
 | [0022](0022-transaction-d-un-cas-d-usage-dans-infrastructure.md) | La transaction d'un cas d'usage est posée par infrastructure | Acceptée |
 | [0023](0023-relire-un-agregat-par-ses-operations.md) | Relire un agrégat en rejouant ses opérations | Acceptée |
 | [0024](0024-port-de-lecture-pour-une-liste.md) | Un port de lecture pour une liste qui joint plusieurs agrégats | Acceptée |
 | [0025](0025-saison-courante-en-configuration.md) | La saison courante est une constante de configuration | Acceptée |
+| [0027](0027-competition-contexte-distinct.md) | Compétition, un bounded context distinct de la gestion de club | Proposée |
+| [0028](0028-retour-a-la-vie-du-club.md) | Retour à la vie du club et aux compétitions | Acceptée |
