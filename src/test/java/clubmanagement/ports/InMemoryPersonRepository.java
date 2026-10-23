@@ -18,7 +18,8 @@ public class InMemoryPersonRepository implements PersonRepository {
 
     private Person snapshot(Person person) {
         Person copy = person.ffeId()
-                .map(ffeId -> Person.licensedPlayer(person.id(), person.firstName(), person.lastName(), ffeId))
+                .map(ffeId -> Person.registeredLicensedPlayer(person.id(), person.firstName(), person.lastName(),
+                        ffeId, Optional.ofNullable(person.eloRating()), person.fideTitle()))
                 .orElseGet(() -> new Person(person.id(), person.firstName(), person.lastName(), person.email().orElse(null)));
         copy.giveEloRating(person.eloRating());
         try {
