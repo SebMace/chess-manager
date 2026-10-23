@@ -1,9 +1,11 @@
 package competition.ports;
 
+import competition.domain.ClubId;
 import competition.domain.Competition;
 import competition.domain.CompetitionId;
 import competition.domain.League;
 import competition.domain.Season;
+import competition.domain.Team;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -57,6 +59,25 @@ public abstract class CompetitionRepositoryContract {
 
         assertEquals(Set.of(nationale4, regionale1), Set.copyOf(found));
         assertEquals(2, found.size());
+    }
+
+    @Test
+    void should_find_the_teams_engaged_in_a_saved_competition() {
+        CompetitionRepository competitions = competitions();
+        CompetitionId id = new CompetitionId(new UUID(0, 7));
+        ClubId cavaliers = new ClubId(new UUID(1, 1));
+        ClubId pithiviers = new ClubId(new UUID(1, 5));
+        Competition competition = new Competition(id, "Nationale 4", new League("Centre-Val de Loire"),
+                new Season(2026, 2027), 6);
+        competition.engageTeamOf(cavaliers);
+        competition.engageTeamOf(cavaliers);
+        competition.engageTeamOf(pithiviers);
+        competitions.save(competition);
+
+        List<Team> teams = competitions.find(id).orElseThrow().teams();
+
+        assertEquals(Set.of(new Team(cavaliers, 1), new Team(cavaliers, 2), new Team(pithiviers, 1)), Set.copyOf(teams));
+        assertEquals(3, teams.size());
     }
 
     @Test
