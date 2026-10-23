@@ -6,10 +6,13 @@ import competition.domain.Team;
 import competition.ports.CompetitionRepository;
 
 public class EngageTeam {
+    private final CompetitionRepository competitions;
+
     public EngageTeam(CompetitionRepository competitions) {
+        this.competitions = competitions;
     }
 
     public Team engageTeam(CompetitionId competition, ClubId club) {
-        throw new UnsupportedOperationException("not implemented yet");
+        return competitions.find(competition).orElseThrow().engageTeamOf(club);
     }
 }
