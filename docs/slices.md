@@ -261,26 +261,35 @@ haut.
   - à l'écran, un code postal unique remplit le champ seulement s'il est vide ; plusieurs codes
     sont suggérés ; si la recherche échoue, rien n'est suggéré, sans message.
 
-## Compétition : la Nationale 4 du Loiret
+## Compétition : la Nationale 4 de la Ligue du Centre-Val de Loire
 
 Depuis le 23 octobre 2026, le thème *Compétitions* est découpé pour un premier besoin : un
 bounded context `competition` à part (ADR 0027, proposé), des slices nommées d'après leur cas
 d'usage, chacune passée au crible YAGNI.
 
 **Le besoin.** Les clubs créés dans l'application engagent chacun une équipe dans le championnat
-interclubs de Nationale 4 du Loiret : huit équipes, sept rondes, six échiquiers. Un calendrier
-fixé en début de saison donne les rencontres de chaque ronde. Avant la ronde, le capitaine compose
-son équipe et peut imprimer la feuille de match ; après la ronde, il saisit les résultats.
+interclubs de Nationale 4 de la Ligue du Centre-Val de Loire, dont le Loiret est l'un des six
+comités : huit équipes, sept rondes, six échiquiers. Un calendrier fixé en début de saison donne
+les rencontres de chaque ronde. Avant la ronde, le capitaine compose son équipe et peut imprimer la
+feuille de match ; après la ronde, il saisit les résultats.
 
-**Règles retenues**, d'après le A02 de la saison 2025-2026 et décrites avec nos mots (ADR 0018) :
+**Règles retenues**, d'après le A02 et les règles générales R01 de la saison 2026-2027, décrites
+avec nos mots (ADR 0018) :
 
+- l'organisateur d'une compétition décide qui peut y jouer. La Fédération organise la Top 16 à la
+  Nationale 3, avec des clubs de toute Ligue. Une Ligue organise la Nationale 4 et les divisions
+  régionales, pour ses clubs selon la pratique, car aucun texte lu ne l'écrit. Un comité organise
+  les divisions départementales. Une Ligue regroupe plusieurs comités : celle du Centre-Val de Loire
+  en compte six (Cher, Eure-et-Loir, Indre, Indre-et-Loire, Loir-et-Cher et Loiret) ;
 - la Nationale 4 se joue en groupes de 8 ou 10 équipes, en toutes rondes (sept ou neuf rondes),
-  sous la responsabilité de la Ligue, qui nomme le directeur de groupe et peut apporter des
-  modifications mineures. Les dates des rondes viennent du calendrier fédéral ; le directeur de
-  groupe conçoit les appariements et fixe les lieux. L'heure de début est 14h15, sauf contrordre ;
+  sous la responsabilité de la Ligue, qui fixe le nombre de ses groupes, les compose, nomme le
+  directeur de groupe et peut apporter des modifications mineures. Les dates des rondes viennent du
+  calendrier fédéral ; le directeur de groupe conçoit les appariements et fixe les lieux. L'heure
+  de début est 14h15, sauf contrordre ;
 - six échiquiers : le A02 laisse aux Ligues le choix d'une Nationale 4 à six échiquiers (3.7.a,
-  huit par défaut), et le porteur du projet indique que c'est le cas du Loiret, sans règlement
-  local publié. Le nombre d'échiquiers est donc une donnée de la compétition ;
+  huit par défaut), et le porteur du projet indique que c'est le cas dans le Loiret, sans règlement
+  local publié. La Ligue décidant, nous supposons que c'est le cas de toute la Ligue du
+  Centre-Val de Loire (à confirmer). Le nombre d'échiquiers est donc une donnée de la compétition ;
 - l'équipe première nommée dans les appariements, celle qui reçoit, a les blancs aux échiquiers
   impairs et les noirs aux échiquiers pairs (3.2) ;
 - seuls les licenciés A peuvent jouer, et la licence peut être prise jusqu'à l'heure de début de
@@ -289,13 +298,19 @@ son équipe et peut imprimer la feuille de match ; après la ronde, il saisit le
 - écart d'Elo : l'Elo retenu est le dernier publié ; quand deux membres de l'équipe ont des Elo qui
   diffèrent de plus de 100 points, le mieux classé joue devant l'autre (3.6.e). Le seuil est
   strict (100 passe, 101 est refusé), la règle vaut pour toutes les paires, pas seulement pour les
-  échiquiers voisins, et le manquement coûte un forfait administratif au mieux classé. Le texte de
-  2009 disait 103 : la valeur de la Ligue du Centre-Val de Loire reste à confirmer ;
+  échiquiers voisins, et le manquement coûte un forfait administratif au mieux classé. Les textes
+  de 2025-2026 et 2026-2027 disent 100, celui de 2009 disait 103 : la valeur de la Ligue du
+  Centre-Val de Loire reste à confirmer ;
+- un joueur jamais classé reçoit un Elo estimé selon sa catégorie d'âge (R01 5), par exemple 1399
+  pour un senior, 1199 pour un U20 à U16 et 999 pour un U14 ou U12 en cadence standard.
+  L'application ne stocke pas la date de naissance, donc pas la catégorie d'âge ;
 - la composition est une liste ordonnée, sans trou entre les échiquiers, remise au moins 15
-  minutes avant le début ; elle ne se modifie plus ensuite (3.6.a). À partir de 2026-2027, un
-  membre de l'équipe autre que le capitaine pourra la remettre ;
+  minutes avant le début ; elle ne se modifie plus ensuite (3.6.a). À défaut du capitaine, un
+  membre de l'équipe peut la remettre, et chaque équipe a un capitaine titulaire d'une licence
+  fédérale (R01 8) ;
 - un club peut engager plusieurs équipes, même dans un même groupe. Elles sont numérotées par force
-  décroissante, et un joueur ne joue que dans une des équipes d'un groupe (1.2, 3.7.b, 3.7.d) ;
+  décroissante, et un joueur ne joue que dans une des équipes d'un groupe, sauf en barrage (1.2,
+  3.7.b, 3.7.d) ;
 - une équipe compte au plus trois joueurs mutés par match, deux quand elle est de six (3.7.g) ;
 - un club engagé aligne une équipe à chaque ronde, faute de quoi c'est un forfait (4.3), que nous
   ne modélisons pas encore ;
@@ -306,10 +321,13 @@ son équipe et peut imprimer la feuille de match ; après la ronde, il saisit le
   points « pour »), puis aux différentiels de toute la compétition (4.4).
 
 Sources : [le A02 de la saison
-2025-2026](https://www.echecs.asso.fr/Actus/2864/A02_2025_26_Championnat_de_France_des_Clubs.pdf)
-(texte modifié par la CT le 17/05/2025) et [la liste des modifications
-2026-2027](http://echecs.asso.fr/Actus/2864/Suivi_modifications_2026_27.pdf), non exhaustive. Le
-texte A02 de 2026-2027 reste à lire.
+2026-2027](http://echecs.asso.fr/Actus/2864/A02_2026_27_Championnat_de_France_des_Clubs.pdf)
+(daté du 14/10/2026) et [les règles générales R01 de la saison
+2026-2027](http://echecs.asso.fr/Actus/2864/R01_2026_27_Regles_generales.pdf) (modifiées le
+13/06/2026). Le A02 de 2025-2026 dit la même chose sur ces points, hormis deux précisions de
+2026-2027 : la remise de la composition par un autre membre que le capitaine, et l'exception des
+barrages pour un joueur dans deux équipes d'un même groupe (3.7.d). Aucun règlement de la Ligue du
+Centre-Val de Loire n'a été trouvé.
 
 **Contrôle YAGNI.** Le site de la FFE permet déjà de préparer une feuille de match et de la
 poster au directeur de groupe. Le A02 exige un document officiel pour la composition (3.6.a), et
@@ -327,8 +345,9 @@ si les cas d'usage seuls suffisent, alimentés en développement comme les clubs
 
 | Slice | Package | Statut | Dépend de |
 |---|---|---|---|
+| Find the league of a committee | `clubmanagement.leagueofcommittee` | à venir | — |
 | Create a competition | `competition.createcompetition` | prochaine de ce contexte | — |
-| Engage a team in a competition | `competition.engageteam` | à venir | Create a competition, Create a club |
+| Engage a team in a competition | `competition.engageteam` | à venir | Create a competition, Create a club, Find the league of a committee |
 | Schedule a match | `competition.schedulematch` | à venir | Engage a team in a competition |
 | Compose a team for a match | `competition.composeteam` | à venir | Schedule a match, Register a new member |
 | Print the match sheet | `competition.printmatchsheet` | à venir | Compose a team for a match |
@@ -336,27 +355,33 @@ si les cas d'usage seuls suffisent, alimentés en développement comme les clubs
 
 ### Create a competition
 
-- **Intention** : l'administrateur crée la compétition d'une saison, avec son nom et le nombre
-  d'échiquiers de ses équipes. Par exemple « Nationale 4 Centre-Val de Loire », six échiquiers,
-  pour la saison 2026-2027.
+- **Intention** : l'administrateur crée la compétition d'une saison, avec son nom, la Ligue qui
+  l'organise et le nombre d'échiquiers de ses équipes. Par exemple « Nationale 4 », organisée par
+  la Ligue du Centre-Val de Loire, six échiquiers, pour la saison 2026-2027.
 - **Décisions proposées** :
-  - le formulaire ne demande que le nom et le nombre d'échiquiers : la saison est la saison
-    courante (ADR 0025), et la division et la Ligue vont dans le nom, car une liste à une seule
-    option n'apporterait rien (YAGNI) ;
+  - le formulaire demande le nom, la Ligue organisatrice et le nombre d'échiquiers : la saison est
+    la saison courante (ADR 0025), et la division reste dans le nom. La Ligue n'est plus dans le
+    nom, parce qu'elle est le lien avec la localisation des clubs (ADR 0027) ;
+  - la Ligue organisatrice est une donnée de la compétition, nommée `organizingLeague` ; la
+    Fédération et le comité attendront une compétition qui en a besoin (YAGNI) ;
+  - la Ligue est d'abord désignée par son nom. Choisir sa Ligue dans une liste (les régions de
+    l'INSEE) viendra avec *Find the league of a committee* ;
   - le nombre d'échiquiers est un entier strictement positif, refusé sinon ;
   - le nombre de rondes ne se déclare pas : il découle du calendrier (YAGNI) ;
   - le contexte a sa propre saison plutôt que d'emprunter celle de `clubmanagement` : une slice ne
     possède pas le modèle d'un autre contexte (ADR 0027).
-- **Premier test**, en langage métier : quand l'administrateur crée la compétition « Nationale 4
-  Centre-Val de Loire », jouée sur six échiquiers, il est informé que la compétition « Nationale 4
-  Centre-Val de Loire » a été créée pour la saison 2026-2027. Le refus d'une compétition sans
-  échiquier vient ensuite.
+- **Premier test**, en langage métier : quand l'administrateur crée la compétition « Nationale 4 »
+  organisée par la Ligue du Centre-Val de Loire et jouée sur six échiquiers, il est informé que la
+  compétition « Nationale 4 » a été créée pour la saison 2026-2027, organisée par cette Ligue et
+  jouée sur six échiquiers. Le refus d'une compétition sans échiquier vient ensuite.
 - **Couches** : acceptation, cas d'usage, persistance, REST, contrat et écran. L'écran est voulu
   pour cette première slice, qui pose aussi le squelette du contexte (package, migration, REST,
   contrat, règles ArchUnit) : le geste ne se fait qu'une fois par saison, donc le formulaire reste
   minimal.
-- **Questions ouvertes** : deux compétitions de même nom la même saison ? L'effectif du groupe
-  (8 ou 10 équipes) se déclare-t-il à la création, ou se constate-t-il aux engagements ?
+- **Questions ouvertes** : deux compétitions de même nom, de même Ligue et de même saison ?
+  L'effectif du groupe (8 ou 10 équipes) se déclare-t-il à la création, ou se constate-t-il aux
+  engagements ? Une Ligue qui a plusieurs groupes de Nationale 4 : une compétition par groupe, ou
+  une compétition par Ligue qui contient des groupes ?
 
 ### Les slices suivantes
 
@@ -365,9 +390,12 @@ Détaillées quand on les démarrera ; ce qui suit garde les questions déjà co
 - *Engage a team in a competition* : un club engage une équipe, par exemple DEMO01. Une équipe est
   identifiée par son club et son numéro, qui range les équipes du club par force décroissante
   (3.7.b) : un club peut en engager plusieurs, même dans un groupe, et dans plusieurs compétitions
-  de la saison. L'existence du club est vérifiée par le port, pas par une clé étrangère.
-  Questions : le numéro est-il saisi ou attribué ? Est-il propre à la compétition, ou au club pour
-  toute la saison ? Un club que l'application ne gère pas peut-il engager une équipe ?
+  de la saison. L'existence du club est vérifiée par le port, pas par une clé étrangère. Quand la
+  compétition est organisée par une Ligue, le club doit être de cette Ligue : sa Ligue se déduit de
+  son comité, par la slice préalable *Find the league of a committee*, calculée depuis les régions
+  de l'INSEE (ADR 0018). Questions : le numéro est-il saisi ou attribué ? Est-il propre à la
+  compétition, ou au club pour toute la saison ? Un club que l'application ne gère pas peut-il
+  engager une équipe ? Les Ligues sont-elles exactement les régions de l'INSEE ?
 - *Schedule a match* : l'administrateur fixe une rencontre (ronde, date, équipe qui reçoit, équipe
   visiteuse). Deux équipes engagées et distinctes ; une équipe ne joue qu'une rencontre par ronde.
   Les dates viennent du calendrier fédéral et les appariements du directeur de groupe. Questions :
@@ -381,7 +409,8 @@ Détaillées quand on les démarrera ; ce qui suit garde les questions déjà co
   À trancher : une composition contraire aux règles est-elle refusée (recommandé) ou seulement
   signalée ? Une équipe incomplète est-elle permise (le A02 n'interdit que les trous, 3.6.a) ? La
   composition fige-t-elle l'Elo et la licence au moment où elle est faite ? Jusqu'à quand se
-  modifie-t-elle ? Le A02 ne traite pas le joueur non classé. Les autres règles du A02 sur la
+  modifie-t-elle ? Un joueur non classé reçoit un Elo estimé selon sa catégorie d'âge (R01 5) :
+  faut-il stocker la date de naissance, ou saisir l'Elo estimé ? Les autres règles du A02 sur la
   composition sont à examiner chacune avec un exemple avant d'être codées (YAGNI) : les mutés
   (3.7.g, la mutation n'a pas encore d'opération propre dans Club Management), la nationalité
   (3.7.h), l'Elo supérieur à 2400 (3.7.j), un joueur dans une seule équipe d'un groupe (3.7.d) et
