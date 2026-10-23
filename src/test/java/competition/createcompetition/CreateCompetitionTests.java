@@ -23,4 +23,11 @@ class CreateCompetitionTests {
         assertEquals(newId, created);
         assertTrue(competitions.find(created).isPresent());
     }
+
+    @Test
+    void should_save_the_name_of_the_competition() {
+        CompetitionId created = createCompetition.createCompetition("Nationale 4 Centre-Val de Loire", 6);
+
+        assertEquals("Nationale 4 Centre-Val de Loire", competitions.find(created).orElseThrow().name());
+    }
 }
