@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { Competitions, NewCompetition } from '../ports/competitions';
 
 @Component({
   selector: 'app-create-competition',
@@ -6,19 +7,26 @@ import { Component } from '@angular/core';
   template: `
     <section class="card" aria-labelledby="create-competition-title">
       <h2 id="create-competition-title">Créer une compétition</h2>
-      <form novalidate>
+      <form
+        novalidate
+        (submit)="create($event, {
+          name: competitionName.value,
+          organizingLeague: organizingLeague.value,
+          boards: Number(boards.value),
+        })"
+      >
         <div class="fields">
           <div class="field field--wide">
             <label for="competition-name" class="required">Nom de la compétition</label>
-            <input id="competition-name" aria-required="true" placeholder="ex. Nationale 4" />
+            <input id="competition-name" #competitionName aria-required="true" placeholder="ex. Nationale 4" />
           </div>
           <div class="field">
             <label for="organizing-league" class="required">Ligue organisatrice</label>
-            <input id="organizing-league" aria-required="true" placeholder="ex. Centre-Val de Loire" />
+            <input id="organizing-league" #organizingLeague aria-required="true" placeholder="ex. Centre-Val de Loire" />
           </div>
           <div class="field">
             <label for="boards" class="required">Nombre d'échiquiers</label>
-            <input id="boards" type="number" min="1" aria-required="true" placeholder="ex. 6" />
+            <input id="boards" #boards type="number" min="1" aria-required="true" placeholder="ex. 6" />
           </div>
         </div>
         <div class="actions">
@@ -28,4 +36,12 @@ import { Component } from '@angular/core';
     </section>
   `,
 })
-export class CreateCompetition {}
+export class CreateCompetition {
+  private readonly competitions = inject(Competitions);
+  protected readonly Number = Number;
+
+  protected create(event: Event, competition: NewCompetition): void {
+    event.preventDefault();
+    this.competitions.create(competition).subscribe();
+  }
+}
