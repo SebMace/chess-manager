@@ -3,6 +3,45 @@
 Chess Manager is a learning project built progressively with Domain-Driven Design,
 Test-Driven Development and Clean / Hexagonal Architecture principles.
 
+## Quick start: relaunch the back-end
+
+To see in the front-end what you have just developed, restart the back-end from the checkout that
+holds your changes: the main checkout or a worktree such as `../chess-manager-<topic>`. The
+back-end does not reload itself, so every change to the Java code needs a restart.
+
+1. **Check the prerequisites.** A running Docker engine (`docker version` must show a Server
+   section) and Java 26 (`mvn -version`).
+2. **Stop the back-end that is running** with Ctrl+C in its terminal. Only one back-end can listen
+   on port 8080, and the front-end always talks to that port. If another checkout still holds it,
+   find the process and stop it:
+
+   ```sh
+   lsof -nP -iTCP:8080 -sTCP:LISTEN
+   kill <PID>
+   ```
+
+3. **Start the back-end** from the root of the checkout:
+
+   ```sh
+   mvn spring-boot:run
+   ```
+
+   It is ready when the log shows `Started ChessManagerApplication`, a few seconds later. Spring
+   Boot starts the PostgreSQL container itself, Flyway applies any new migration, and the `dev`
+   profile resets the demonstration data (see [Run the application locally](#run-the-application-locally)).
+4. **Start the front-end** in a second terminal if it is not already running (`npm ci` the first
+   time):
+
+   ```sh
+   cd front-end
+   npm start
+   ```
+
+5. **Open <http://localhost:4200>.** The data was reset and the clubs got new identifiers, so a
+   screen opened before the restart (`/clubs/<id>/members`, for example) no longer finds its
+   club: go back to the home page and pick the club again. The front-end reloads its own changes
+   by itself and does not need a restart.
+
 ## Product direction: club life and competitions
 
 Chess Manager is first a tool for the life of a chess club: its members and their licenses, its
