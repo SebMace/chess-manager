@@ -6,8 +6,13 @@ import clubmanagement.domain.club.vo.Session;
 import clubmanagement.ports.ClubCalendar;
 import clubmanagement.ports.ClubRepository;
 import clubmanagement.createclub.CreateClub;
+import competition.competitionsofseason.CompetitionsOfSeason;
 import competition.createcompetition.CreateCompetition;
+import competition.domain.Competition;
+import competition.domain.CompetitionId;
 import competition.domain.League;
+import competition.domain.Team;
+import competition.engageteam.EngageTeam;
 import clubmanagement.domain.club.vo.CommitteeCode;
 import clubmanagement.domain.club.vo.FfeClubId;
 import clubmanagement.domain.club.vo.PostalAddress;
@@ -33,6 +38,8 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.NONE;
@@ -54,6 +61,8 @@ class DevelopmentDataTests {
     private final RegisterNewMember registerNewMember;
     private final MembersOfClub membersOfClub;
     private final CreateCompetition createCompetition;
+    private final EngageTeam engageTeam;
+    private final CompetitionsOfSeason competitionsOfSeason;
 
     /** Eight clubs, so that an interclub competition can be played in seven rounds. */
     private static final int CLUBS = 8;
@@ -62,8 +71,11 @@ class DevelopmentDataTests {
     DevelopmentDataTests(@Autowired ClubRepository clubs, @Autowired CreateClub createClub,
                          @Autowired DevelopmentData developmentData, @Autowired JdbcClient jdbc,
                          @Autowired ClubCalendar clubCalendar, @Autowired RegisterNewMember registerNewMember,
-                         @Autowired MembersOfClub membersOfClub, @Autowired CreateCompetition createCompetition) {
+                         @Autowired MembersOfClub membersOfClub, @Autowired CreateCompetition createCompetition,
+                         @Autowired EngageTeam engageTeam, @Autowired CompetitionsOfSeason competitionsOfSeason) {
         this.createCompetition = createCompetition;
+        this.engageTeam = engageTeam;
+        this.competitionsOfSeason = competitionsOfSeason;
         this.clubs = clubs;
         this.createClub = createClub;
         this.developmentData = developmentData;
@@ -203,12 +215,38 @@ class DevelopmentDataTests {
     }
 
     @Test
+    void each_start_begins_again_even_when_a_competition_has_engaged_teams() {
+        CompetitionId competition = createCompetition.createCompetition("Nationale 4 engagée pendant une démonstration",
+                new League("Centre-Val de Loire"), 6);
+        engageTeam.engageTeam(competition, new competition.domain.ClubId(UUID.randomUUID()));
+
+        developmentData.run(null);
+
+        assertEquals(0, jdbc.sql("SELECT count(*) FROM competition_team WHERE competition_id = :competition")
+                .param("competition", competition.competitionId()).query(Integer.class).single());
+    }
+
+    @Test
     void each_start_begins_again_even_when_a_competition_exists() {
         createCompetition.createCompetition("Nationale 4 ajoutée pendant une démonstration",
                 new League("Centre-Val de Loire"), 6);
 
         developmentData.run(null);
 
-        assertEquals(0, jdbc.sql("SELECT count(*) FROM competition").query(Integer.class).single());
+        assertEquals(List.of("Nationale 4"), jdbc.sql("SELECT name FROM competition").query(String.class).list());
+    }
+
+    @Test
+    void the_nationale_4_of_the_season_has_one_team_of_each_demonstration_club() {
+        developmentData.run(null);
+
+        List<Competition> competitions = competitionsOfSeason.competitionsOfCurrentSeason().competitions();
+        assertEquals(List.of("Nationale 4"), competitions.stream().map(Competition::name).toList());
+        List<Team> teams = competitions.get(0).teams();
+        Set<UUID> demonstrationClubs = clubs.inCommittee(new CommitteeCode("45")).stream()
+                .map(club -> club.id().clubId()).collect(Collectors.toSet());
+        assertEquals(demonstrationClubs, teams.stream().map(team -> team.club().clubId()).collect(Collectors.toSet()));
+        assertEquals(CLUBS, teams.size());
+        assertTrue(teams.stream().allMatch(team -> team.number() == 1));
     }
 }

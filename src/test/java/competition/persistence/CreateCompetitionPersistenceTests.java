@@ -9,7 +9,9 @@ import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
@@ -37,15 +39,19 @@ class CreateCompetitionPersistenceTests {
     @Test
     void should_find_again_a_competition_created_by_an_administrator() {
         CompetitionId id = new CompetitionId(new UUID(0, 1));
-        CreateCompetition createCompetition = new CreateCompetition(
-                new JdbcCompetitionRepository(JdbcClient.create(dataSource)), SEASON, () -> id);
+        CreateCompetition createCompetition = new CreateCompetition(competitions(), SEASON, () -> id);
 
         createCompetition.createCompetition("Nationale 4 Centre-Val de Loire", new League("Centre-Val de Loire"), 6);
 
-        Competition found = new JdbcCompetitionRepository(JdbcClient.create(dataSource)).find(id).orElseThrow();
+        Competition found = competitions().find(id).orElseThrow();
         assertEquals("Nationale 4 Centre-Val de Loire", found.name());
         assertEquals(SEASON, found.season());
         assertEquals(new League("Centre-Val de Loire"), found.organizingLeague());
         assertEquals(6, found.boards());
+    }
+
+    private static JdbcCompetitionRepository competitions() {
+        return new JdbcCompetitionRepository(JdbcClient.create(dataSource),
+                new TransactionTemplate(new DataSourceTransactionManager(dataSource)));
     }
 }

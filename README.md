@@ -350,8 +350,10 @@ the tables and creates **fictitious** clubs of the Loiret committee (45) through
 eight clubs, `DEMO01` to `DEMO08`, each with ten fictitious players (FFE identifiers `DEMOJ101` to
 `DEMOJ810`), so that an interclub competition between them takes seven rounds. The players are
 rated from 1300 to 2400, many of them around 1800, with the same ratings at every start. The
-strongest hold a FIDE title, from the FIDE rating floor of each (CM 2200, MF 2300, MI 2400). Anything created
-during a session, players included, is therefore lost at the next start. Real club names, FFE
+strongest hold a FIDE title, from the FIDE rating floor of each (CM 2200, MF 2300, MI 2400). The eight clubs
+also engage a team (number 1) in the Nationale 4 of the Centre-Val de Loire league for the current season,
+created by the same data. Anything created during a session, players included, is therefore lost at the
+next start. Real club names, FFE
 identifiers and people are personal or FFE data and must not be committed. No other profile
 creates or deletes data.
 

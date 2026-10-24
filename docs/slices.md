@@ -334,34 +334,103 @@ poster au directeur de groupe. Le A02 exige un document officiel pour la composi
 le club responsable de la rencontre saisit le procès-verbal sur le site fédéral avant 22 h
 (3.11.a). Ce que le site ne fait pas, c'est contrôler la composition avec les membres, les
 licences et les Elo que l'application connaît déjà : c'est la valeur de *Compose a team for a
-match*, et la raison de la construire en premier. *Print the match sheet* et *Record the results
-of a match* attendent que le besoin se confirme : la feuille ne remplace pas le document
-officiel, et la saisie des résultats ferait double emploi avec celle du site fédéral.
+match*. *Print the match sheet* attend que le besoin se confirme : la feuille ne remplace pas le
+document officiel.
+
+*Record the results of a match* ferait double emploi avec la saisie du site fédéral. Le 23 octobre
+2026, le porteur du projet a donné la raison qui manquait : l'application garde la mémoire du club,
+ce que le site ne fait pas. Pour chaque échiquier, le résultat et un commentaire du capitaine ou du
+joueur, puis le récit de la ronde écrit par le webmaster ou le capitaine. La slice passe donc avant
+*Compose a team for a match* et accepte la double saisie.
 
 *Create a competition*, *Engage a team in a competition* et *Schedule a match* sont des gestes
-d'une fois par saison, faits par un administrateur : à se demander s'ils justifient un écran, ou
-si les cas d'usage seuls suffisent, alimentés en développement comme les clubs de démonstration
-(voir la leçon YAGNI plus haut).
+d'une fois par saison, faits par un administrateur. Le porteur du projet a tranché le 23 octobre
+2026 : ni écran ni REST pour *Engage a team in a competition* et *Schedule a match* (YAGNI). Les
+cas d'usage seuls suffisent, alimentés en développement comme les clubs de démonstration (voir la
+leçon YAGNI plus haut) ; un écran viendra quand un administrateur le demandera. Même choix pour
+l'écriture d'un commentaire et d'un récit : seul leur affichage a un écran.
 
 | Slice | Package | Statut | Dépend de |
 |---|---|---|---|
 | Find the league of a committee | `clubmanagement.leagueofcommittee` | à venir | — |
 | Create a competition | `competition.createcompetition` | livrée | — |
 | Consult the competitions of the season | `competition.competitionsofseason` | livrée | Create a competition |
-| Engage a team in a competition | `competition.engageteam` | prochaine de ce contexte | Create a competition, Create a club, Find the league of a committee |
+| Engage a team in a competition | `competition.engageteam` | livrée | Create a competition |
 | Schedule a match | `competition.schedulematch` | à venir | Engage a team in a competition |
+| Consult the calendar of a competition | `competition.calendarofcompetition` | à venir | Schedule a match |
+| Record the results of a match | `competition.recordmatchresults` | à venir | Schedule a match, Register a new member |
+| Consult a match | `competition.matchofcompetition` | à venir | Record the results of a match, Consult the calendar of a competition |
+| Comment a board of a match | `competition.commentboard` | à venir | Record the results of a match |
+| Write the report of a match | `competition.writematchreport` | à venir | Record the results of a match |
 | Compose a team for a match | `competition.composeteam` | à venir | Schedule a match, Register a new member |
 | Print the match sheet | `competition.printmatchsheet` | à venir | Compose a team for a match |
-| Record the results of a match | `competition.recordmatchresults` | à venir | Compose a team for a match |
-| Consult the calendar of a competition | `competition.calendarofcompetition` | à venir | Schedule a match |
 | Consult the standings of a competition | `competition.standingsofcompetition` | à venir | Record the results of a match |
 
-Ordre proposé : *Consult the competitions of the season*, puis *Engage a team in a competition*
-(sans le contrôle de la Ligue, qui viendra avec *Find the league of a committee* : les huit clubs de
-démonstration sont du Loiret), *Schedule a match*, *Record the results of a match* et les deux
-consultations qui en dépendent. Les slices de consultation sont celles par lesquelles
-l'administrateur voit où il en est : la liste des compétitions, le calendrier avec ses rondes
-jouées, le classement.
+Ordre proposé : la démonstration de la ronde 1, ci-dessous, passe par les sept premières slices du
+tableau, de *Engage a team in a competition* à *Write the report of a match* (le contrôle de la
+Ligue d'un club attend *Find the league of a committee* : les huit clubs de démonstration sont du
+Loiret). *Compose a team for a match*, *Print the match sheet* et le classement suivent. Les slices
+de consultation sont celles par lesquelles l'administrateur voit où il en est : la liste des
+compétitions, le calendrier avec ses rondes jouées, la rencontre, le classement.
+
+### La démonstration de la ronde 1
+
+Le 23 octobre 2026, le porteur du projet demande de voir la compétition vivre dans l'application :
+il est capitaine d'une équipe d'Orléans (« Les Cavaliers de la Loire », DEMO01, club de
+démonstration) engagée en Nationale 4 pour la saison 2026-2027. La première ronde, jouée le 11
+octobre 2026 contre Pithiviers (« Pithiviers Roque Club », DEMO05), doit montrer, échiquier par
+échiquier, le résultat et un commentaire, puis le récit de la ronde. Le jeu d'essais de
+développement (`DevelopmentData`) la crée par les cas d'usage, comme les clubs : il vide les tables
+et rejoue la démonstration à chaque démarrage.
+
+Ordre des slices, choisi pour que l'écran s'enrichisse à chaque pas :
+
+1. *Engage a team in a competition* : cas d'usage et persistance, ni REST ni écran ;
+2. *Schedule a match* : idem ;
+3. *Consult the calendar of a competition* : REST, contrat et écran, la ronde 1 « à jouer » ;
+4. *Record the results of a match* : cas d'usage et persistance, la ronde devient « jouée » ;
+5. *Consult a match* : REST, contrat et écran, les échiquiers, les joueurs et les résultats ;
+6. *Comment a board of a match* : cas d'usage et persistance, les commentaires sur l'écran de la
+   rencontre ;
+7. *Write the report of a match* : idem, le récit.
+
+Le canevas de la rencontre. Orléans reçoit, donc ses joueurs ont les blancs aux échiquiers impairs.
+Seuls les licenciés A jouent, du mieux classé au moins bien classé ; les Elo viennent des données
+de développement, dont le tirage est fixe.
+
+| Éch. | Blancs | Noirs | Résultat |
+|---|---|---|---|
+| 1 | Bastien Durand (Orléans, 2092) | Hugo Moreau (Pithiviers, 2313, MF) | 0-1 |
+| 2 | Élodie Morel (Pithiviers, 2049) | Fabien Fournier (Orléans, 2028) | ½-½ |
+| 3 | Antoine Robert (Orléans, 2009) | Damien Roux (Pithiviers, 1897) | 1-0 |
+| 4 | Antoine Leroy (Pithiviers, 1836) | Inès Leroy (Orléans, 1904) | 0-1 |
+| 5 | Alice Bernard (Orléans, 1871) | Inès Lefebvre (Pithiviers, 1829) | ½-½ |
+| 6 | Bastien Laurent (Pithiviers, 1773) | Damien Michel (Orléans, 1839) | ½-½ |
+
+Orléans l'emporte de justesse, avec deux victoires contre une. Les deux licenciées B d'Orléans
+(Gaëlle Dubois et Chloé Simon) restent sur le banc. Les commentaires et le récit, entièrement
+imaginaires, sont rédigés quand leurs slices existent, et montrés au porteur du projet avant d'être
+écrits dans le jeu d'essais.
+
+Hypothèses retenues, sauf avis contraire :
+
+- l'auteur d'un commentaire ou d'un récit est un membre de l'un des deux clubs, sans rôle de
+  capitaine ni de webmaster (hors backlog ; l'authentification est différée, ADR 0019) ;
+- un commentaire par échiquier, ajouté après la saisie du résultat ; un récit par club et par
+  rencontre ; ni l'un ni l'autre ne se modifie (YAGNI) ;
+- ni écran de saisie, ni REST d'écriture, pour l'engagement, la rencontre, le commentaire et le
+  récit : le jeu d'essais appelle les cas d'usage, et seules les consultations ont un écran ;
+- la saisie des résultats ne contrôle ni la licence A ni l'écart d'Elo : ces règles sont celles de
+  *Compose a team for a match*, pour les rondes à venir. Le jeu d'essais les respecte ;
+- pas de « club par défaut » : Orléans est DEMO01. La notion viendra avec un écran « ma rencontre » ;
+- seule la rencontre Orléans–Pithiviers est jouée. Les trois autres de la ronde 1 et le classement
+  viennent plus tard, le classement les exigeant toutes ;
+- le récit s'appelle `MatchReport` dans le code (à valider) ;
+- la date du 11 octobre 2026 vient du calendrier fédéral et ne vit que dans le jeu d'essais, jamais
+  dans le domaine (ADR 0029 à écrire : l'ADR 0018 vise les données de référence, pas sept dates
+  d'événement ; la lecture juridique est au porteur du projet) ;
+- chaque slice qui stocke des données a sa migration Flyway, validée par le porteur du projet, et
+  les textes libres (commentaires, récits) ajoutent un traitement au registre des traitements.
 
 ### Create a competition
 
@@ -432,25 +501,62 @@ jouées, le classement.
 - **Questions ouvertes** : l'écran de création mène-t-il à la liste une fois la compétition créée ?
   Faut-il voir les compétitions d'une saison passée ?
 
+### Engage a team in a competition
+
+- **Intention** : l'administrateur engage une équipe d'un club dans une compétition de la saison.
+  Par exemple, le club « Les Cavaliers de la Loire » dans la Nationale 4 de 2026-2027 : son équipe 1.
+- **Décisions proposées** :
+  - `Competition` porte ses équipes engagées (ADR 0027) : l'engagement passe par l'agrégat. Une
+    équipe est identifiée par son club et son numéro (3.7.b), et un club peut en engager plusieurs,
+    même dans un groupe ;
+  - le numéro est attribué, pas saisi : la première équipe d'un club dans la compétition reçoit 1,
+    la suivante 2, dans l'ordre des engagements. Le A02 les range par force décroissante : changer
+    l'ordre viendra avec un exemple qui le demande (YAGNI) ;
+  - le numéro est propre à la compétition : le même club a l'équipe 1 de la Nationale 4 et l'équipe
+    1 d'une autre compétition ;
+  - le club est désigné par un identifiant propre au contexte (`ClubId` de `competition`), traduit
+    à la frontière. L'existence du club n'est pas vérifiée aujourd'hui : personne n'engage à la
+    main, et le jeu d'essais engage des clubs qu'il vient de créer. Le port et l'adaptateur
+    anticorruption viendront avec le premier exemple qui l'exige : un club inconnu refusé, ou la
+    lecture des joueurs du club par *Record the results of a match* (ADR 0027) ;
+  - pas de contrôle de la Ligue du club avant *Find the league of a committee* ;
+  - pas de limite à 8 ou 10 équipes : l'effectif se constate, il ne se déclare pas (YAGNI) ;
+  - ni REST ni écran (23 octobre 2026) : le jeu d'essais appelle le cas d'usage, et engage les huit
+    clubs de démonstration dans la Nationale 4.
+- **Premiers tests**, en langage métier : quand l'administrateur engage une équipe du club « Les
+  Cavaliers de la Loire » dans la compétition « Nationale 4 », le club a l'équipe 1 engagée dans
+  cette compétition. Un second scénario : quand il engage une seconde équipe du même club, le club
+  a les équipes 1 et 2.
+- **État** : livrée, sans REST ni écran (23 octobre 2026). Le scénario d'acceptation (dans la porte
+  de build), le domaine (`Competition.engageTeamOf`, numérotation par club, `reconstitute` pour relire
+  une compétition avec ses équipes), le cas d'usage `EngageTeam` et la persistance : migration `V16`
+  (table `competition_team`, clé primaire sur la compétition, le club et le numéro, aucune clé
+  étrangère vers les tables de club). Le `save` de l'adaptateur JDBC insère la compétition si elle
+  n'existe pas, remplace ses équipes par celles de l'agrégat, le tout dans une transaction de
+  l'adaptateur (ADR 0006) ; `inSeason` relit les équipes de la saison en une seule requête. Le jeu
+  d'essais crée la Nationale 4 et y engage l'équipe 1 des huit clubs de démonstration.
+- **Couches** : acceptation, cas d'usage, domaine (`Competition` et ses équipes), persistance (une
+  table des équipes engagées, avec sa migration Flyway à valider) et jeu d'essais de développement.
+  Ni REST, ni contrat, ni écran.
+- **Questions ouvertes** : engager deux fois la même équipe est-il une erreur ? Une équipe se
+  retire-t-elle (forfait général) ? Le numéro est-il propre à la compétition, ou au club pour toute
+  la saison ? Les Ligues sont-elles exactement les régions de l'INSEE, pour le contrôle à venir ?
+  Une compétition inconnue donne aujourd'hui un `NoSuchElementException` brut : un refus métier
+  viendra avec le premier appelant qui en a besoin. L'ordre dans lequel les équipes ont été engagées
+  ne se conserve pas à la relecture (la table ne porte pas de rang) : la règle métier est le numéro
+  par club.
+
 ### Les slices suivantes
 
 Détaillées quand on les démarrera ; ce qui suit garde les questions déjà constatées.
 
-- *Engage a team in a competition* : un club engage une équipe, par exemple DEMO01. Une équipe est
-  identifiée par son club et son numéro, qui range les équipes du club par force décroissante
-  (3.7.b) : un club peut en engager plusieurs, même dans un groupe, et dans plusieurs compétitions
-  de la saison. L'existence du club est vérifiée par le port, pas par une clé étrangère. Quand la
-  compétition est organisée par une Ligue, le club doit être de cette Ligue : sa Ligue se déduit de
-  son comité, par la slice préalable *Find the league of a committee*, calculée depuis les régions
-  de l'INSEE (ADR 0018). Questions : le numéro est-il saisi ou attribué ? Est-il propre à la
-  compétition, ou au club pour toute la saison ? Un club que l'application ne gère pas peut-il
-  engager une équipe ? Les Ligues sont-elles exactement les régions de l'INSEE ?
 - *Schedule a match* : l'administrateur fixe une rencontre (ronde, date, équipe qui reçoit, équipe
   visiteuse). Deux équipes engagées et distinctes ; une équipe ne joue qu'une rencontre par ronde.
-  Les dates viennent du calendrier fédéral et les appariements du directeur de groupe. Questions :
-  saisir à la main les 28 rencontres (huit équipes, sept rondes, quatre rencontres par ronde), ou
-  générer le calendrier, ce qui n'est pas demandé ? L'heure de début, 14h15 par défaut,
-  compte-t-elle pour le délai de remise des compositions ?
+  Les dates viennent du calendrier fédéral et les appariements du directeur de groupe. Ni REST ni
+  écran ; pour la démonstration, une seule rencontre : la ronde 1, le 11 octobre 2026, Orléans reçoit
+  Pithiviers. Questions : saisir à la main les 28 rencontres (huit équipes, sept rondes, quatre
+  rencontres par ronde), ou générer le calendrier, ce qui n'est pas demandé ? L'heure de début,
+  14h15 par défaut, compte-t-elle pour le délai de remise des compositions ?
 - *Compose a team for a match*, le cœur : le capitaine place des joueurs de son club aux
   échiquiers de son équipe. Trois cycles : le cas nominal (membres du club, un seul échiquier par
   joueur, sans trou, couleurs dérivées), puis la licence A seule (les données de développement ont
@@ -468,22 +574,42 @@ Détaillées quand on les démarrera ; ce qui suit garde les questions déjà co
   l'ordre, les couleurs, le nom, l'identifiant FFE et l'Elo des joueurs des deux équipes, et la
   place des résultats et des signatures. Lecture seule, impression par le navigateur. Question :
   elle ne remplace pas le document officiel exigé par le A02 (3.6.a) ; à quoi sert-elle alors ?
-- *Record the results of a match* : le capitaine saisit le résultat de chaque échiquier, et le
-  score de la rencontre en découle selon le barème retenu plus haut. Le procès-verbal officiel est
-  saisi sur le site fédéral par le club responsable de la rencontre, le club recevant sauf décision
-  contraire (2.5, 3.11.a) : cette slice ne se justifie que si elle évite une double saisie ou
-  garde l'historique du club. Question : une saisie se corrige-t-elle ?
+- *Record the results of a match* : pour chaque échiquier, les deux joueurs, identifiés par leur
+  identifiant FFE, leur couleur, qui découle de l'échiquier, et le résultat ; le score de la
+  rencontre en découle selon le barème retenu plus haut. Aucune composition préalable, et aucun
+  contrôle de la licence A ni de l'écart d'Elo : ces règles sont celles de *Compose a team for a
+  match*, pour les rondes à venir. Le procès-verbal officiel est saisi sur le site fédéral par le
+  club responsable de la rencontre, le club recevant sauf décision contraire (2.5, 3.11.a) : la
+  slice garde la mémoire du club et accepte la double saisie. Ni REST ni écran de saisie. Les
+  joueurs viennent des membres du club : c'est le premier usage du port et de l'adaptateur
+  anticorruption de l'ADR 0027, qui change la règle d'architecture « `competition` ne dépend pas de
+  `clubmanagement` » en « seul cet adaptateur en dépend ». Questions : le nom et l'Elo sont-ils
+  figés au moment de la saisie ? Une saisie se corrige-t-elle ?
 - *Consult the calendar of a competition* : les rondes de la saison avec leur date et leurs
   rencontres, la ronde jouée distinguée de celle qui reste à jouer. Pas d'horloge : une ronde est
-  jouée quand les résultats de ses rencontres sont saisis. Question : une ronde dont une partie
-  seulement est saisie est-elle jouée ?
+  jouée quand les résultats de ses rencontres sont saisis. REST, contrat et écran. Question : une
+  ronde dont une partie seulement est saisie est-elle jouée ?
+- *Consult a match* : l'écran d'une rencontre, atteint depuis le calendrier : les deux équipes, la
+  ronde et la date, puis, pour chaque échiquier, les joueurs (nom, Elo, couleur) et le résultat.
+  REST, contrat et écran. Il s'enrichit des commentaires et des récits.
+- *Comment a board of a match* : un membre de l'un des deux clubs laisse un commentaire sur un
+  échiquier dont le résultat est saisi. Un commentaire par échiquier, sans modification (YAGNI),
+  affiché sur l'écran de la rencontre ; ni écran ni REST d'écriture. L'auteur est un membre du club,
+  sans rôle. Questions : un joueur peut-il commenter la partie de l'adversaire ? Un commentaire se
+  supprime-t-il ? Le texte libre ajoute un traitement au registre des traitements.
+- *Write the report of a match* : le récit de la rencontre (`MatchReport`), écrit par un membre
+  d'un des deux clubs, qui le raconte à sa façon : un récit par club et par rencontre, sans
+  modification, affiché sous les échiquiers ; ni écran ni REST d'écriture, pas d'éditeur de texte
+  riche (YAGNI). Questions : les deux clubs écrivent-ils chacun le leur ? Le récit d'un club est-il
+  visible de l'autre ? Même traitement au registre que les commentaires.
 - *Consult the standings of a competition* : le classement, au total des points de match (3, 2, 1),
   puis au résultat entre les équipes à égalité, au différentiel et aux points « pour » (A02 4.4),
   une nulle ne comptant pas dans le score d'une partie. Il n'est calculé que sur les rencontres
   dont les résultats sont saisis.
 
 Hors backlog, tant qu'aucun cas d'usage ne le demande (YAGNI) : la génération du calendrier, les
-forfaits et pénalités, le capitaine comme concept, les coups des parties et les autres divisions.
+forfaits et pénalités, le capitaine comme concept, les coups des parties, les autres divisions et
+les écrans de saisie de l'engagement, de la rencontre, du commentaire et du récit.
 
 ## Thèmes, à découper le moment venu
 

@@ -1,61 +1,119 @@
 package competition.persistence;
 
+import competition.domain.ClubId;
 import competition.domain.Competition;
 import competition.domain.CompetitionId;
 import competition.domain.League;
 import competition.domain.Season;
+import competition.domain.Team;
 import competition.ports.CompetitionRepository;
 import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.transaction.support.TransactionOperations;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class JdbcCompetitionRepository implements CompetitionRepository {
     private static final String SELECT_COMPETITIONS = """
             SELECT id, name, season_begin_year, season_end_year, boards, organizing_league_name
             FROM competition""";
     private final JdbcClient jdbc;
+    private final TransactionOperations transactions;
 
-    public JdbcCompetitionRepository(JdbcClient jdbc) {
+    public JdbcCompetitionRepository(JdbcClient jdbc, TransactionOperations transactions) {
         this.jdbc = jdbc;
+        this.transactions = transactions;
     }
 
     @Override
     public Optional<Competition> find(CompetitionId competitionId) {
         return jdbc.sql(SELECT_COMPETITIONS + " WHERE id = :id")
                 .param("id", competitionId.competitionId())
-                .query(JdbcCompetitionRepository::competition)
-                .optional();
+                .query(JdbcCompetitionRepository::row)
+                .optional()
+                .map(row -> row.competition(teamsOf(competitionId)));
     }
 
     @Override
     public List<Competition> inSeason(Season season) {
+        Map<CompetitionId, List<Team>> teams = teamsInSeason(season);
         return jdbc.sql(SELECT_COMPETITIONS + " WHERE season_begin_year = :beginYear AND season_end_year = :endYear")
                 .param("beginYear", season.yearBegin())
                 .param("endYear", season.yearEnd())
-                .query(JdbcCompetitionRepository::competition)
+                .query(JdbcCompetitionRepository::row)
+                .list().stream()
+                .map(row -> row.competition(teams.getOrDefault(row.id(), List.of())))
+                .toList();
+    }
+
+    /** The competition and its teams are saved in one transaction: a competition is never kept with only some of its teams. */
+    @Override
+    public void save(Competition competition) {
+        transactions.executeWithoutResult(transaction -> {
+            jdbc.sql("""
+                            INSERT INTO competition (id, name, season_begin_year, season_end_year, boards, organizing_league_name)
+                            VALUES (:id, :name, :seasonBeginYear, :seasonEndYear, :boards, :organizingLeagueName)
+                            ON CONFLICT (id) DO NOTHING""")
+                    .param("id", competition.id().competitionId())
+                    .param("name", competition.name())
+                    .param("seasonBeginYear", competition.season().yearBegin())
+                    .param("seasonEndYear", competition.season().yearEnd())
+                    .param("boards", competition.boards())
+                    .param("organizingLeagueName", competition.organizingLeague().name())
+                    .update();
+            jdbc.sql("DELETE FROM competition_team WHERE competition_id = :competition")
+                    .param("competition", competition.id().competitionId())
+                    .update();
+            competition.teams().forEach(team -> jdbc.sql("""
+                            INSERT INTO competition_team (competition_id, club_id, team_number)
+                            VALUES (:competition, :club, :number)""")
+                    .param("competition", competition.id().competitionId())
+                    .param("club", team.club().clubId())
+                    .param("number", team.number())
+                    .update());
+        });
+    }
+
+    private List<Team> teamsOf(CompetitionId competitionId) {
+        return jdbc.sql("""
+                        SELECT club_id, team_number FROM competition_team
+                        WHERE competition_id = :competition ORDER BY club_id, team_number""")
+                .param("competition", competitionId.competitionId())
+                .query((row, rowNumber) -> new Team(new ClubId(row.getObject("club_id", UUID.class)),
+                        row.getInt("team_number")))
                 .list();
     }
 
-    @Override
-    public void save(Competition competition) {
-        jdbc.sql("""
-                        INSERT INTO competition (id, name, season_begin_year, season_end_year, boards, organizing_league_name)
-                        VALUES (:id, :name, :seasonBeginYear, :seasonEndYear, :boards, :organizingLeagueName)""")
-                .param("id", competition.id().competitionId())
-                .param("name", competition.name())
-                .param("seasonBeginYear", competition.season().yearBegin())
-                .param("seasonEndYear", competition.season().yearEnd())
-                .param("boards", competition.boards())
-                .param("organizingLeagueName", competition.organizingLeague().name())
-                .update();
+    /** The teams of every competition of the season in one query, rather than one query per competition. */
+    private Map<CompetitionId, List<Team>> teamsInSeason(Season season) {
+        return jdbc.sql("""
+                        SELECT team.competition_id, team.club_id, team.team_number
+                        FROM competition_team team JOIN competition ON competition.id = team.competition_id
+                        WHERE competition.season_begin_year = :beginYear AND competition.season_end_year = :endYear
+                        ORDER BY team.club_id, team.team_number""")
+                .param("beginYear", season.yearBegin())
+                .param("endYear", season.yearEnd())
+                .query((row, rowNumber) -> Map.entry(new CompetitionId(row.getObject("competition_id", UUID.class)),
+                        new Team(new ClubId(row.getObject("club_id", UUID.class)), row.getInt("team_number"))))
+                .list().stream()
+                .collect(Collectors.groupingBy(Map.Entry::getKey,
+                        Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
     }
 
-    private static Competition competition(ResultSet row, int rowNumber) throws SQLException {
-        return new Competition(
+    /** What the competition table holds; the teams live in a table of their own. */
+    private record CompetitionRow(CompetitionId id, String name, League organizingLeague, Season season, int boards) {
+        Competition competition(List<Team> teams) {
+            return Competition.reconstitute(id, name, organizingLeague, season, boards, teams);
+        }
+    }
+
+    private static CompetitionRow row(ResultSet row, int rowNumber) throws SQLException {
+        return new CompetitionRow(
                 new CompetitionId(row.getObject("id", UUID.class)),
                 row.getString("name"),
                 new League(row.getString("organizing_league_name")),
