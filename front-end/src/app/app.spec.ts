@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { App } from './app';
 import { appConfig } from './app.config';
 
@@ -50,6 +50,20 @@ describe('App', () => {
     await fixture.whenStable();
 
     expect(labels(page)).toContain('Nom de la compétition');
+  });
+
+  it('lets the administrator consult the competitions of the season', async () => {
+    const fixture = await openApplication();
+    const page = fixture.nativeElement as HTMLElement;
+
+    linkNamed(page, 'Compétitions').click();
+    await fixture.whenStable();
+    TestBed.inject(HttpTestingController)
+      .expectOne({ method: 'GET', url: '/api/competitions' })
+      .flush({ season: { yearBegin: 2026, yearEnd: 2027 }, competitions: [] });
+    await fixture.whenStable();
+
+    expect(page.querySelector('h2')?.textContent).toBe('Compétitions de la saison 2026-2027');
   });
 
   it('lets the administrator come back to the clubs of their committee', async () => {

@@ -110,6 +110,98 @@
       "type": "Synchronous/HTTP"
     },
     {
+      "description": "a request for the competitions of the current season",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "the competition Nationale 4 of the Centre-Val de Loire league is created for the current season"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/api/competitions"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "competitions": [
+              {
+                "boards": 6,
+                "name": "Nationale 4",
+                "organizingLeague": "Centre-Val de Loire"
+              }
+            ],
+            "season": {
+              "yearBegin": 2026,
+              "yearEnd": 2027
+            }
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.competitions": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.competitions[*].boards": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.competitions[*].name": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.competitions[*].organizingLeague": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.season.yearBegin": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.season.yearEnd": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
       "description": "a request for the members of a club",
       "pending": false,
       "providerStates": [

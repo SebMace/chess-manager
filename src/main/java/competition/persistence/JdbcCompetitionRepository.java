@@ -9,10 +9,14 @@ import org.springframework.jdbc.core.simple.JdbcClient;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 public class JdbcCompetitionRepository implements CompetitionRepository {
+    private static final String SELECT_COMPETITIONS = """
+            SELECT id, name, season_begin_year, season_end_year, boards, organizing_league_name
+            FROM competition""";
     private final JdbcClient jdbc;
 
     public JdbcCompetitionRepository(JdbcClient jdbc) {
@@ -21,12 +25,19 @@ public class JdbcCompetitionRepository implements CompetitionRepository {
 
     @Override
     public Optional<Competition> find(CompetitionId competitionId) {
-        return jdbc.sql("""
-                        SELECT id, name, season_begin_year, season_end_year, boards, organizing_league_name
-                        FROM competition WHERE id = :id""")
+        return jdbc.sql(SELECT_COMPETITIONS + " WHERE id = :id")
                 .param("id", competitionId.competitionId())
                 .query(JdbcCompetitionRepository::competition)
                 .optional();
+    }
+
+    @Override
+    public List<Competition> inSeason(Season season) {
+        return jdbc.sql(SELECT_COMPETITIONS + " WHERE season_begin_year = :beginYear AND season_end_year = :endYear")
+                .param("beginYear", season.yearBegin())
+                .param("endYear", season.yearEnd())
+                .query(JdbcCompetitionRepository::competition)
+                .list();
     }
 
     @Override

@@ -346,12 +346,22 @@ si les cas d'usage seuls suffisent, alimentés en développement comme les clubs
 | Slice | Package | Statut | Dépend de |
 |---|---|---|---|
 | Find the league of a committee | `clubmanagement.leagueofcommittee` | à venir | — |
-| Create a competition | `competition.createcompetition` | prochaine de ce contexte | — |
-| Engage a team in a competition | `competition.engageteam` | à venir | Create a competition, Create a club, Find the league of a committee |
+| Create a competition | `competition.createcompetition` | livrée | — |
+| Consult the competitions of the season | `competition.competitionsofseason` | livrée | Create a competition |
+| Engage a team in a competition | `competition.engageteam` | prochaine de ce contexte | Create a competition, Create a club, Find the league of a committee |
 | Schedule a match | `competition.schedulematch` | à venir | Engage a team in a competition |
 | Compose a team for a match | `competition.composeteam` | à venir | Schedule a match, Register a new member |
 | Print the match sheet | `competition.printmatchsheet` | à venir | Compose a team for a match |
 | Record the results of a match | `competition.recordmatchresults` | à venir | Compose a team for a match |
+| Consult the calendar of a competition | `competition.calendarofcompetition` | à venir | Schedule a match |
+| Consult the standings of a competition | `competition.standingsofcompetition` | à venir | Record the results of a match |
+
+Ordre proposé : *Consult the competitions of the season*, puis *Engage a team in a competition*
+(sans le contrôle de la Ligue, qui viendra avec *Find the league of a committee* : les huit clubs de
+démonstration sont du Loiret), *Schedule a match*, *Record the results of a match* et les deux
+consultations qui en dépendent. Les slices de consultation sont celles par lesquelles
+l'administrateur voit où il en est : la liste des compétitions, le calendrier avec ses rondes
+jouées, le classement.
 
 ### Create a competition
 
@@ -376,9 +386,9 @@ si les cas d'usage seuls suffisent, alimentés en développement comme les clubs
   organisée par la Ligue du Centre-Val de Loire et jouée sur six échiquiers, il est informé que la
   compétition « Nationale 4 » a été créée pour la saison 2026-2027, organisée par cette Ligue et
   jouée sur six échiquiers. Un second scénario décrit le refus d'une compétition sans échiquier.
-- **État** : acceptation, cas d'usage, persistance, REST, contrat Pact et écran livrés
+- **État** : livrée. Acceptation, cas d'usage, persistance, REST, contrat Pact et écran
   (`POST /api/competitions`, avec le vidage de la table au démarrage du profil dev, et l'écran
-  `/competitions/new`). Restent les règles ArchUnit du contexte et l'extension de PIT.
+  `/competitions/new`), puis les règles ArchUnit du contexte et l'extension de PIT.
 - **Couches** : acceptation, cas d'usage, persistance, REST, contrat et écran. L'écran est voulu
   pour cette première slice, qui pose aussi le squelette du contexte (package, migration, REST,
   contrat, règles ArchUnit) : le geste ne se fait qu'une fois par saison, donc le formulaire reste
@@ -387,6 +397,40 @@ si les cas d'usage seuls suffisent, alimentés en développement comme les clubs
   L'effectif du groupe (8 ou 10 équipes) se déclare-t-il à la création, ou se constate-t-il aux
   engagements ? Une Ligue qui a plusieurs groupes de Nationale 4 : une compétition par groupe, ou
   une compétition par Ligue qui contient des groupes ?
+
+### Consult the competitions of the season
+
+- **Intention** : l'administrateur voit les compétitions de la saison courante, avec leur nom, la
+  Ligue qui les organise et leur nombre d'échiquiers, sous le titre de la saison. Par exemple, pour
+  2026-2027 : « Nationale 4 », Ligue du Centre-Val de Loire, six échiquiers.
+- **Décisions proposées** :
+  - la saison est la saison courante (ADR 0025). Elle est affichée en titre, même quand aucune
+    compétition n'existe : la réponse porte la saison et la liste ;
+  - seules les compétitions de la saison courante sont listées ; celles d'une autre saison existent
+    dans la base, sans écran pour l'instant ;
+  - la liste est triée par nom, puis par Ligue, sans tenir compte des accents ni des majuscules
+    (comme les clubs d'un comité) : « Élite 1 » vient entre « départementale 2 » et « Nationale 4 ».
+    Le cas d'usage trie, l'écran garde l'ordre reçu. Ni recherche, ni pagination, ni filtre (YAGNI,
+    comme pour les membres d'un club) ;
+  - la lecture passe par le port `CompetitionRepository` (une requête par saison) : la liste ne
+    joint aucun autre agrégat, ce que vise l'ADR 0024 pour un port de lecture ;
+  - la réponse ne porte pas d'identifiant de compétition : aucun écran n'en a besoin, les slices
+    qui ouvrent une compétition l'ajouteront ;
+  - la liste s'enrichira des équipes engagées et des rondes jouées au fil des slices suivantes.
+- **Premiers tests**, en langage métier : quand l'administrateur consulte les compétitions de la
+  saison 2026-2027 après la création de « Nationale 4 », organisée par la Ligue du Centre-Val de
+  Loire et jouée sur six échiquiers, il voit la saison 2026-2027 et cette compétition. Une
+  compétition d'une autre saison n'est pas listée. Sans compétition, il est informé qu'il n'y en a
+  aucune pour la saison.
+- **État** : livrée. Trois scénarios d'acceptation, cas d'usage (saison affichée, tri par nom puis
+  Ligue), requête par saison dans le port et son adaptateur JDBC, REST (`GET /api/competitions`),
+  contrat Pact (l'interaction énoncée par le front-end, l'état fournisseur « la compétition
+  Nationale 4 de la Ligue du Centre-Val de Loire est créée pour la saison courante ») et écran
+  (`/competitions`, lien « Compétitions »).
+- **Couches** : acceptation, cas d'usage, persistance (requête par saison), REST
+  (`GET /api/competitions`), contrat Pact et écran (`/competitions`, lien « Compétitions »).
+- **Questions ouvertes** : l'écran de création mène-t-il à la liste une fois la compétition créée ?
+  Faut-il voir les compétitions d'une saison passée ?
 
 ### Les slices suivantes
 
@@ -429,10 +473,17 @@ Détaillées quand on les démarrera ; ce qui suit garde les questions déjà co
   saisi sur le site fédéral par le club responsable de la rencontre, le club recevant sauf décision
   contraire (2.5, 3.11.a) : cette slice ne se justifie que si elle évite une double saisie ou
   garde l'historique du club. Question : une saisie se corrige-t-elle ?
+- *Consult the calendar of a competition* : les rondes de la saison avec leur date et leurs
+  rencontres, la ronde jouée distinguée de celle qui reste à jouer. Pas d'horloge : une ronde est
+  jouée quand les résultats de ses rencontres sont saisis. Question : une ronde dont une partie
+  seulement est saisie est-elle jouée ?
+- *Consult the standings of a competition* : le classement, au total des points de match (3, 2, 1),
+  puis au résultat entre les équipes à égalité, au différentiel et aux points « pour » (A02 4.4),
+  une nulle ne comptant pas dans le score d'une partie. Il n'est calculé que sur les rencontres
+  dont les résultats sont saisis.
 
-Hors backlog, tant qu'aucun cas d'usage ne le demande (YAGNI) : le classement, la génération du
-calendrier, les forfaits et pénalités, le capitaine comme concept, les coups des parties et les
-autres divisions.
+Hors backlog, tant qu'aucun cas d'usage ne le demande (YAGNI) : la génération du calendrier, les
+forfaits et pénalités, le capitaine comme concept, les coups des parties et les autres divisions.
 
 ## Thèmes, à découper le moment venu
 

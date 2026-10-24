@@ -414,9 +414,10 @@ an administrator.
 
 ## Competitions
 
-*Create a competition* is the first slice of the proposed Competition context (ADR 0027). So far
-the application can only create a competition, through a screen of the front-end: there is no read
-endpoint yet.
+*Create a competition* and *Consult the competitions of the season* are the first two slices of the
+proposed Competition context (ADR 0027). So far the application creates a competition and lists the
+competitions of the current season, through two screens of the front-end. A competition cannot be
+opened on its own yet.
 
 - A competition has a name, the Ligue that organizes it and a number of boards per team. Its
   season is the current season of the application (ADR 0025).
@@ -426,6 +427,10 @@ endpoint yet.
   club management.
 - A request without a name or without an organizing Ligue is refused with 400. An empty name or
   Ligue is not refused yet.
+- The list shows the current season (ADR 0025) and, under it, the competitions of that season only,
+  sorted by name then by Ligue, ignoring accents and capitals. A season without any competition is
+  still shown, with an empty list. A competition has no identifier in the list yet: no screen needs
+  it.
 - The `competition` table has no foreign key to the club tables, and the `dev` profile empties it at
   each start.
 
@@ -435,10 +440,19 @@ POST /api/competitions   {"name": "Nationale 4", "organizingLeague": "Centre-Val
                          →  201 Created, Location: /api/competitions/<id>
 ```
 
-No endpoint serves that `Location` yet. The Pact contract records this interaction, stated by
-`front-end/src/app/competition/http/http-competitions.spec.ts`: the front-end relies on the 201
-only, and treats any other answer as a failure. As everywhere, nothing checks yet that the caller
-is an administrator.
+```
+GET /api/competitions    →  200 {"season": {"yearBegin": 2026, "yearEnd": 2027},
+                                 "competitions": [{"name": "Nationale 4",
+                                                   "organizingLeague": "Centre-Val de Loire",
+                                                   "boards": 6}]}
+```
+
+No endpoint serves that `Location` yet. The Pact contract records both interactions, stated by
+`front-end/src/app/competition/http/http-competitions.spec.ts`: for the creation the front-end
+relies on the 201 only, and treats any other answer as a failure; for the list it relies on the
+season and, for each competition, its name, its organizing Ligue and its boards, after the provider
+state "the competition Nationale 4 of the Centre-Val de Loire league is created for the current
+season". As everywhere, nothing checks yet that the caller is an administrator.
 
 ## Front-end (Angular)
 
@@ -455,7 +469,9 @@ administrator that they are now a member and shows them in the list. Another lin
 compétition", leads to the screen that creates a competition from its name, its organizing Ligue and
 its number of boards, at `/competitions/new`: it asks for a missing name or Ligue and for a whole
 number of boards of at least 1, then tells the administrator whether the competition has been
-created. It needs Node.js 22.22, 24.15 or 26 and npm.
+created. The link "Compétitions" leads to the competitions of the current season, at
+`/competitions`: the season in the heading, then each competition with its Ligue and its number of
+boards, or a notice when the season has none. It needs Node.js 22.22, 24.15 or 26 and npm.
 
 | File | Role |
 |---|---|
@@ -473,9 +489,10 @@ created. It needs Node.js 22.22, 24.15 or 26 and npm.
 | `src/app/club-management/http/http-clubs.ts` | `HttpClubs` adapter: implements `Clubs` over the REST API. |
 | `src/app/club-management/http/http-communes.ts` | `HttpCommunes` adapter: implements `Communes` over the REST API. |
 | `src/app/competition/create-competition/create-competition.ts` | `CreateCompetition` component: the form and the creation outcome. |
+| `src/app/competition/competitions-of-season/competitions-of-season.ts` | `CompetitionsOfSeason` component: the season and its competitions. |
 | `src/app/competition/ports/competitions.ts` | `Competitions` port: what the competition screens need, with no HTTP detail. |
 | `src/app/competition/http/http-competitions.ts` | `HttpCompetitions` adapter: implements `Competitions` over the REST API. |
-| `src/app/app.routes.ts` | The clubs of a committee at `/`, the creation of a club at `/clubs/new`, the opening hours of a club at `/clubs/<id>/opening-hours`, the members of a club at `/clubs/<id>/members`, the creation of a competition at `/competitions/new`. |
+| `src/app/app.routes.ts` | The clubs of a committee at `/`, the creation of a club at `/clubs/new`, the opening hours of a club at `/clubs/<id>/opening-hours`, the members of a club at `/clubs/<id>/members`, the competitions of the season at `/competitions`, the creation of a competition at `/competitions/new`. |
 | `src/app/app.config.ts` | Provides the router and wires `Clubs`, `Communes`, `Competitions`, `Members` and `OpeningHours` to their HTTP adapters. |
 
 As in the back-end, each slice has its own folder named after its use case (`create-club`);
