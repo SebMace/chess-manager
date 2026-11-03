@@ -20,12 +20,18 @@ Seule la prochaine slice est détaillée ; les autres le seront quand on les dé
 
 Depuis le 23 octobre 2026, Chess Manager est d'abord un outil pour la vie d'un club (ADR 0028).
 Ses deux domaines sont la gestion de club (clubs, personnes, licences, horaires d'ouverture,
-imports FFE) et les compétitions par équipes, à commencer par la Nationale 4 du Loiret (voir plus
+identifiants FFE facultatifs) et les compétitions par équipes, à commencer par la Nationale 4 du Loiret (voir plus
 bas). Chaque nouvelle slice passe d'abord au crible YAGNI.
 
 La gestion de club n'est pas en pause : *Register a new member* et *Consult the members of a
 club* ont été menées jusqu'à l'écran, avant de présenter l'application au président et au
 secrétaire d'un club.
+
+**Depuis le 1er novembre 2026 (ADR 0030), le cœur du produit est de raconter et de partager la vie
+des clubs** : récits de rencontres, parties commentées, actualités, avec Orléans pour club pilote et
+une conception multi-club. La FFE n'est pas une dépendance : la V1 n'appelle aucun service fédéral.
+Les compétitions deviennent un domaine de soutien : ce qui est livré reste, et aucune nouvelle slice
+de compétition n'est démarrée (voir « Vie du club » plus bas).
 
 **Chess Decision** n'est plus le produit phare (ADR 0028). Décidé le 2 octobre 2026 (ADR 0020),
 c'était un outil personnel de progression : le joueur soumet une position, éventuellement des
@@ -261,7 +267,101 @@ haut.
   - à l'écran, un code postal unique remplit le champ seulement s'il est vide ; plusieurs codes
     sont suggérés ; si la recherche échoue, rien n'est suggéré, sans message.
 
+## Vie du club : raconter et partager
+
+Depuis le 1er novembre 2026 (ADR 0030), c'est le cœur du produit. Un club, Orléans le premier,
+raconte ses rencontres, publie ses comptes rendus et partage les parties commentées de ses joueurs.
+Rien de tout cela ne dépend d'un service fédéral. La carte des sous-domaines, des contextes et des
+rôles est dans [`carte-du-domaine.md`](carte-du-domaine.md).
+
+**Le parcours visé.** Un joueur d'Orléans joue contre Chartres. Le webmaster crée la rencontre. Le
+joueur saisit et commente sa partie sur Lichess, puis en apporte le PGN dans ChessManager, qui le
+conserve et permet de la rejouer, l'échiquier orienté selon la couleur du joueur. Le joueur ajoute
+éventuellement un commentaire, le webmaster valide, et le récit de la rencontre, enrichi des
+parties, devient consultable sur le site du club.
+
+Un nouveau contexte, `clublife`, est créé par la première slice qui en a besoin (la 2). Il ne
+dépend ni de `competition` ni d'aucun service externe autre que Lichess ; seul son adaptateur vers
+`clubmanagement` en dépend.
+
+| # | Slice | Package | Statut | Dépend de |
+|---|---|---|---|---|
+| 1 | Appoint a webmaster of a club | `clubmanagement.appointwebmaster` | prochaine | Create a club, Register a new member |
+| 2 | Create a club encounter | `clublife.createencounter` | à venir | 1 |
+| 3 | Publish the story of an encounter | `clublife.publishstory` | à venir | 2 |
+| 4 | Consult the stories of a club | `clublife.storiesofclub` | à venir | 3 |
+| 5 | Propose a game of an encounter | `clublife.proposegame` | à venir | 2 |
+| 6 | Validate a game proposal | `clublife.validategame` | à venir | 5 |
+| 7 | Consult a game | `clublife.gameofencounter` | à venir | 6 ; la licence AGPL (ADR 0031) permet le viewer de Lichess, son ajout se décide ici |
+| 8 | Import a game from a Lichess study | `clublife.importlichessgame` | à venir | 5 et le spike Lichess |
+
+Une nouvelle règle sur un cas d'usage existant est une évolution, pas une slice. Ainsi le refus
+d'un webmaster d'un autre club est un second scénario de la slice 3, le commentaire du joueur est un
+champ de la slice 5, et le refus d'une proposition est une évolution de la slice 6. Le nom de la
+rencontre dans le code reste à trancher au premier test : `Match` appartient à `competition`.
+
+**Scénarios d'acceptation prévus**, en langage métier. Ils s'écrivent en `.feature` au premier
+RED de chaque slice, pas avant.
+
+*Slice 3, le scénario cible :*
+
+```gherkin
+Scénario : Un webmaster publie le récit d'une rencontre
+  Étant donné le club « Orléans »
+  Et la rencontre d'Orléans contre Chartres
+  Et un webmaster du club « Orléans »
+  Quand le webmaster rédige puis publie le récit de cette rencontre
+  Alors le récit est consultable dans l'espace public du club « Orléans »
+  Et le récit appartient au club « Orléans »
+```
+
+- Slice 3, second scénario : le webmaster d'un autre club n'est pas autorisé à publier le récit
+  d'une rencontre d'Orléans ; aucun récit n'est publié.
+- Slice 5 : un joueur d'Orléans propose sa partie de la rencontre contre Chartres, avec son PGN et
+  son commentaire ; la proposition attend la validation du webmaster et n'est pas publique.
+- Slice 6 : le webmaster valide la proposition ; la partie apparaît dans le récit.
+- Slice 7 : un joueur qui avait les Noirs voit sa partie avec les Noirs en bas ; une partie qui part
+  d'une position personnalisée s'affiche depuis cette position.
+- Slice 8 : le joueur importe sa partie depuis l'adresse de son étude Lichess ; si Lichess ne répond
+  pas, il est invité à coller son PGN.
+
+Hors backlog tant qu'aucun cas d'usage ne le demande (YAGNI) : les actualités et événements du
+club, l'association d'un compte Lichess, les rappels (Craft Calendar), les commentaires des
+visiteurs, la modération, un import ou une donnée venant de la FFE.
+
+### Appoint a webmaster of a club
+
+- **Intention** : l'administrateur de la plateforme nomme une personne webmaster d'un club, pour
+  qu'elle puisse ensuite publier au nom de ce club. Par exemple Camille Martin, webmaster du club
+  Orléans.
+- **Contrôle YAGNI** : le besoin est réel, parce que sans webmaster nommé la règle centrale d'un
+  site multi-club, « un webmaster n'agit que pour son club », ne peut ni s'écrire ni se tester.
+  L'option la plus simple est retenue : un geste de l'administrateur, un webmaster par club, sans
+  retrait, sans plusieurs webmasters, sans capitaine, sans écran. Le geste est rare (une fois par
+  club) : les cas d'usage seuls suffisent, alimentés en développement comme les clubs de
+  démonstration.
+- **Décisions proposées** :
+  - la responsabilité de webmaster est distincte du statut d'une relation avec un club (prospect,
+    membre, partenaire, ADR 0014) ; comment la modéliser (un nouvel agrégat, une opération de
+    `ClubRelationship`) se tranche au premier test ;
+  - la personne doit déjà exister dans l'application ;
+  - l'authentification reste différée (ADR 0019) : l'administrateur n'est pas vérifié, et la
+    personne qui agit est une donnée du cas d'usage. Elle sera traitée avant d'ouvrir le site aux
+    utilisateurs d'Orléans.
+- **Premier test**, en langage métier : quand l'administrateur nomme Camille Martin webmaster du
+  club Orléans, il est informé que Camille Martin est webmaster du club Orléans. Un second scénario
+  décrit le refus de nommer une personne inconnue.
+- **Couches** : acceptation, cas d'usage, persistance, REST et contrat ; pas d'écran.
+- **Questions ouvertes** : le webmaster doit-il être membre du club pour la saison ? Plusieurs
+  webmasters ? Qui en retire un ? Le capitaine peut-il aussi créer les rencontres (V1 : le
+  webmaster seulement) ? L'administrateur de la plateforme modère-t-il les contenus ?
+
 ## Compétition : la Nationale 4 de la Ligue du Centre-Val de Loire
+
+> **Gel depuis le 1er novembre 2026 (ADR 0030).** La compétition devient un domaine de soutien : les
+> slices livrées restent, et celles de ce tableau qui ne sont pas démarrées (*Compose a team for a
+> match*, *Print the match sheet*, …) attendent qu'un besoin des clubs les demande. Rien ci-dessous
+> n'est supprimé.
 
 Depuis le 23 octobre 2026, le thème *Compétitions* est découpé pour un premier besoin : un
 bounded context `competition` à part (ADR 0027, proposé), des slices nommées d'après leur cas

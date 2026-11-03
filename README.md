@@ -42,14 +42,19 @@ back-end does not reload itself, so every change to the Java code needs a restar
    club: go back to the home page and pick the club again. The front-end reloads its own changes
    by itself and does not need a restart.
 
-## Product direction: club life and competitions
+## Product direction: the life of chess clubs
 
-Chess Manager is first a tool for the life of a chess club: its members and their licenses, its
-opening hours and, since 23 October 2026, its team competitions. The first competition is the
-Nationale 4 interclub championship of the Loiret: the clubs created in the application each engage
-a team, a calendar fixes the matches of every round, and before a round the captain composes the
-team, prints the match sheet and, afterwards, enters the results. See `docs/slices.md` for the
-backlog.
+Chess Manager is an independent platform for the life of chess clubs: telling their matches,
+publishing their reports and sharing the annotated games of their players (ADR 0030). Orléans is
+the pilot club, and the design stays multi-club. Clubs produce and publish their own content, and
+nothing in the product depends on a federal service. Lichess is where games are entered and
+analysed; Chess Manager keeps the PGN, replays it, and lets the webmaster of a club validate what
+is published. See `docs/slices.md` for the backlog and `docs/carte-du-domaine.md` for the map of
+subdomains, contexts and roles.
+
+Club management (members, licenses, opening hours) is delivered and kept. Team competitions (the
+Nationale 4 interclub championship of the Loiret) were the direction from 23 October 2026
+(ADR 0028): what is delivered stays, and no new competition slice is planned for now.
 
 Chess Decision, a personal chess-improvement tool that confronts the reasoning a player submits
 about a position with the concrete resources of that position, was the product direction from
@@ -89,6 +94,20 @@ its own domain.
 
 **Status.** This is a proposed architectural direction (ADR 0027, awaiting validation), not
 existing code yet.
+
+## Planned bounded context: Club Life
+
+Club Life is the core of the product (ADR 0030). It will hold what a club tells and shares: its
+matches (called encounters until a name is settled), the stories that report them, and the
+annotated games its players contribute as PGN, with a webmaster who validates what becomes public.
+Every piece of content belongs to one club, and a webmaster acts only on the content of their own
+club.
+
+**Status.** This is an accepted direction, not existing code yet: the package `clublife` is created
+by the first slice that needs it. Chess Moves is not a bounded context: the PGN is kept as text and
+replayed by a viewer in the front-end. Lichess is where games are entered; the Lichess import and
+the PGN viewer (whose GPL license led to the AGPL, ADR 0031) are studied in `docs/spikes/lichess.md` and
+`docs/spikes/pgn-viewer.md`.
 
 ## Planned bounded context: Craft Calendar
 
@@ -868,5 +887,11 @@ Adding this workflow does not itself enable that repository setting.
 
 ## License and authorship
 
-MIT License. Created by Sébastien Macé.
+Chess Manager is free software, released under the GNU Affero General Public License, version 3
+or any later version (AGPL-3.0-or-later): see `LICENSE` and ADR 0031. Copyright (C) 2024-2026
+Sébastien Macé. Anyone who runs a modified version as a network service must offer its source code
+to the users of that service. Code published before the change of license remains available under
+the MIT License. Contributions are accepted under the same license as the project.
+
+Created by Sébastien Macé.
 Human contributors remain responsible for reviewing and understanding their contributions.

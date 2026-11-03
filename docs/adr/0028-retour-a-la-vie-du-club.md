@@ -5,7 +5,9 @@ Date : 2026-10-23
 ## Statut
 
 Acceptée. Remplace la priorité donnée à Chess Decision par
-[0020](0020-priorite-a-chess-decision.md).
+[0020](0020-priorite-a-chess-decision.md). Précisée par
+[0030](0030-recentrer-sur-la-vie-des-clubs.md) : le cœur est de raconter et de partager la vie du
+club, et les compétitions passent en soutien.
 
 ## Contexte
 
