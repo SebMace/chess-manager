@@ -43,3 +43,4 @@ passe au statut « Remplacée par NNNN ».
 | [0027](0027-competition-contexte-distinct.md) | Compétition, un bounded context distinct de la gestion de club | Proposée |
 | [0028](0028-retour-a-la-vie-du-club.md) | Retour à la vie du club et aux compétitions | Acceptée, précisée par 0030 |
 | [0030](0030-recentrer-sur-la-vie-des-clubs.md) | Recentrer ChessManager sur la vie des clubs d'échecs avec Orléans comme club pilote | Acceptée |
+| [0031](0031-passer-sous-licence-agpl.md) | Passer ChessManager de la licence MIT à la licence AGPL-3.0 | Acceptée |

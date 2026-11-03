@@ -40,7 +40,8 @@ Pas fait :
 | Politique de protection des données (PDF) | usages annoncés des données | date non indiquée |
 
 La licence GPL du plugin concerne son code, pas les données qu'il affiche. Aucune ligne du plugin
-n'est reprise ici ni ne doit l'être dans ce dépôt MIT.
+n'est reprise ici ni ne doit l'être dans ce dépôt (la licence MIT d'alors a depuis laissé la place
+à l'AGPL, mais le plugin n'est pas un sujet de ce projet).
 
 ## 2. Le service vu par le plugin
 

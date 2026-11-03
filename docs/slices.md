@@ -292,7 +292,7 @@ dépend ni de `competition` ni d'aucun service externe autre que Lichess ; seul 
 | 4 | Consult the stories of a club | `clublife.storiesofclub` | à venir | 3 |
 | 5 | Propose a game of an encounter | `clublife.proposegame` | à venir | 2 |
 | 6 | Validate a game proposal | `clublife.validategame` | à venir | 5 |
-| 7 | Consult a game | `clublife.gameofencounter` | à venir | 6 et le choix du viewer |
+| 7 | Consult a game | `clublife.gameofencounter` | à venir | 6 ; la licence AGPL (ADR 0031) permet le viewer de Lichess, son ajout se décide ici |
 | 8 | Import a game from a Lichess study | `clublife.importlichessgame` | à venir | 5 et le spike Lichess |
 
 Une nouvelle règle sur un cas d'usage existant est une évolution, pas une slice. Ainsi le refus

@@ -90,9 +90,9 @@ Nous retenons l'option B. Nous inscrivons ce principe :
    clubs, nomme leur webmaster), le webmaster (crée les rencontres, publie, valide), le joueur
    membre (propose ses parties) et le visiteur (lit). Un webmaster d'Orléans ne peut rien sur les
    contenus d'un autre club.
-9. **La licence MIT n'est pas changée par cet ADR.** Le viewer PGN complet étant sous GPL-3.0,
-   l'auteur tranchera entre assembler un viewer permissif et passer au copyleft
-   ([`docs/spikes/pgn-viewer.md`](../spikes/pgn-viewer.md)).
+9. **La licence passe de MIT à AGPL-3.0**, pour pouvoir utiliser le viewer PGN de Lichess, sous
+   GPL-3.0 ([`docs/spikes/pgn-viewer.md`](../spikes/pgn-viewer.md)). Cet ADR ne la change pas
+   lui-même : voir [0031](0031-passer-sous-licence-agpl.md).
 
 ## Conséquences
 
@@ -108,7 +108,7 @@ une application, une base, chaque contenu porte son club.
   une double saisie, à surveiller ;
 - les récits et les PGN nomment des personnes, dont des adversaires : chaque slice qui les stocke
   ajoute un traitement à `docs/registre-des-traitements.md` ;
-- le viewer et sa licence peuvent coûter du travail ou une décision de licence ;
+- les futures dépendances devront être compatibles avec l'AGPL-3.0 ([0031](0031-passer-sous-licence-agpl.md)) ;
 - une partie du code de `competition` risque de rester peu utilisée.
 
 ### Impacts sur les contextes
@@ -164,11 +164,10 @@ L'historique n'est pas réécrit : seul le statut de 0028 annonce la précision.
 
 ## Questions ouvertes
 
-1. **Licence** : MIT avec un viewer assemblé, ou copyleft avec le viewer Lichess ?
-2. **Authentification** : quel fournisseur, et à quelle slice ?
-3. **Webmaster** : un seul par club ? Qui le retire ? Doit-il être membre ? Le capitaine peut-il
+1. **Authentification** : quel fournisseur, et à quelle slice ?
+2. **Webmaster** : un seul par club ? Qui le retire ? Doit-il être membre ? Le capitaine peut-il
    créer les rencontres ? (V1 : le webmaster seulement.)
-4. **Nom de la rencontre** dans le code : `Match` est déjà pris par `competition`.
-5. **Noms des adversaires** dans les PGN et les récits publiés : règle de publication.
-6. **Modération** par l'administrateur de la plateforme.
-7. **Sort des branches** `chessmoves` et `feat/create-competition`.
+3. **Nom de la rencontre** dans le code : `Match` est déjà pris par `competition`.
+4. **Noms des adversaires** dans les PGN et les récits publiés : règle de publication.
+5. **Modération** par l'administrateur de la plateforme.
+6. **Sort des branches** `chessmoves` et `feat/create-competition`.

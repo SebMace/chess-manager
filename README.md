@@ -106,7 +106,7 @@ club.
 **Status.** This is an accepted direction, not existing code yet: the package `clublife` is created
 by the first slice that needs it. Chess Moves is not a bounded context: the PGN is kept as text and
 replayed by a viewer in the front-end. Lichess is where games are entered; the Lichess import and
-the PGN viewer, with its license question, are studied in `docs/spikes/lichess.md` and
+the PGN viewer (whose GPL license led to the AGPL, ADR 0031) are studied in `docs/spikes/lichess.md` and
 `docs/spikes/pgn-viewer.md`.
 
 ## Planned bounded context: Craft Calendar
@@ -870,5 +870,11 @@ Adding this workflow does not itself enable that repository setting.
 
 ## License and authorship
 
-MIT License. Created by Sébastien Macé.
+Chess Manager is free software, released under the GNU Affero General Public License, version 3
+or any later version (AGPL-3.0-or-later): see `LICENSE` and ADR 0031. Copyright (C) 2024-2026
+Sébastien Macé. Anyone who runs a modified version as a network service must offer its source code
+to the users of that service. Code published before the change of license remains available under
+the MIT License. Contributions are accepted under the same license as the project.
+
+Created by Sébastien Macé.
 Human contributors remain responsible for reviewing and understanding their contributions.

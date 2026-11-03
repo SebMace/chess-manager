@@ -5,6 +5,11 @@ Date : 2026-11-01. Spike de la PR #31.
 **Méthode.** Lecture des README et des métadonnées des bibliothèques (`gh api`, `npm view`) ;
 aucune bibliothèque installée ni exécutée. Ce n'est pas un avis juridique.
 
+**Statut : décidé le 2026-11-02.** L'auteur a choisi le chemin B, le copyleft : ChessManager passe
+sous AGPL-3.0 ([0031](../adr/0031-passer-sous-licence-agpl.md)). Les sections 3 à 6 gardent
+l'analyse qui a mené à ce choix. L'ajout du viewer de Lichess se décidera à la slice *Consult a
+game*.
+
 ## 1. Ce qu'on attend d'un viewer
 
 Rejouer une partie à partir de son PGN, avec : navigation coup par coup, commentaires, variantes,
@@ -94,8 +99,8 @@ décide de rien, n'ajoute aucune validation de coups, et affiche une erreur si l
 
 ## 8. Reste à vérifier
 
-- les variantes et commentaires de `@mliebelt/pgn-parser`, et les variantes de `chess.js` (un test
+- que le viewer Lichess lit une partie dont les balises `SetUp` et `FEN` sont dans le PGN (un test
   avec un PGN écrit par nous suffit) ;
-- l'orientation de `cm-chessboard` ;
-- que le viewer Lichess lit une partie dont les balises `SetUp` et `FEN` sont dans le PGN ;
-- la compatibilité de licences des dépendances actuelles, avec un outil de licences.
+- comment le monter dans un composant Angular 22, et le style qu'il demande ;
+- la compatibilité des dépendances du serveur avec l'AGPL, avec un outil de licences (celles du
+  front-end livrées au navigateur sont en MIT, Apache-2.0 et 0BSD).
